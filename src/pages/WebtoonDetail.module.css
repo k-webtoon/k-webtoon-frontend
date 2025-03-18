@@ -1,0 +1,198 @@
+.container {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  width: 100%;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.flexContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.thumbnailContainer {
+  background-color: #f3f4f6;
+  padding: 2rem;
+}
+
+.thumbnail {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.infoContainer {
+  padding: 2rem;
+  width: 100%;
+}
+
+.titleBox {
+  background-color: white;
+  border-radius: 0.375rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.infoBox {
+  background-color: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.infoTitle {
+  text-align: center;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.centerContent {
+  display: flex;
+  justify-content: center;
+}
+
+.starFilled {
+  color: #f59e0b;
+  font-size: 1.25rem;
+}
+
+.starEmpty {
+  color: #d1d5db;
+  font-size: 1.25rem;
+}
+
+.link {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.favoriteButton {
+  color: #f59e0b;
+  font-size: 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.favoriteButton:focus {
+  outline: none;
+}
+
+.reviewSection {
+  background-color: #f9fafb;
+  padding: 2rem;
+  width: 100%;
+}
+
+.reviewHeader {
+  background-color: white;
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.reviewTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.reviewContainer {
+  background-color: white;
+  padding: 1.5rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+}
+
+.reviewCard {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.reviewCardHighlighted {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #60a5fa;
+  background-color: #eff6ff;
+}
+
+.reviewUser {
+  font-weight: 500;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.reviewComment {
+  color: #4b5563;
+  margin-bottom: 0.75rem;
+}
+
+.reviewLikes {
+  text-align: right;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .reviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .flexContainer {
+    flex-direction: row;
+  }
+
+  .thumbnailContainer {
+    width: 30%;
+  }
+
+  .infoContainer {
+    width: 70%;
+  }
+
+  .reviewGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

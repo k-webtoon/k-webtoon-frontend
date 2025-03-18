@@ -1,12 +1,7 @@
-import './App.css'
+import "./App.css";
 
 function App() {
-
-  return (
-    <>
-        메인페이지
-    </>
-  )
+  return <>메인페이지</>;
 }
 
-export default App
+export default App;
