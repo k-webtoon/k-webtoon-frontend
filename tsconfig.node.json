@@ -1,24 +1,12 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "target": "ES2022", // 서버에서 최신 ECMAScript 기능 사용
+    "module": "ESNext", // ESNext 모듈 시스템 사용
+    "skipLibCheck": true, // 라이브러리 타입 검사 생략
+    "types": ["vite/client"], // Vite 타입 정의 포함
+    "esModuleInterop": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"], // Vite 설정 파일만 포함
+  "exclude": ["node_modules"] // node_modules 제외
 }

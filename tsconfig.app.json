@@ -1,19 +1,17 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2020",
+    "target": "ES2022", // 최신 ECMAScript 버전으로 설정
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"], // DOM 관련 기능도 포함
     "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    "skipLibCheck": true, // 라이브러리 타입 검사 생략
+    "moduleResolution": "bundler", // Vite에서 잘 동작하는 설정
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "noEmit": true, // 실제 컴파일 없이 타입 검사만 수행
+    "jsx": "react-jsx", // React 17 JSX 변환 방식 사용
 
     /* Linting */
     "strict": true,
@@ -22,5 +20,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"], // 프로젝트 소스 폴더만 포함
+  "exclude": ["node_modules"] // node_modules 제외
 }
