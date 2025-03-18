@@ -3,5 +3,12 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+//      "@/lib/utils": ["./src/utils/ShadcnUtils.ts"] // 상대 경로 사용
+    }
+  }
 }
