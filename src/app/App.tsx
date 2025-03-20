@@ -1,4 +1,4 @@
-import './App.css'
+import './global.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Main from "@/pages/main/Main.tsx";
 import Layout from "@/layouts/Layout.tsx";
@@ -15,7 +15,6 @@ function App() {
                   {/*비회원 ======================*/}
 
                   {/*회원 ======================*/}
-
 
                   {/*웹툰*/}
                   <Route path='/webtoon' element={<WebtoonMain />} />
