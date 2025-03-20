@@ -1,14 +1,13 @@
-
 import { FC } from "react";
 import { Outlet } from 'react-router-dom';
 
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
+import UserHeader from "@/shared/ui/layout/UserHeader.tsx";
+import Footer from './Footer.tsx';
 
 const Layout: FC = () => {
     return (
         <>
-            <Header />
+            <UserHeader />
             <main className="main">
                 <div>
                     <Outlet />
