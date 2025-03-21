@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "@/shared/ui/layout/Layout.tsx";
-import UserLayout from "@/shared/ui/layout/UserLayout.tsx";
+import Layout from "@/widgets/layout/ui/Layout.tsx";
+import UserLayout from "@/widgets/layout/ui/UserLayout.tsx";
 import Main from "@/pages/main/Main.tsx";
 import Login from "@/pages/auth/Login.tsx";
 import Signup from "@/pages/auth/Signup.tsx";
@@ -9,7 +9,7 @@ import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import UserMain from "@/pages/user/UserMain.tsx";
 import Error from "@/pages/error/Error.tsx";
-import SearchBar from "@/features/search/SearchBar.tsx";
+import SearchBar from "@/features/search/ui/SearchBar.tsx";
 
 const RoutesConfig = () => (
   <Routes>
