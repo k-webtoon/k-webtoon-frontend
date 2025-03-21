@@ -23,22 +23,22 @@ const SearchBar = () => {
   }, [query, setResults]);
 
   return (
-    <div className="relative max-w-lg mx-auto p-4">
+    <div className="relative max-w-md mx-auto p-4">
       {/* 검색 입력창 */}
-      <div className="relative">
+      <div className="relative w-full">
         <Input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="웹툰 제목을 검색하세요..."
-          className="w-64 border-gray-200 focus:border-gray-300 rounded-full pl-10 pr-4 h-10 focus-visible:ring-gray-200 transition-all"
+          placeholder="웹툰 제목 또는 작가를 검색하세요..."
+          className="w-full border-gray-200 focus:border-gray-300 rounded-full pl-10 pr-4 h-10 focus-visible:ring-gray-200 transition-all"
         />
         <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
       </div>
 
       {/* 검색 결과 */}
       {results.length > 0 && (
-        <ul className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <ul className="mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {results.map((item: Webtoon) => (
             <li
               key={item.id}
@@ -47,13 +47,15 @@ const SearchBar = () => {
               <img
                 src={item.thumbnailUrl}
                 alt={item.titleName}
-                className="w-12 h-12 object-cover rounded-md mr-3"
+                className="w-10 h-10 object-cover rounded-md mr-3"
               />
-              <div>
-                <div className="text-sm font-semibold text-gray-800">
+              <div className="flex flex-col">
+                <div className="text-sm font-semibold text-gray-800 truncate">
                   {item.titleName}
                 </div>
-                <div className="text-xs text-gray-600">{item.author}</div>
+                <div className="text-xs text-gray-600 truncate">
+                  {item.author}
+                </div>
               </div>
             </li>
           ))}
