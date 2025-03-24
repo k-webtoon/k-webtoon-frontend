@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react"
-import { useLocation } from "react-router-dom"
-import { DesktopHeader } from "./DesktopHeader"
-import { MobileHeader } from "./MobileHeader"
-import { MobileSearch } from "@/features/header-search/ui/MobileSearch"
-import { SubNavigation } from "./SubNavigation"
-import logo from "@/shared/assets/curatoon.png"
+import { useLocation, Link } from "react-router-dom"
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs.tsx"
+import { Button } from "@/shared/ui/shadcn/button.tsx"
+import { Search } from "lucide-react"
 import { NavItem, SubTabItem } from "@/entities/navigation/model/types"
 import { Notification } from "@/entities/notification/model/types"
+import SearchBar from "@/features/search/ui/SearchBar.tsx"
+import CustomDropdown from "@/shared/ui/custom/CustomDropdown.tsx"
+import logo from "@/shared/assets/curatoon.png"
 
 const Header: React.FC = () => {
     const location = useLocation();
     const [activeTab, setActiveTab] = useState("home")
     const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [activeSubTab, setActiveSubTab] = useState("section1")
 
     const navItems: NavItem[] = [
         { title: "홈", href: "/", value: "home" },
@@ -45,61 +47,163 @@ const Header: React.FC = () => {
 
     // 알림 데이터
     const notifications: Notification[] = [
-        { id: 1, label: "새로운 웹툰이 업로드되었습니다." },
-        { id: 2, label: "친구가 웹툰 리스트를 스크랩했습니다." },
-        { id: 3, label: "알림 설정이 변경되었습니다." },
+        { id: 1, label: "로그인 후 더 다양한 서비스를 이용하세요." }
     ]
 
     return (
-        <>
-            <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
-                <header className="w-full  backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    {/* 데스크탑 헤더 - 항상 최상단에 위치하도록 수정 */}
-                    <div className="border-b">
-                        <div className="px-5">
-                            <DesktopHeader
-                                logo={logo}
-                                navItems={navItems}
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
-                                notifications={notifications}
-                            />
+        <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+            <div>
+                {/* 로고 및 네비게이션 섹션 */}
+                <div className="container mx-auto border-b transition-colors duration-300">
+                    {/* 로고 - 모바일 & 데스크탑 공통 */}
+                    <div className="flex items-center justify-between h-16 px-4 md:px-0 transition-all duration-300">
+                        {/* 좌측 - 로고 & 탭 */}
+                        <div className="flex items-center gap-2 transition-all duration-300">
+                            <Link to="/" className="flex items-center">
+                                <img src={logo} alt="Logo" className="h-8 transition-transform duration-300" />
+                            </Link>
+
+                            {/* 데스크탑 탭 메뉴 */}
+                            <Tabs value={activeTab} onValueChange={setActiveTab} className="transition-opacity duration-300">
+                                <TabsList className="bg-transparent h-16">
+                                    {navItems.map((item) => (
+                                        <TabsTrigger
+                                            key={item.value}
+                                            value={item.value}
+                                            className="h-full px-5 rounded-none text-gray-600 data-[state=active]:text-gray-900 !border-0 data-[state=active]:!border-0 data-[state=active]:!shadow-none data-[state=active]:bg-transparent relative transition-all duration-300 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gray-900 after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300"
+                                            asChild
+                                        >
+                                            <Link
+                                                to={item.href}
+                                                onClick={() => setActiveTab(item.value)}
+                                            >
+                                                {item.title}
+                                            </Link>
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+                            </Tabs>
                         </div>
 
-                        {/* 모바일 헤더 */}
-                        <div className="px-5">
-                            <MobileHeader
-                                logo={logo}
-                                navItems={navItems}
-                                subTabItems={subTabItems}
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
-                                isSearchOpen={isSearchOpen}
-                                setIsSearchOpen={setIsSearchOpen}
-                            />
+                        {/* 우측 - 유틸리티 메뉴 */}
+                        {/* 데스크탑 유틸리티 메뉴 */}
+                        <div className="hidden md:flex items-center transition-opacity duration-300">
+                            <ul className="flex items-center">
+                                <li className="mr-4">
+                                    <SearchBar />
+                                </li>
+                                <li>
+                                    <div className="mr-2">
+                                        <CustomDropdown
+                                            label="알림"
+                                            items={notifications.map((notification) => ({
+                                                label: notification.label,
+                                                onClick: () => console.log("알림 클릭됨", notification.id),
+                                            }))}
+                                        />
+                                    </div>
+                                </li>
+                                <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
+                                    <Link to="/login">로그인</Link>
+                                </li>
+                                <li className="bg-gray-900 hover:bg-gray-700 text-white rounded-md px-4 py-2 text-sm transition-colors duration-300">
+                                    <Link to="/signup">회원가입</Link>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* 모바일 유틸리티 메뉴 */}
+                        <div className="flex md:hidden items-center transition-opacity duration-300">
+                            <ul className="flex items-center">
+                                <li>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-gray-600 transition-colors duration-300"
+                                        onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                    >
+                                        <Search />
+                                    </Button>
+                                </li>
+                                <li>
+                                    <CustomDropdown
+                                        label="알림"
+                                        items={notifications.map((notification) => ({
+                                            label: notification.label,
+                                            onClick: () => console.log("알림 클릭됨", notification.id),
+                                        }))}
+                                    />
+                                </li>
+                                <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
+                                    <Link to="/login">로그인</Link>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <div>
-                        {/* 모바일 검색창 */}
-                        <MobileSearch
-                            isOpen={isSearchOpen}
-                            onClose={() => setIsSearchOpen(false)}
-                        />    {/* 서브 네비게이션 - 데스크탑 헤더 아래에 위치하도록 분리 */}
-                        {activeTab === "home" && (
-                            <div className="w-full border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5">
-                                <SubNavigation
-                                    activeTab={activeTab}
-                                    subTabItems={subTabItems}
-                                />
-                            </div>
-                        )}
-                    </div>
-                </header>
-
-
+                </div>
             </div>
-            {/* 헤더와 서브네비게이션의 높이만큼 여백 추가 */}
-        </>
+
+            {/* 모바일 검색창 */}
+            <div
+                className={`container mx-auto px-4 md:px-0 transition-all duration-300 ease-in-out overflow-hidden ${
+                    isSearchOpen ? 'max-h-16 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+            >
+                <SearchBar
+                    isMobile={true}
+                    onClose={() => setIsSearchOpen(false)}
+                    className="md:hidden py-2"
+                />
+            </div>
+
+            {/* 서브 네비게이션 (홈 탭에서만 표시) */}
+            {activeTab === "home" && (
+                <div className="container mx-auto border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+                    <ul className="flex overflow-x-auto py-3 px-4 md:px-0 whitespace-nowrap transition-all duration-300">
+                        {subTabItems.map((item, index) => {
+                            // href에서 섹션 ID 추출
+                            const sectionId = `section${item.href.split('/').pop()}`;
+
+                            // 활성화 여부에 따른 클래스 결정
+                            const isActive = activeSubTab === sectionId;
+                            const linkClass = isActive
+                                ? "text-sm font-bold text-gray-900 transition-colors duration-300"
+                                : "text-sm text-gray-600 hover:text-gray-900 transition-colors duration-300";
+
+                            // 스크롤 이동 함수
+                            const scrollToSection = (e: React.MouseEvent) => {
+                                e.preventDefault();
+                                setActiveSubTab(sectionId);
+
+                                const section = document.getElementById(sectionId);
+                                if (section) {
+                                    // 헤더 높이를 고려하여 스크롤 위치 조정
+                                    const headerHeight = 80; // 헤더와 서브네비게이션 높이에 맞게 조정
+                                    const sectionTop = section.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+                                    window.scrollTo({
+                                        top: sectionTop,
+                                        behavior: "smooth"
+                                    });
+                                }
+                            };
+
+                            return (
+                                <li key={index} className="mr-6 transition-transform duration-300">
+                                    <a
+                                        href={`#${sectionId}`}
+                                        onClick={scrollToSection}
+                                        className={linkClass}
+                                    >
+                                        {item.title}
+                                    </a>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            )}
+        </header>
     )
 }
 
