@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs.tsx"
-import { Button } from "@/shared/ui/shadcn/button.tsx"
-import { Search } from "lucide-react"
 import { NavItem, SubTabItem } from "@/entities/navigation/model/types"
-import { Notification } from "@/entities/notification/model/types"
 import SearchBar from "@/features/search/ui/SearchBar.tsx"
-import CustomDropdown from "@/shared/ui/custom/CustomDropdown.tsx"
 import logo from "@/shared/assets/curatoon.png"
+import HeaderActions from "@/widgets/header/ui/HeaderActions.tsx";
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -45,13 +42,8 @@ const Header: React.FC = () => {
         { title: "#큐레이툰 에디터 추천", href: "/4" }
     ]
 
-    // 알림 데이터
-    const notifications: Notification[] = [
-        { id: 1, label: "로그인 후 더 다양한 서비스를 이용하세요." }
-    ]
-
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+        <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white transition-all duration-300">
             <div>
                 {/* 로고 및 네비게이션 섹션 */}
                 <div className="container mx-auto border-b transition-colors duration-300">
@@ -86,59 +78,11 @@ const Header: React.FC = () => {
                         </div>
 
                         {/* 우측 - 유틸리티 메뉴 */}
-                        {/* 데스크탑 유틸리티 메뉴 */}
-                        <div className="hidden md:flex items-center transition-opacity duration-300">
-                            <ul className="flex items-center">
-                                <li className="mr-4">
-                                    <SearchBar />
-                                </li>
-                                <li>
-                                    <div className="mr-2">
-                                        <CustomDropdown
-                                            label="알림"
-                                            items={notifications.map((notification) => ({
-                                                label: notification.label,
-                                                onClick: () => console.log("알림 클릭됨", notification.id),
-                                            }))}
-                                        />
-                                    </div>
-                                </li>
-                                <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
-                                    <Link to="/login">로그인</Link>
-                                </li>
-                                <li className="bg-gray-900 hover:bg-gray-700 text-white rounded-md px-4 py-2 text-sm transition-colors duration-300">
-                                    <Link to="/signup">회원가입</Link>
-                                </li>
-                            </ul>
-                        </div>
+                        <HeaderActions
+                            isSearchOpen={isSearchOpen}
+                            setIsSearchOpen={setIsSearchOpen}
+                        />
 
-                        {/* 모바일 유틸리티 메뉴 */}
-                        <div className="flex md:hidden items-center transition-opacity duration-300">
-                            <ul className="flex items-center">
-                                <li>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-gray-600 transition-colors duration-300"
-                                        onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                    >
-                                        <Search />
-                                    </Button>
-                                </li>
-                                <li>
-                                    <CustomDropdown
-                                        label="알림"
-                                        items={notifications.map((notification) => ({
-                                            label: notification.label,
-                                            onClick: () => console.log("알림 클릭됨", notification.id),
-                                        }))}
-                                    />
-                                </li>
-                                <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
-                                    <Link to="/login">로그인</Link>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>

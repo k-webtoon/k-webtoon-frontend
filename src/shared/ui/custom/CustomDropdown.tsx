@@ -4,7 +4,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger
-} from "@/shared/ui/shadcn/dropdown-menu"; // 경로는 프로젝트에 맞게 조정
+} from "@/shared/ui/shadcn/dropdown-menu";
 
 import { Bell, User } from "lucide-react"
 
@@ -25,9 +25,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, items }) => {
                 <div className="inline-flex items-center justify-center size-9 rounded-md text-gray-600 hover:text-gray-900 hover:bg-accent transition-colors cursor-pointer">
                     <span>
                         {label === "알림" ? (
-                        <Bell className="h-5 w-5" />
+                        <Bell className="h-4 w-4" />
                     ) : (
-                        <User className="h-5 w-5" />
+                        <User className="h-4 w-4" />
                     )}
                     </span>
                 </div>
