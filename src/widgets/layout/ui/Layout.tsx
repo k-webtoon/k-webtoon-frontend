@@ -9,7 +9,7 @@ const Layout: FC = () => {
         <>
             <Header />
             <main className="main">
-                <div>
+                <div className="pt-10">
                     <Outlet />
                 </div>
             </main>
