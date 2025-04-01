@@ -33,11 +33,26 @@ const RoutesConfig = () => (
             {/* 회원만 접근 가능 ====================== */}
             <Route element={<ProtectedRoute />} >
                 <Route path="/mypage" element={<UserMain />} />
+                    {/* 마이페이지 (로그인 사용자) */}
+              <Route path="home" element={<UserMain />} />
+              <Route path="likes" element={<MyLikeWebtoon />} />
+              <Route path="comments" element={<MyComments />} />
+              <Route path="followers" element={<MyFollowers />} />
+              <Route path="followees" element={<MyFollowees />} />
+              <Route path="*" element={<Error />} />
             </Route>
 
             {/* 오류 */}
             <Route path="*" element={<Error />} />
-
+      {/* 유저 페이지 (다른 유저 프로필) */}
+      {/*<Route path="user/:userId" element={<UserLayout />}>
+        <Route index element={<Navigate to="home" />} />
+        <Route path="home" element={<UserProfile />} />
+        <Route path="likes" element={<UserLikeWebtoon />} />
+        <Route path="comments" element={<UserComments />} />
+        <Route path="followers" element={<UserFollowers />} />
+        <Route path="followees" element={<UserFollowees />} />
+      </Route>*/}
         </Route>
     </Routes>
 );
