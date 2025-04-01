@@ -7,17 +7,16 @@ import FindPassword from "@/pages/auth/FindPassword.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import SearchBar from "@/features/search/ui/SearchBar.tsx";
-import UserMain from "@/pages/user/UserMain.tsx";
-import MyLikeWebtoon from "@/pages/user/MyLikeWebtoon.tsx";
-import MyComments from "@/pages/user/MyComments.tsx";
-import MyFollowers from "@/pages/user/MyFollowers.tsx";
-import MyFollowees from "@/pages/user/MyFollowees.tsx";
-import UserLayout from "@/pages/user/UserLayout.tsx";
-import UserProfile from "@/pages/user/UserProfile.tsx";
-import UserLikeWebtoon from "@/pages/user/UserLikeWebtoon.tsx";
-import UserComments from "@/pages/user/UserComments.tsx";
-import UserFollowers from "@/pages/user/UserFollowers.tsx";
-import UserFollowees from "@/pages/user/UserFollowees.tsx";
+import UserMain from "@/pages/user/mypage/UserMain.tsx";
+import MyLikeWebtoon from "@/pages/user/mypage/MyLikeWebtoon.tsx";
+import MyComments from "@/pages/user/mypage/MyComments.tsx";
+import MyFollowers from "@/pages/user/mypage/MyFollowers.tsx";
+import MyFollowees from "@/pages/user/mypage/MyFollowees.tsx";
+import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
+import UserLikeWebtoon from "@/pages/user/userpage/UserLikeWebtoon.tsx";
+import UserComments from "@/pages/user/userpage/UserComments.tsx";
+import UserFollowers from "@/pages/user/userpage/UserFollowers.tsx";
+import UserFollowees from "@/pages/user/userpage/UserFollowees.tsx";
 import ProtectedRoute from "@/app/routes/ProtectedRoute.tsx";
 import UnprotectedRoute from "@/app/routes/UnprotectedRoute.tsx";
 import Error from "@/pages/error/Error.tsx";
@@ -51,7 +50,7 @@ const RoutesConfig = () => (
       </Route>
 
       {/* 👤 다른 유저 프로필 */}
-      <Route path="user/:userId" element={<UserLayout />}>
+      <Route path="user/:userId" element={<Layout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<UserProfile />} />
         <Route path="likes" element={<UserLikeWebtoon />} />
