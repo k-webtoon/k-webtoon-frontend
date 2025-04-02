@@ -6,7 +6,6 @@ interface User {
   indexId: number;
   nickname: string;
   userEmail: string;
-  // 다른 사용자 속성들...
 }
 
 interface AuthState {
@@ -14,25 +13,23 @@ interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  user: User | null; // 사용자 정보 추가
+  user: User | null;
 
   login: (userEmail: string, userPassword: string) => Promise<void>;
   checkAuth: () => Promise<void>;
-  fetchUserInfo: () => Promise<void>; // 사용자 정보 가져오는 함수 추가
+  fetchUserInfo: () => Promise<void>;
 }
 
-// 토큰 검증 함수 - 단순히 토큰 존재 여부만 확인
 const validateStoredToken = (): string | null => {
   const token = localStorage.getItem("token");
   return token;
 };
 
-// 상태 초기화 함수
 const initializeAuthState = () => {
   const token = validateStoredToken();
   return {
     token: token,
-    isAuthenticated: !!token, // 토큰이 있으면 true, 없으면 false
+    isAuthenticated: !!token,
     loading: false,
     error: null,
     user: null,
@@ -42,108 +39,101 @@ const initializeAuthState = () => {
 const useAuthStore = create<AuthState>((set, get) => ({
   ...initializeAuthState(),
 
-  /**
-   * 사용자 로그인을 처리합니다.
-   */
   login: async (userEmail: string, userPassword: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await authApi.login(userEmail, userPassword);
-      console.log("로그인 응답:", response);
+      const loginData = {
+        userEmail,
+        userPassword,
+      };
 
-      if (response.data.token) {
-        // 토큰 저장
-        const token = response.data.token;
+      // response는 직접 JWT 토큰 문자열
+      const token = await authApi.login(loginData);
+      console.log("로그인 응답 토큰:", token);
+
+      if (token) {
         localStorage.setItem("token", token);
         console.log("토큰 저장됨:", token);
 
-        // 상태 업데이트
         set({
-          token,
+          token: token,
           isAuthenticated: true,
           loading: false,
-          // 응답에 user 정보가 있다면 설정
-          user: response.data.indexId
-            ? {
-                indexId: response.data.indexId,
-                nickname: response.data.nickname,
-                userEmail: response.data.userEmail,
-              }
-            : null,
+          user: null, // 초기에는 null로 설정
         });
 
-        // 로그인 성공 후 사용자 정보 가져오기 시도
-        if (!response.data.indexId) {
-          try {
-            await get().fetchUserInfo();
-          } catch (e) {
-            console.error("로그인 후 사용자 정보 가져오기 실패:", e);
-          }
+        // 토큰 저장 후 사용자 정보 조회
+        try {
+          await get().fetchUserInfo();
+        } catch (e) {
+          console.error("로그인 후 사용자 정보 가져오기 실패:", e);
         }
       } else {
-        throw new Error("토큰이 없습니다");
+        throw new Error("서버 응답에 토큰이 없습니다.");
       }
     } catch (error: any) {
-      console.error("로그인 오류:", error);
+      console.error("로그인 처리 중 오류:", {
+        error,
+        message: error.response?.data?.message,
+        status: error.response?.status,
+      });
+
       set({
         loading: false,
         error: error.response?.data?.message || "로그인에 실패했습니다.",
+        isAuthenticated: false,
+        token: null,
+        user: null,
       });
+
+      throw error;
     }
   },
 
-  /**
-   * 현재 토큰의 유효성을 검증합니다.
-   */
   checkAuth: async () => {
-    // 로딩 상태 설정
     set({ loading: true });
-
-    // 로컬 스토리지에서 토큰 확인
     const storedToken = localStorage.getItem("token");
     console.log("인증 확인 시작:", { storedToken });
 
-    // 토큰이 없으면 인증 상태 false로 설정하고 종료
     if (!storedToken) {
-      console.log("토큰 없음, 인증 상태 false로 설정");
-      set({ token: null, isAuthenticated: false, loading: false });
+      console.log("토큰 없음, 인증 상태 초기화");
+      set({ token: null, isAuthenticated: false, loading: false, user: null });
       return;
     }
 
     try {
-      // 서버에 토큰 유효성 검증 요청
       const isValid = await authApi.validateToken(storedToken);
       console.log("토큰 검증 결과:", isValid);
 
       if (isValid) {
-        // 토큰이 유효하면 인증 상태 true로 설정
         set({ token: storedToken, isAuthenticated: true, loading: false });
-        console.log("토큰 유효함, 인증 상태 true로 설정");
+        console.log("토큰 유효, 사용자 정보 조회 시작");
 
-        // 토큰이 유효하면 사용자 정보도 가져오기
         try {
           await get().fetchUserInfo();
         } catch (e) {
-          console.error("사용자 정보 가져오기 실패:", e);
+          console.error("사용자 정보 조회 실패:", e);
+          // 사용자 정보 조회 실패 시에도 인증 상태는 유지
         }
       } else {
-        // 토큰이 유효하지 않으면 제거하고 인증 상태 false로 설정
+        console.log("토큰 무효, 인증 상태 초기화");
         localStorage.removeItem("token");
-        set({ token: null, isAuthenticated: false, loading: false });
-        console.log("토큰 유효하지 않음, 인증 상태 false로 설정");
+        set({
+          token: null,
+          isAuthenticated: false,
+          loading: false,
+          user: null,
+        });
       }
     } catch (error) {
-      console.error("토큰 검증 중 오류:", error);
-      // 오류 발생 시 토큰이 만료되었거나 서버에 문제가 있을 수 있으므로,
-      // 보안을 위해 토큰을 제거하지는 않고 현재 상태를 유지합니다.
-      // 단, 로딩 상태는 해제합니다.
-      set({ loading: false });
+      console.error("인증 확인 중 오류:", error);
+      set({
+        loading: false,
+        error: "인증 확인 중 오류가 발생했습니다.",
+      });
     }
   },
 
-  /**
-   * 사용자 정보를 가져옵니다.
-   */
   fetchUserInfo: async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -153,11 +143,19 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const userInfo = await userApi.getUserInfo();
-      set({ user: userInfo, loading: false });
+      console.log("사용자 정보 조회 성공:", userInfo);
+
+      set({
+        user: userInfo,
+        loading: false,
+        error: null,
+      });
     } catch (error) {
-      console.error("사용자 정보 가져오기 실패:", error);
-      set({ loading: false });
-      // 에러가 발생해도 로그아웃하지 않고 인증 상태 유지
+      console.error("사용자 정보 조회 실패:", error);
+      set({
+        loading: false,
+        error: "사용자 정보를 가져오는데 실패했습니다.",
+      });
     }
   },
 }));

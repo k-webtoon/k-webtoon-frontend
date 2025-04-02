@@ -22,7 +22,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const { login, loading, error } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,12 +33,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
     }
 
     try {
+      // userEmail과 userPassword로 정확히 매핑
       await login(email, password);
       if (onSuccess) onSuccess();
-      console.log("성공", email, password);
+      console.log("로그인 시도:", { userEmail: email, userPassword: password });
     } catch (err) {
-      // 에러는 이미 store에서 처리됨
-      console.log("에러", email, password);
+      console.error("로그인 에러:", err);
     }
   };
 
