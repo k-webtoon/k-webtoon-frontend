@@ -1,16 +1,27 @@
 // src/pages/user/mypage/MyProfile.tsx
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useUserStore } from "@/entities/user/model/userStore";
-import useAuthStore from "@/entities/auth/model/authStore";
-import { UserInfo, UserComment, LikedWebtoon, FollowUser } from "@/entities/user/model/types";
+import useAuthStore from "@/entities/auth/model/userStore";
+import {
+  UserInfo,
+  UserComment,
+  LikedWebtoon,
+  FollowUser,
+} from "@/entities/user/model/types";
 import { TopWebtoonInfo } from "@/entities/webtoon/model/types";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { clsx } from "clsx";
 
-type TabType = "overview" | "settings" | "security" | "privacy" | "followers" | "followees";
+type TabType =
+  | "overview"
+  | "settings"
+  | "security"
+  | "privacy"
+  | "followers"
+  | "followees";
 
 // LikedWebtoon을 TopWebtoonInfo로 변환하는 함수
 const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): TopWebtoonInfo => ({
@@ -24,10 +35,15 @@ const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): TopWebtoonInfo => ({
   thumbnailUrl: webtoon.thumbnailUrl,
   synopsis: "",
   rankGenreTypes: ["DRAMA"],
-  starScore: 0
+  starScore: 0,
 });
 
 export const MyProfile = () => {
+  // location에서 전달된 사용자 정보 확인
+  const location = useLocation();
+  const locationUserInfo = location.state?.userInfo;
+  
+  // @ts-ignore
   const { user } = useAuthStore();
   const {
     userInfo,
@@ -62,17 +78,34 @@ export const MyProfile = () => {
     commentVisibility: "public",
     likeVisibility: "public",
   });
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
-    if (user?.indexId) {
-      fetchMyInfo(user.indexId);
-      fetchMyLikedWebtoons(user.indexId);
-      fetchMyComments(user.indexId);
-      fetchFollowers(user.indexId);
-      fetchFollowees(user.indexId);
+    // location.state에서 사용자 정보가 넘어왔는지 확인
+    const userId = locationUserInfo?.indexId || user?.indexId;
+    
+    if (userId) {
+      console.log("프로필 페이지에서 사용할 사용자 ID:", userId);
+      fetchMyInfo(userId);
+      fetchMyLikedWebtoons(userId);
+      fetchMyComments(userId);
+      fetchFollowers(userId);
+      fetchFollowees(userId);
+    } else {
+      console.error("사용자 ID를 찾을 수 없습니다:", { locationUserInfo, user });
     }
-  }, [user?.indexId, fetchMyInfo, fetchMyLikedWebtoons, fetchMyComments, fetchFollowers, fetchFollowees]);
+  }, [
+    locationUserInfo,
+    user,
+    fetchMyInfo,
+    fetchMyLikedWebtoons,
+    fetchMyComments,
+    fetchFollowers,
+    fetchFollowees,
+  ]);
 
   const handleProfileUpdate = async () => {
     try {
@@ -84,7 +117,7 @@ export const MyProfile = () => {
       if (isBioEditing) {
         // 소개가 수정된 경우
         await updateUserBio(editedBio);
-        setUserInfo(prev => prev ? { ...prev, bio: editedBio } : null);
+        setUserInfo((prev) => (prev ? { ...prev, bio: editedBio } : null));
       }
       setIsEditing(false);
       setIsBioEditing(false);
@@ -106,11 +139,15 @@ export const MyProfile = () => {
     }
     // TODO: 비밀번호 변경 API 호출
     setMessage({ type: "success", text: "비밀번호가 변경되었습니다." });
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
   };
 
   const handlePrivacyChange = async (setting: string, value: string) => {
-    setPrivacySettings(prev => ({ ...prev, [setting]: value }));
+    setPrivacySettings((prev) => ({ ...prev, [setting]: value }));
     // TODO: 공개 범위 설정 API 호출
     setMessage({ type: "success", text: "설정이 저장되었습니다." });
   };
@@ -136,10 +173,23 @@ export const MyProfile = () => {
                 ))}
                 {likedWebtoons.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
                     </svg>
-                    <p className="text-lg font-medium">아직 좋아요한 웹툰이 없습니다</p>
+                    <p className="text-lg font-medium">
+                      아직 좋아요한 웹툰이 없습니다
+                    </p>
                   </div>
                 )}
               </div>
@@ -152,19 +202,32 @@ export const MyProfile = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {comments.map((comment) => (
-                  <CommentCard 
-                    key={comment.id} 
-                    comment={comment} 
+                  <CommentCard
+                    key={comment.id}
+                    comment={comment}
                     webtoonId={comment.webtoonId}
                     onDelete={() => handleCommentDelete(comment.id)}
                   />
                 ))}
                 {comments.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      />
                     </svg>
-                    <p className="text-lg font-medium">아직 작성한 댓글이 없습니다</p>
+                    <p className="text-lg font-medium">
+                      아직 작성한 댓글이 없습니다
+                    </p>
                   </div>
                 )}
               </div>
@@ -188,7 +251,9 @@ export const MyProfile = () => {
                         />
                         <div>
                           <h3 className="font-medium">{follower.nickname}</h3>
-                          <p className="text-sm text-gray-500">{follower.userEmail}</p>
+                          <p className="text-sm text-gray-500">
+                            {follower.userEmail}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -197,8 +262,19 @@ export const MyProfile = () => {
               ))}
               {(!followers || followers.length === 0) && (
                 <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                   <p className="text-lg font-medium">아직 팔로워가 없습니다</p>
                 </div>
@@ -223,7 +299,9 @@ export const MyProfile = () => {
                         />
                         <div>
                           <h3 className="font-medium">{followee.nickname}</h3>
-                          <p className="text-sm text-gray-500">{followee.userEmail}</p>
+                          <p className="text-sm text-gray-500">
+                            {followee.userEmail}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -232,10 +310,23 @@ export const MyProfile = () => {
               ))}
               {(!followees || followees.length === 0) && (
                 <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
-                  <p className="text-lg font-medium">아직 팔로잉하는 사용자가 없습니다</p>
+                  <p className="text-lg font-medium">
+                    아직 팔로잉하는 사용자가 없습니다
+                  </p>
                 </div>
               )}
             </div>
@@ -248,28 +339,46 @@ export const MyProfile = () => {
             {isEditing ? (
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">닉네임</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    닉네임
+                  </label>
                   <input
                     type="text"
                     value={editedInfo?.nickname || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, nickname: e.target.value } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev ? { ...prev, nickname: e.target.value } : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    이메일
+                  </label>
                   <input
                     type="email"
                     value={editedInfo?.userEmail || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, userEmail: e.target.value } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev ? { ...prev, userEmail: e.target.value } : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">성별</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    성별
+                  </label>
                   <select
                     value={editedInfo?.gender || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, gender: e.target.value } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev ? { ...prev, gender: e.target.value } : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">선택하세요</option>
@@ -279,31 +388,51 @@ export const MyProfile = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">나이</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    나이
+                  </label>
                   <input
                     type="number"
                     value={editedInfo?.userAge || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, userAge: parseInt(e.target.value) } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev
+                          ? { ...prev, userAge: parseInt(e.target.value) }
+                          : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
                     max="120"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">프로필 이미지 URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    프로필 이미지 URL
+                  </label>
                   <input
                     type="text"
                     value={editedInfo?.profileImage || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, profileImage: e.target.value } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev ? { ...prev, profileImage: e.target.value } : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="이미지 URL을 입력하세요"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">소개</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    소개
+                  </label>
                   <textarea
                     value={editedInfo?.bio || ""}
-                    onChange={(e) => setEditedInfo(prev => prev ? { ...prev, bio: e.target.value } : null)}
+                    onChange={(e) =>
+                      setEditedInfo((prev) =>
+                        prev ? { ...prev, bio: e.target.value } : null
+                      )
+                    }
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={4}
                     placeholder="자신을 소개해주세요"
@@ -330,28 +459,46 @@ export const MyProfile = () => {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">닉네임</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    닉네임
+                  </h3>
                   <p className="text-gray-900">{userInfo?.nickname}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">이메일</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    이메일
+                  </h3>
                   <p className="text-gray-900">{userInfo?.userEmail}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">성별</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    성별
+                  </h3>
                   <p className="text-gray-900">
-                    {userInfo?.gender === "MALE" ? "남성" : 
-                     userInfo?.gender === "FEMALE" ? "여성" : 
-                     userInfo?.gender === "OTHER" ? "기타" : "미설정"}
+                    {userInfo?.gender === "MALE"
+                      ? "남성"
+                      : userInfo?.gender === "FEMALE"
+                      ? "여성"
+                      : userInfo?.gender === "OTHER"
+                      ? "기타"
+                      : "미설정"}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">나이</h3>
-                  <p className="text-gray-900">{userInfo?.userAge || "미설정"}</p>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    나이
+                  </h3>
+                  <p className="text-gray-900">
+                    {userInfo?.userAge || "미설정"}
+                  </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">소개</h3>
-                  <p className="text-gray-900 whitespace-pre-wrap">{userInfo?.bio || "소개가 없습니다."}</p>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    소개
+                  </h3>
+                  <p className="text-gray-900 whitespace-pre-wrap">
+                    {userInfo?.bio || "소개가 없습니다."}
+                  </p>
                 </div>
                 <button
                   onClick={() => {
@@ -372,29 +519,50 @@ export const MyProfile = () => {
             <h2 className="text-xl font-bold mb-6">비밀번호 변경</h2>
             <form onSubmit={handlePasswordChange} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">현재 비밀번호</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  현재 비밀번호
+                </label>
                 <input
                   type="password"
                   value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      currentPassword: e.target.value,
+                    }))
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">새 비밀번호</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  새 비밀번호
+                </label>
                 <input
                   type="password"
                   value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      newPassword: e.target.value,
+                    }))
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">새 비밀번호 확인</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  새 비밀번호 확인
+                </label>
                 <input
                   type="password"
                   value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -413,10 +581,14 @@ export const MyProfile = () => {
             <h2 className="text-xl font-bold mb-6">공개 범위 설정</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">프로필 공개 범위</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  프로필 공개 범위
+                </label>
                 <select
                   value={privacySettings.profileVisibility}
-                  onChange={(e) => handlePrivacyChange("profileVisibility", e.target.value)}
+                  onChange={(e) =>
+                    handlePrivacyChange("profileVisibility", e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="public">전체 공개</option>
@@ -425,10 +597,14 @@ export const MyProfile = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">댓글 공개 범위</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  댓글 공개 범위
+                </label>
                 <select
                   value={privacySettings.commentVisibility}
-                  onChange={(e) => handlePrivacyChange("commentVisibility", e.target.value)}
+                  onChange={(e) =>
+                    handlePrivacyChange("commentVisibility", e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="public">전체 공개</option>
@@ -437,10 +613,14 @@ export const MyProfile = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">좋아요한 웹툰 공개 범위</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  좋아요한 웹툰 공개 범위
+                </label>
                 <select
                   value={privacySettings.likeVisibility}
-                  onChange={(e) => handlePrivacyChange("likeVisibility", e.target.value)}
+                  onChange={(e) =>
+                    handlePrivacyChange("likeVisibility", e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="public">전체 공개</option>
@@ -477,7 +657,9 @@ export const MyProfile = () => {
             <div className="mb-4">
               <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
                 <img
-                  src={userInfo.profileImage || "/images/profile-placeholder.jpg"}
+                  src={
+                    userInfo.profileImage || "/images/profile-placeholder.jpg"
+                  }
                   alt="프로필"
                   className="w-full h-full object-cover"
                 />
@@ -540,17 +722,23 @@ export const MyProfile = () => {
 
             {/* 팔로우 통계 */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <button 
-                onClick={() => setActiveTab("followers")} 
+              <button
+                onClick={() => setActiveTab("followers")}
                 className="flex items-center gap-2 hover:text-blue-500 mb-2 w-full text-left"
               >
-                <span className="font-semibold">{userInfo.followerCount || 0}</span> 팔로워
+                <span className="font-semibold">
+                  {userInfo.followerCount || 0}
+                </span>{" "}
+                팔로워
               </button>
-              <button 
-                onClick={() => setActiveTab("followees")} 
+              <button
+                onClick={() => setActiveTab("followees")}
                 className="flex items-center gap-2 hover:text-blue-500 w-full text-left"
               >
-                <span className="font-semibold">{userInfo.followeeCount || 0}</span> 팔로잉
+                <span className="font-semibold">
+                  {userInfo.followeeCount || 0}
+                </span>{" "}
+                팔로잉
               </button>
             </div>
 
@@ -610,7 +798,9 @@ export const MyProfile = () => {
             <div
               className={clsx(
                 "mb-4 p-4 rounded",
-                message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                message.type === "success"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               )}
             >
               {message.text}
