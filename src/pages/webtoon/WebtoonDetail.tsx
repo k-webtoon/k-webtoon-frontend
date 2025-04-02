@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebtoonDetailStore } from '@/entities/webtoondetail/model/store';
 import { getWebtoonDetail, commentApi } from '@/app/api/webtoonDetailApi';
-import { CommentRequest } from '@/entities/webtoondetail/types';
+import { CommentRequest } from '@/entities/webtoondetail/model/types.ts';
 
 function WebtoonDetail() {
     const { id } = useParams<{ id: string }>();

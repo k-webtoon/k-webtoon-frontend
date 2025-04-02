@@ -1,10 +1,10 @@
 import axios from "axios";
-import {WebtoonInfo} from "@/entities/webtoon/model/types.ts";
+import {WebtoonInfo, WebtoonPaginatedResponse} from "@/entities/webtoon/model/types.ts";
 
 const BASE_URL = 'http://localhost:8080/api/webtoons';
 
 // 조회수 높은 웹툰 리스트 조회 API
-export const topWebtoons = async (page: number = 0, size: number = 10):Promise<WebtoonInfo> => {
+export const topWebtoons = async (page: number = 0, size: number = 10):Promise<WebtoonPaginatedResponse> => {
   const response = await axios.get(`${BASE_URL}/top`, {
     params: { page, size }
   });

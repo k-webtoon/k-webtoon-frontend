@@ -7,8 +7,8 @@ import FindPassword from "@/pages/auth/FindPassword.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import UserMain from "@/pages/user/UserMain.tsx";
+import Search from "@/pages/search/Search.tsx";
 import Error from "@/pages/error/Error.tsx";
-import SearchBar from "@/features/search/ui/SearchBar.tsx";
 import ProtectedRoute from "@/app/routes/ProtectedRoute.tsx";
 import UnprotectedRoute from "@/app/routes/UnprotectedRoute.tsx";
 
@@ -24,10 +24,11 @@ const RoutesConfig = () => (
                 <Route path="find/password" element={<FindPassword />} />
             </Route>
 
+            {/*<Route path=*/}
             {/* 웹툰 */}
             <Route path="/webtoon" element={<WebtoonMain />} />
             <Route path="/webtoon/:id" element={<WebtoonDetail />} />
-            <Route path="/search" element={<SearchBar />} />
+            <Route path="/search" element={<Search />} />
 
 
             {/* 회원만 접근 가능 ====================== */}
