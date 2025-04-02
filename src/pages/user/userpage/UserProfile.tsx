@@ -96,7 +96,7 @@ const UserProfile = () => {
         await followUserAction(user.indexId, numericUserId);
       }
       setIsFollowing(!isFollowing);
-      
+
       // 팔로워 목록 새로고침
       await fetchFollowers(numericUserId);
     } catch (error) {
@@ -277,14 +277,14 @@ const UserProfile = () => {
 
             {/* 팔로우 통계 */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <button 
-                onClick={() => setActiveTab("followers")} 
+              <button
+                onClick={() => setActiveTab("followers")}
                 className="flex items-center gap-2 hover:text-blue-500 mb-2 w-full text-left"
               >
                 <span className="font-semibold">{userInfo?.followerCount || 0}</span> 팔로워
               </button>
-              <button 
-                onClick={() => setActiveTab("followees")} 
+              <button
+                onClick={() => setActiveTab("followees")}
                 className="flex items-center gap-2 hover:text-blue-500 w-full text-left"
               >
                 <span className="font-semibold">{userInfo?.followeeCount || 0}</span> 팔로잉

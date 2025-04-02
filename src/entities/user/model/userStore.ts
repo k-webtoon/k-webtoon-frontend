@@ -39,7 +39,7 @@ interface UserState {
   fetchMyInfo: (userId: number) => Promise<void>;
   fetchMyLikedWebtoons: (userId: number) => Promise<void>;
   fetchMyComments: (userId: number) => Promise<void>;
-  
+
   // 프로필 업데이트 액션
   setUserInfo: (userInfo: UserInfo | null) => void;
   updateUserInfo: (userInfo: Partial<UserInfo>) => Promise<void>;
@@ -244,7 +244,7 @@ export const useUserStore = create<UserState>((set) => ({
 
   // 프로필 업데이트 액션
   setUserInfo: (userInfo: UserInfo | null) => set({ userInfo }),
-  
+
   updateUserInfo: async (userInfo: Partial<UserInfo>) => {
     try {
       // API 호출

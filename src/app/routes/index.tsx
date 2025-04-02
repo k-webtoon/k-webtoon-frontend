@@ -41,19 +41,24 @@ const RoutesConfig = () => (
       <Route path="search" element={<SearchBar />} />
 
       {/* 🔐 마이페이지 (로그인 유저만) */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/mypage/profile" element={<MyProfile />} />
+      <Route path="mypage" element={<ProtectedRoute />}>
+        <Route index element={<UserMain />} />
+        <Route path="home" element={<UserMain />} />
+        <Route path="likes" element={<MyLikeWebtoon />} />
+        <Route path="comments" element={<MyComments />} />
+        <Route path="followers" element={<MyFollowers />} />
+        <Route path="followees" element={<MyFollowees />} />
+        <Route path="*" element={<Error />} />
       </Route>
 
       {/* 👤 다른 유저 프로필 */}
-      <Route path="/user/:userId">
-        <Route index element={<Navigate to="profile" replace />} />
-        <Route path="profile" element={<UserProfile />} />
+      <Route path="user/:userId" element={<Layout />}>
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<UserProfile />} />
+        <Route path="likes" element={<UserLikeWebtoon />} />
         <Route path="comments" element={<UserComments />} />
-        <Route path="followees" element={<UserFollowees />} />
         <Route path="followers" element={<UserFollowers />} />
-        <Route path="liked-webtoons" element={<UserLikeWebtoon />} />
+        <Route path="followees" element={<UserFollowees />} />
       </Route>
 
       {/* 🚫 잘못된 경로 */}
