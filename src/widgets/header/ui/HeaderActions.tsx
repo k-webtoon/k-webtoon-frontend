@@ -1,11 +1,12 @@
 import useAuthStore from '@/entities/auth/model/authStore.ts';
 import { Link, useNavigate } from "react-router-dom";
-import CustomDropdown from "@/shared/ui/custom/CustomDropdown.tsx";
+import CustomDropdown  from "@/shared/ui/custom/CustomDropdown.tsx";
 import {Notification} from "@/entities/notification/model/types.ts";
 import {User} from "@/entities/user/model/types.ts";
 import SearchBar from "@/features/search/ui/SearchBar.tsx";
 import {Button} from "@/shared/ui/shadcn/button.tsx";
 import {Search} from "lucide-react";
+
 
 interface HeaderActionsProps {
     isSearchOpen: boolean;
@@ -164,8 +165,8 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                             <CustomDropdown
                                 label="유저"
                                 items={users.map((item) => ({
-                                    label: item.label,
-                                    onClick: item.onClick,
+                                    label: item.label!,
+                                    onClick: item.onClick!,
                                 }))}
                             />
                         </li>

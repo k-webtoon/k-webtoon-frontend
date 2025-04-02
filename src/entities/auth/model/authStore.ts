@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { authApi } from '../../../app/api/authApi.tsx';
+import { authApi } from '@/app/api/authApi.ts';
 
 interface AuthState {
     token: string | null;

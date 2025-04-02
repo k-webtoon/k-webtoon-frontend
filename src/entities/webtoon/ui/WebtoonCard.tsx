@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { Card, CardFooter, CardTitle } from "@/shared/ui/shadcn/card.tsx"
 import { Badge } from "@/shared/ui/shadcn/badge.tsx"
 import { Star } from "lucide-react"
-import {mapGenre, TopWebtoonInfo} from "@/entities/webtoon/model/types.ts";
+import {mapGenre, WebtoonInfo} from "@/entities/webtoon/model/types.ts";
 import { cn } from "@/shared/lib/cn";
 import LikeButton from "@/features/like/ui/LikeButton.tsx";
 import BookmarkButton from "@/features/bookmark/ui/BookmarkButton.tsx";
 import WatchedButton from "@/features/watched-status/ui/WatchedButton.tsx";
 
 export interface WebtoonCardProps {
-    webtoon: TopWebtoonInfo;
+    webtoon: WebtoonInfo;
     // 카드 사이즈
     size?: 'sm' | 'md' | 'lg';
     // 뱃지 표시 여부 (완결, 성인)

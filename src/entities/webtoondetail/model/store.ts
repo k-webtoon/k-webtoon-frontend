@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { WebtoonDetailState, Comment } from "../types";
+import { WebtoonDetailState, Comment } from "./types.ts";
 
 export const useWebtoonDetailStore = create<WebtoonDetailState>((set) => ({
     webtoon: null,
