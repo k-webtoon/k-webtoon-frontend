@@ -6,18 +6,18 @@ import CharacterChat from "@/features/CharacterChat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
 import josuck from "@/shared/assets/josuck.png";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
-import useAuthStore from "@/entities/auth/model/authStore.ts";
+import { useUserStore } from '@/entities/auth/model/userStore.ts';
 
 const Main: React.FC = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(useAuthStore.getState().isAuthenticated);
+    const [isAuthenticated, setIsAuthenticated] = useState(useUserStore.getState().isAuthenticated);
     const { topWebtoonList, fetchTopWebtoons } = useWebtoonStore();
 
     useEffect(() => {
         // 초기 상태 설정
-        setIsAuthenticated(useAuthStore.getState().isAuthenticated);
+        setIsAuthenticated(useUserStore.getState().isAuthenticated);
 
         // 상태 변화를 구독
-        const unsubscribe = useAuthStore.subscribe(
+        const unsubscribe = useUserStore.subscribe(
             (state) => {
                 setIsAuthenticated(state.isAuthenticated);
                 console.log('인증 상태 변경됨:', state.isAuthenticated);
@@ -86,10 +86,20 @@ const Main: React.FC = () => {
                             <AISearchSection />
                         </section>
                         <section id="section3" className="pt-5">
+                            <WebtoonSlider
+                                title="인기 웹툰"
+                                webtoons={() => Promise.resolve(topWebtoonList!)}
+                                cardSize={'sm'}
+                                showActionButtons={false}
+                                showAI={false}
+                                initialLoad={true}
+                            />
+                        </section>
+                        <section id="section4" className="pt-5">
                             <CharacterChat character={sampleCharacter} />
                         </section>
 
-                        <section id="section4" className="pt-5">
+                        <section id="section5" className="pt-5">
                             <CommunityReviews reviews={sampleReviews} />
                         </section>
                     </>

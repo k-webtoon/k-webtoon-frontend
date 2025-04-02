@@ -5,12 +5,13 @@ import {
   LikedWebtoon,
   FollowUser,
 } from "@/entities/user/model/types.ts";
+import {LoginDTO} from "@/entities/auth/model/types.ts";
 
-const BASE_URL = "http://localhost:8080/api/user";
+const USER_BASE_URL = "http://localhost:8080/api/user";
 
 // Axios 인스턴스 생성
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: USER_BASE_URL,
   withCredentials: true,
 });
 
@@ -25,62 +26,106 @@ apiClient.interceptors.request.use((config) => {
 
 // 사용자 정보 조회
 export const getUserInfo = async (userId: number): Promise<UserInfo> => {
-  const response = await apiClient.get(`/${userId}/info`);
+  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/info`);
   return response.data;
 };
 
 // 사용자가 작성한 댓글 조회
 export const getUserComments = async (
-  userId: number
+    userId: number
 ): Promise<UserComment[]> => {
-  const response = await apiClient.get(`/${userId}/comments`);
+  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/comments`);
   return response.data;
 };
 
 // 사용자가 좋아요한 웹툰 조회
 export const getLikedWebtoons = async (
-  userId: number
+    userId: number
 ): Promise<LikedWebtoon[]> => {
-  const response = await apiClient.get(`/${userId}/liked-webtoons`);
+  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/liked-webtoons`);
   return response.data;
 };
 
 // 사용자가 팔로우하는 사용자 목록 조회
 export const getFollowees = async (userId: number): Promise<FollowUser[]> => {
-  const response = await apiClient.get(`/${userId}/followees`);
+  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/followees`);
   return response.data;
 };
 
 // 사용자를 팔로우하는 사용자 목록 조회
 export const getFollowers = async (userId: number): Promise<FollowUser[]> => {
-  const response = await apiClient.get(`/${userId}/followers`);
+  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/followers`);
   return response.data;
 };
 
 // 사용자 팔로우 기능
 export const followUser = async (
-  followerId: number,
-  followeeId: number
+    followerId: number,
+    followeeId: number
 ): Promise<void> => {
-  await apiClient.post(`/follow`, { followerId, followeeId });
+  await apiClient.post(`${USER_BASE_URL}/follow`, { followerId, followeeId });
 };
 
 // 사용자 언팔로우 기능
 export const unfollowUser = async (
-  followerId: number,
-  followeeId: number
+    followerId: number,
+    followeeId: number
 ): Promise<void> => {
-  await apiClient.post(`/unfollow`, { followerId, followeeId });
+  await apiClient.post(`${USER_BASE_URL}/unfollow`, { followerId, followeeId });
 };
 
+// 사용자 관련 API
 export const userApi = {
+  /**
+   * 이메일과 비밀번호로 로그인합니다.
+   * @param {LoginDTO} loginData - 이메일과 비밀번호 정보
+   * @returns {Promise<string>} - JWT 토큰
+   */
+  login: async (loginData: LoginDTO): Promise<string> => {
+    try {
+      const response = await axios.post(`http://localhost:8080/api/auth/login`, loginData);
+      return response.data;
+    } catch (error) {
+      console.error('로그인 오류:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 토큰의 유효성을 검증합니다.
+   * @param {string} token - 검증할 JWT 토큰
+   * @returns {Promise<boolean>} - 토큰 유효 여부
+   */
+  validateToken: async (token: string): Promise<boolean> => {
+    try {
+      // 토큰 구조 확인 (JWT는 3개 부분으로 나뉘어져 있음)
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        return false;
+      }
+      // 토큰의 페이로드(payload) 디코딩
+      const payload = JSON.parse(atob(tokenParts[1]));
+      // 만료 시간 확인
+      if (payload.exp) {
+        const expTime = payload.exp * 1000; // JWT는 초 단위, JS는 밀리초 단위
+        const currentTime = Date.now();
+        // 만료되지 않았으면 유효한 것으로 간주
+        return expTime > currentTime;
+      }
+      return true;
+    } catch (error) {
+      console.error('토큰 검증 오류:', error);
+      return false;
+    }
+  },
+
   /**
    * 현재 로그인한 사용자 정보를 가져옵니다.
    */
   getUserInfo: async () => {
     try {
       // 생성한 apiClient 인스턴스 사용 (토큰이 자동 추가됨)
-      const response = await apiClient.get("/me");
+      const response = await apiClient.get(`${USER_BASE_URL}/me`);
       console.log("사용자 정보 응답:", response.data);
       return response.data;
     } catch (error) {
@@ -101,4 +146,22 @@ export const userApi = {
       throw error;
     }
   },
+
+  /**
+   * 회원가입 기능
+   */
+  register: async (userData: {
+    userEmail: string;
+    userPassword: string;
+    nickname: string;
+  }) => {
+    try {
+      const response = await axios.post(`http://localhost:8080/api/auth/register`, userData);
+      console.log("회원가입 응답:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      throw error;
+    }
+  }
 };
