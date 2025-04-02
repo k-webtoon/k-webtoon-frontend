@@ -3,7 +3,7 @@ import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Search, X } from "lucide-react";
 import { useSearchStore } from "@/entities/search/model/searchStore.ts";
-import { Webtoon } from "@/entities/webtoon/model/types.ts";
+import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
 import { searchWebtoons } from "@/app/api/webtoonsApi.ts";
 import { useNavigate } from "react-router-dom";
 
@@ -98,7 +98,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 isMobile ? "fixed inset-x-0 mx-4" : "absolute z-10 w-full"
               } bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1`}
             >
-              {results.map((item: Webtoon) => (
+              {results.map((item: WebtoonInfo) => (
                 <li
                   key={item.id}
                   className="flex items-center p-2 hover:bg-gray-100 transition duration-150 cursor-pointer"

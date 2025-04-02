@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useUserStore } from "@/entities/user/model/userStore.ts";
 import FollowButton from "@/components/FollowButton";
 import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
-import useAuthStore from "@/entities/auth/model/authStore.ts";
+import useAuthStore from "@/entities/auth/model/userStore.ts";
 // import { Skeleton } from "@/shared/ui/shadcn/skeleton.tsx"; // 아직 구현되지 않음
 
 const UserProfile = () => {
