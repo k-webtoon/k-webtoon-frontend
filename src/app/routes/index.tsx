@@ -20,6 +20,8 @@ import UserFollowees from "@/pages/user/userpage/UserFollowees.tsx";
 import ProtectedRoute from "@/app/routes/ProtectedRoute.tsx";
 import UnprotectedRoute from "@/app/routes/UnprotectedRoute.tsx";
 import Error from "@/pages/error/Error.tsx";
+import MyPage from "@/pages/user/MyPage";
+import { MyProfile } from "@/pages/user/mypage/MyProfile";
 
 const RoutesConfig = () => (
   <Routes>
@@ -39,24 +41,19 @@ const RoutesConfig = () => (
       <Route path="search" element={<SearchBar />} />
 
       {/* 🔐 마이페이지 (로그인 유저만) */}
-      <Route path="mypage" element={<ProtectedRoute />}>
-        <Route index element={<UserMain />} />
-        <Route path="home" element={<UserMain />} />
-        <Route path="likes" element={<MyLikeWebtoon />} />
-        <Route path="comments" element={<MyComments />} />
-        <Route path="followers" element={<MyFollowers />} />
-        <Route path="followees" element={<MyFollowees />} />
-        <Route path="*" element={<Error />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/profile" element={<MyProfile />} />
       </Route>
 
       {/* 👤 다른 유저 프로필 */}
-      <Route path="user/:userId" element={<Layout />}>
-        <Route index element={<Navigate to="home" replace />} />
-        <Route path="home" element={<UserProfile />} />
-        <Route path="likes" element={<UserLikeWebtoon />} />
+      <Route path="/user/:userId">
+        <Route index element={<Navigate to="profile" replace />} />
+        <Route path="profile" element={<UserProfile />} />
         <Route path="comments" element={<UserComments />} />
-        <Route path="followers" element={<UserFollowers />} />
         <Route path="followees" element={<UserFollowees />} />
+        <Route path="followers" element={<UserFollowers />} />
+        <Route path="liked-webtoons" element={<UserLikeWebtoon />} />
       </Route>
 
       {/* 🚫 잘못된 경로 */}
