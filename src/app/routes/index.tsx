@@ -20,6 +20,8 @@ import UserFollowees from "@/pages/user/userpage/UserFollowees.tsx";
 import ProtectedRoute from "@/app/routes/ProtectedRoute.tsx";
 import UnprotectedRoute from "@/app/routes/UnprotectedRoute.tsx";
 import Error from "@/pages/error/Error.tsx";
+import MyPage from "@/pages/user/MyPage";
+import { MyProfile } from "@/pages/user/mypage/MyProfile";
 
 const RoutesConfig = () => (
   <Routes>
