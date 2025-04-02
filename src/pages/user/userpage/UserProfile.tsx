@@ -2,19 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useUserStore } from "@/entities/user/model/userStore";
-import useAuthStore from "@/entities/auth/model/authStore";
+import useAuthStore from "@/entities/auth/model/userStore";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { FollowUserCard } from "@/entities/user/ui/FollowUserCard";
 import FollowButton from "@/components/FollowButton";
 import { clsx } from "clsx";
 import { LikedWebtoon } from "@/entities/user/model/types";
-import { TopWebtoonInfo } from "@/entities/webtoon/model/types";
 
 type TabType = "overview" | "followers" | "followees";
 
 // LikedWebtoon을 TopWebtoonInfo로 변환하는 함수
-const convertToTopWebtoonInfo = (likedWebtoon: LikedWebtoon): TopWebtoonInfo => {
+const convertToTopWebtoonInfo = (likedWebtoon: LikedWebtoon) => {
   return {
     id: likedWebtoon.id,
     titleId: likedWebtoon.id,

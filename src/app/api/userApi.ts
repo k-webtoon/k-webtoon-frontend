@@ -5,7 +5,7 @@ import {
   LikedWebtoon,
   FollowUser,
 } from "@/entities/user/model/types.ts";
-import {LoginDTO} from "@/entities/auth/model/types.ts";
+import { LoginDTO } from "@/entities/auth/model/types.ts";
 
 const USER_BASE_URL = "http://localhost:8080/api/user";
 
@@ -24,6 +24,32 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // 서버 응답이 있는 경우
+      const status = error.response.status;
+      const message =
+        error.response.data?.message || "알 수 없는 오류가 발생했습니다.";
+
+      if (status === 401) {
+        // 인증 오류 처리
+        localStorage.removeItem("token"); // 토큰 제거
+        window.location.href = "/login"; // 로그인 페이지로 강제 이동
+      }
+
+      throw {
+        name: "ApiError",
+        message,
+        status,
+        stack: error.stack,
+      };
+    }
+    throw error;
+  }
+);
+
 // 사용자 정보 조회
 export const getUserInfo = async (userId: number): Promise<UserInfo> => {
   const response = await apiClient.get(`${USER_BASE_URL}/${userId}/info`);
@@ -32,7 +58,7 @@ export const getUserInfo = async (userId: number): Promise<UserInfo> => {
 
 // 사용자가 작성한 댓글 조회
 export const getUserComments = async (
-    userId: number
+  userId: number
 ): Promise<UserComment[]> => {
   const response = await apiClient.get(`${USER_BASE_URL}/${userId}/comments`);
   return response.data;
@@ -40,9 +66,11 @@ export const getUserComments = async (
 
 // 사용자가 좋아요한 웹툰 조회
 export const getLikedWebtoons = async (
-    userId: number
+  userId: number
 ): Promise<LikedWebtoon[]> => {
-  const response = await apiClient.get(`${USER_BASE_URL}/${userId}/liked-webtoons`);
+  const response = await apiClient.get(
+    `${USER_BASE_URL}/${userId}/liked-webtoons`
+  );
   return response.data;
 };
 
@@ -60,16 +88,16 @@ export const getFollowers = async (userId: number): Promise<FollowUser[]> => {
 
 // 사용자 팔로우 기능
 export const followUser = async (
-    followerId: number,
-    followeeId: number
+  followerId: number,
+  followeeId: number
 ): Promise<void> => {
   await apiClient.post(`${USER_BASE_URL}/follow`, { followerId, followeeId });
 };
 
 // 사용자 언팔로우 기능
 export const unfollowUser = async (
-    followerId: number,
-    followeeId: number
+  followerId: number,
+  followeeId: number
 ): Promise<void> => {
   await apiClient.post(`${USER_BASE_URL}/unfollow`, { followerId, followeeId });
 };
@@ -83,10 +111,13 @@ export const userApi = {
    */
   login: async (loginData: LoginDTO): Promise<string> => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/auth/login`, loginData);
+      const response = await axios.post(
+        `http://localhost:8080/api/auth/login`,
+        loginData
+      );
       return response.data;
     } catch (error) {
-      console.error('로그인 오류:', error);
+      console.error("로그인 오류:", error);
       throw error;
     }
   },
@@ -99,7 +130,7 @@ export const userApi = {
   validateToken: async (token: string): Promise<boolean> => {
     try {
       // 토큰 구조 확인 (JWT는 3개 부분으로 나뉘어져 있음)
-      const tokenParts = token.split('.');
+      const tokenParts = token.split(".");
       if (tokenParts.length !== 3) {
         return false;
       }
@@ -114,7 +145,7 @@ export const userApi = {
       }
       return true;
     } catch (error) {
-      console.error('토큰 검증 오류:', error);
+      console.error("토큰 검증 오류:", error);
       return false;
     }
   },
@@ -124,13 +155,18 @@ export const userApi = {
    */
   getUserInfo: async () => {
     try {
-      // 생성한 apiClient 인스턴스 사용 (토큰이 자동 추가됨)
       const response = await apiClient.get(`${USER_BASE_URL}/me`);
-      console.log("사용자 정보 응답:", response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("사용자 정보 가져오기 실패:", error);
-      throw error;
+      throw {
+        name: "UserApiError",
+        message:
+          error.response?.data?.message ||
+          "사용자 정보를 가져오는데 실패했습니다.",
+        status: error.response?.status,
+        stack: error.stack,
+      };
     }
   },
 
@@ -138,12 +174,22 @@ export const userApi = {
    * ID로 사용자 정보를 가져옵니다.
    */
   getUserById: async (userId: number) => {
+    if (!userId || isNaN(userId)) {
+      throw new Error("유효하지 않은 사용자 ID입니다.");
+    }
     try {
-      // 기존 apiClient 사용
-      return await getUserInfo(userId);
-    } catch (error) {
+      const response = await apiClient.get(`${USER_BASE_URL}/${userId}/info`);
+      return response.data;
+    } catch (error: any) {
       console.error(`사용자(ID: ${userId}) 정보 가져오기 실패:`, error);
-      throw error;
+      throw {
+        name: "UserApiError",
+        message:
+          error.response?.data?.message ||
+          "사용자 정보를 가져오는데 실패했습니다.",
+        status: error.response?.status,
+        stack: error.stack,
+      };
     }
   },
 
@@ -156,12 +202,32 @@ export const userApi = {
     nickname: string;
   }) => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/auth/register`, userData);
+      const response = await axios.post(
+        `http://localhost:8080/api/auth/register`,
+        userData
+      );
       console.log("회원가입 응답:", response.data);
       return response.data;
     } catch (error) {
       console.error("회원가입 실패:", error);
       throw error;
     }
-  }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      const response = await apiClient.get(`${USER_BASE_URL}/me`);
+      return response.data;
+    } catch (error: any) {
+      console.error("현재 사용자 정보 가져오기 실패:", error);
+      throw {
+        name: "UserApiError",
+        message:
+          error.response?.data?.message ||
+          "사용자 정보를 가져오는데 실패했습니다.",
+        status: error.response?.status,
+        stack: error.stack,
+      };
+    }
+  },
 };

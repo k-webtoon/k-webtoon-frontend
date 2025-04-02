@@ -1,17 +1,42 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+interface ErrorState {
+  error?: {
+    message: string;
+    name?: string;
+    status?: number;
+    stack?: string;
+  };
+}
 
 function Error() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const errorState = location.state as ErrorState;
+
+  useEffect(() => {
+    if (errorState?.error) {
+      console.error("Error details:", {
+        message: errorState.error.message,
+        stack: errorState.error.stack,
+      });
+    }
+  }, [errorState]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="text-center space-y-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-bold text-gray-900">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-700">페이지를 찾을 수 없습니다</h2>
-          <p className="text-gray-500">요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.</p>
+          <h2 className="text-2xl font-semibold text-gray-700">
+            페이지를 찾을 수 없습니다
+          </h2>
+          <p className="text-gray-500">
+            요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.
+          </p>
         </div>
-        
+
         <div className="space-y-4">
           <button
             onClick={() => navigate(-1)}
