@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { topWebtoons, searchWebtoons } from '@/app/api/webtoonsApi.ts';
-import { WebtoonInfo } from '@/entities/webtoon/model/types.ts';
+import {WebtoonInfo, WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
 
 // 상태 인터페이스 정의
 interface WebtoonState {
     // 상태 데이터
-    topWebtoonList: WebtoonInfo | null;
+    topWebtoonList: WebtoonPaginatedResponse | null;
     searchResults: WebtoonInfo | null;
     isLoading: boolean;
     error: string | null;

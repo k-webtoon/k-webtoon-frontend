@@ -1,3 +1,8 @@
+// 페이지네이션된 응답 타입 정의
+export interface PaginatedResponse<T> {
+    content: T[];
+}
+
 // 웹툰 장르 타입 정의 (영문)
 export type GenreType =
     | 'DRAMA'
@@ -50,22 +55,19 @@ export interface WebtoonInfo {
     thumbnailUrl: string;
     synopsis: string;
     rankGenreTypes: GenreType[];
-}
-
-// 인기 웹툰 정보 인터페이스 (조회수 포함)
-export interface TopWebtoonInfo extends WebtoonInfo {
     starScore: number;
 }
 
-// 인기 웹툰 목록 응답 인터페이스 (조회수 기준)
-export interface TopWebtoonListResponse {
-    webtoons: TopWebtoonInfo[];
-    totalCount?: number;
-    currentPage?: number;
-    totalPages?: number;
-}
+// 웹툰 페이지네이션 응답 타입
+export type WebtoonPaginatedResponse = PaginatedResponse<WebtoonInfo>;
 
 // 장르 한글 매핑
 export const mapGenre = (genre: GenreType): KoreanGenreType => {
     return GENRE_MAPPING[genre] || genre as unknown as KoreanGenreType;
 };
+
+
+
+
+
+

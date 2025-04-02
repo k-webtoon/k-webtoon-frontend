@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useWebtoonDetailStore } from "@/entities/webtoondetail/model/store";
 import { getWebtoonDetail, commentApi } from "@/app/api/webtoonDetailApi";
 import { CommentRequest } from "@/entities/webtoondetail/types";
-import useAuthStore from "@/entities/auth/model/authStore";
+import useAuthStore from "@/entities/auth/model/userStore.ts";
 
 function WebtoonDetail() {
   const { id } = useParams<{ id: string }>();
