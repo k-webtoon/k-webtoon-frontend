@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import useAuthStore from '@/entities/auth/model/authStore.ts';
+import useAuthStore from '@/entities/auth/model/userStore.ts';
 
 /**
  * 인증이 필요한 라우트를 보호하는 컴포넌트입니다.

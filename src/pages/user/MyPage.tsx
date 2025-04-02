@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import useAuthStore from "@/entities/auth/model/authStore.ts";
+import useAuthStore from "@/entities/auth/model/userStore.ts";
 import { userApi } from "@/app/api/userApi.ts";
 
 const MyPage = () => {

@@ -29,7 +29,6 @@ const convertToTopWebtoonInfo = (likedWebtoon: LikedWebtoon): TopWebtoonInfo => 
     starScore: 0
   };
 };
-
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const numericUserId = parseInt(userId || "0", 10);

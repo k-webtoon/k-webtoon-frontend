@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useAuthStore from '@/entities/auth/model/authStore.ts';
+import useAuthStore from '@/entities/auth/model/userStore.ts';
 
 /**
  * 로그인된 사용자가 비회원 페이지(로그인, 회원가입 등)에 접근하지 못하도록 하는 라우트 가드
