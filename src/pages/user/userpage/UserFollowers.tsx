@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore.ts";
-import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
+import { useUserStore } from "@/entities/user/model/userStore";
+import { Card, CardContent } from "@/shared/ui/shadcn/card";
 // import {
 //   Avatar,
 //   AvatarFallback,
@@ -13,8 +13,7 @@ const UserFollowers = () => {
   const { userId } = useParams<{ userId: string }>();
   const numericUserId = parseInt(userId || "0", 10);
 
-  const { userInfo, followers, loading, error, fetchUserInfo, fetchFollowers } =
-    useUserStore();
+  const { userInfo, followers, loading, error, fetchUserInfo, fetchFollowers } = useUserStore();
 
   useEffect(() => {
     if (numericUserId) {
@@ -25,14 +24,8 @@ const UserFollowers = () => {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[...Array(5)].map((_, index) => (
-          // <Skeleton key={index} className="h-20 w-full rounded-xl" />
-          <div
-            key={index}
-            className="h-20 w-full rounded-xl bg-gray-200 animate-pulse"
-          ></div>
-        ))}
+      <div className="w-full p-8 text-center">
+        <p>로딩 중...</p>
       </div>
     );
   }
@@ -51,24 +44,51 @@ const UserFollowers = () => {
     );
   }
 
-  if (followers.length === 0) {
-    return (
-      <div className="w-full p-8 text-center">
-        <p className="text-gray-500">팔로워가 없습니다.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">
-        {userInfo?.nickname || "사용자"}님의 팔로워
-      </h1>
-
-      <div className="space-y-4">
-        {followers.map((follower) => (
-          <UserCard key={follower.indexId} user={follower} />
-        ))}
+    <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="border-b pb-4 mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {userInfo?.nickname || "사용자"}님의 팔로워
+          </h1>
+          <p className="text-gray-500 mt-1">총 {followers?.length || 0}명</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {followers?.map((follower) => (
+            <Link to={`/user/${follower.indexId}`} key={follower.indexId}>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold overflow-hidden">
+                      <img
+                        src="/images/profile-placeholder.jpg"
+                        alt="프로필"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">
+                        {follower.nickname}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {follower.userEmail}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+          {(!followers || followers.length === 0) && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="text-lg font-medium">팔로워가 없습니다.</p>
+              <p className="text-sm">다른 사용자들과 소통해보세요!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

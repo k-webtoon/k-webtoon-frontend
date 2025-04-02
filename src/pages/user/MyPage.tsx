@@ -25,9 +25,9 @@ const MyPage = () => {
         console.log("가져온 사용자 정보:", userInfo);
 
         if (userInfo && userInfo.indexId) {
-          console.log("리다이렉트 시도:", `/user/${userInfo.indexId}/profile`);
+          console.log("리다이렉트 시도:", `/mypage/profile`);
           setUserId(userInfo.indexId);
-          navigate(`/user/${userInfo.indexId}/profile`, { replace: true });
+          navigate(`/mypage/profile`, { replace: true });
         } else {
           console.error("사용자 정보에 indexId가 없음:", userInfo);
           setError("사용자 ID를 가져올 수 없습니다.");

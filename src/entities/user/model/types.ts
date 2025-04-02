@@ -8,6 +8,10 @@ export interface UserInfo {
   commentCount: number;
   followerCount: number;
   followeeCount: number;
+  profileImage?: string;
+  bio?: string;
+  followers?: FollowUser[];
+  followees?: FollowUser[];
 }
 
 // 사용자 댓글 인터페이스
@@ -17,6 +21,9 @@ export interface UserComment {
   nickname: string;
   createdDate: string;
   likeCount: number;
+  webtoonId: number;
+  webtoonTitle: string;
+  replyCount: number;
 }
 
 // 좋아요한 웹툰 인터페이스

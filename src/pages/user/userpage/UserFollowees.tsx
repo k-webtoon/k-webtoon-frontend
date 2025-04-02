@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore.ts";
-import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
+import { useUserStore } from "@/entities/user/model/userStore";
+import { Card, CardContent } from "@/shared/ui/shadcn/card";
 // import {
 //   Avatar,
 //   AvatarFallback,
@@ -10,68 +10,7 @@ import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
 // import { Skeleton } from "@/shared/ui/shadcn/skeleton.tsx"; // 아직 구현되지 않음
 
 const UserFollowees = () => {
-  const { userId } = useParams<{ userId: string }>();
-  const numericUserId = parseInt(userId || "0", 10);
-
-  const { userInfo, followees, loading, error, fetchUserInfo, fetchFollowees } =
-    useUserStore();
-
-  useEffect(() => {
-    if (numericUserId) {
-      fetchUserInfo(numericUserId);
-      fetchFollowees(numericUserId);
-    }
-  }, [numericUserId, fetchUserInfo, fetchFollowees]);
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(5)].map((_, index) => (
-          // <Skeleton key={index} className="h-20 w-full rounded-xl" />
-          <div
-            key={index}
-            className="h-20 w-full rounded-xl bg-gray-200 animate-pulse"
-          ></div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full p-8 text-center">
-        <p className="text-red-500">{error}</p>
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md"
-          onClick={() => fetchFollowees(numericUserId)}
-        >
-          다시 시도
-        </button>
-      </div>
-    );
-  }
-
-  if (followees.length === 0) {
-    return (
-      <div className="w-full p-8 text-center">
-        <p className="text-gray-500">팔로우하는 사용자가 없습니다.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">
-        {userInfo?.nickname || "사용자"}님이 팔로우하는 사용자
-      </h1>
-
-      <div className="space-y-4">
-        {followees.map((followee) => (
-          <UserCard key={followee.indexId} user={followee} />
-        ))}
-      </div>
-    </div>
-  );
+  return <div>이 유저가 팔로우한 사람들</div>;
 };
 
 function UserCard({
