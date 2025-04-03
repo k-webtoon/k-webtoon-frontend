@@ -9,22 +9,24 @@ import {
   LikedWebtoon,
   FollowUser,
 } from "@/entities/user/model/types";
-import { TopWebtoonInfo } from "@/entities/webtoon/model/types";
+import { WebtoonInfo } from "@/entities/webtoon/model/types";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { clsx } from "clsx";
 
+// 탭 타입 정의
 type TabType =
   | "overview"
   | "settings"
   | "security"
   | "privacy"
   | "followers"
-  | "followees";
+  | "followees"
+  | "recommendation-settings"; // 새로운 탭 추가
 
 // LikedWebtoon을 TopWebtoonInfo로 변환하는 함수
-const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): TopWebtoonInfo => ({
+const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): WebtoonInfo => ({
   id: webtoon.id,
   titleId: webtoon.id,
   titleName: webtoon.title,
@@ -42,7 +44,7 @@ export const MyProfile = () => {
   // location에서 전달된 사용자 정보 확인
   const location = useLocation();
   const locationUserInfo = location.state?.userInfo;
-  
+
   // @ts-ignore
   const { user } = useAuthStore();
   const {
@@ -63,6 +65,7 @@ export const MyProfile = () => {
     updateUserBio,
   } = useUserStore();
 
+  // 상태 관리
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [isEditing, setIsEditing] = useState(false);
   const [editedInfo, setEditedInfo] = useState<UserInfo | null>(null);
@@ -83,10 +86,11 @@ export const MyProfile = () => {
     text: string;
   } | null>(null);
 
+  // 컴포넌트 마운트 시 사용자 정보 로드
   useEffect(() => {
     // location.state에서 사용자 정보가 넘어왔는지 확인
     const userId = locationUserInfo?.indexId || user?.indexId;
-    
+
     if (userId) {
       console.log("프로필 페이지에서 사용할 사용자 ID:", userId);
       fetchMyInfo(userId);
@@ -107,6 +111,7 @@ export const MyProfile = () => {
     fetchFollowees,
   ]);
 
+  // 프로필 업데이트 핸들러
   const handleProfileUpdate = async () => {
     try {
       // TODO: 프로필 업데이트 API 호출 구현
@@ -127,10 +132,12 @@ export const MyProfile = () => {
     }
   };
 
+  // 댓글 삭제 핸들러
   const handleCommentDelete = async (commentId: number) => {
     // TODO: 댓글 삭제 API 호출 구현
   };
 
+  // 비밀번호 변경 핸들러
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -146,17 +153,49 @@ export const MyProfile = () => {
     });
   };
 
+  // 공개 범위 설정 핸들러
   const handlePrivacyChange = async (setting: string, value: string) => {
     setPrivacySettings((prev) => ({ ...prev, [setting]: value }));
     // TODO: 공개 범위 설정 API 호출
     setMessage({ type: "success", text: "설정이 저장되었습니다." });
   };
 
+  // 탭 콘텐츠 렌더링 함수
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
         return (
           <>
+            {/* 활동 요약 카드 */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+              <h2 className="text-xl font-bold mb-4">활동 요약</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent>
+                    <h3 className="text-lg font-medium">찜한 웹툰</h3>
+                    <p className="text-2xl font-bold">{likedWebtoons.length}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent>
+                    <h3 className="text-lg font-medium">작성한 댓글</h3>
+                    <p className="text-2xl font-bold">{comments.length}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent>
+                    <h3 className="text-lg font-medium">팔로워</h3>
+                    <p className="text-2xl font-bold">{followers.length}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent>
+                    <h3 className="text-lg font-medium">팔로잉</h3>
+                    <p className="text-2xl font-bold">{followees.length}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
             {/* 좋아요한 웹툰 섹션 */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
               <div className="flex justify-between items-center mb-6">
@@ -233,6 +272,51 @@ export const MyProfile = () => {
               </div>
             </div>
           </>
+        );
+      case "recommendation-settings":
+        return (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-bold mb-6">추천 기준 설정</h2>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  선호 장르
+                </label>
+                <select
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="drama">드라마</option>
+                  <option value="action">액션</option>
+                  <option value="romance">로맨스</option>
+                  <option value="comedy">코미디</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  완결 여부
+                </label>
+                <select
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">모두</option>
+                  <option value="completed">완결</option>
+                  <option value="ongoing">연재 중</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  연령가
+                </label>
+                <select
+                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">전체 연령가</option>
+                  <option value="teen">청소년</option>
+                  <option value="adult">성인</option>
+                </select>
+              </div>
+            </div>
+          </div>
         );
       case "followers":
         return (
@@ -438,6 +522,35 @@ export const MyProfile = () => {
                     placeholder="자신을 소개해주세요"
                   />
                 </div>
+
+                {/* 웹페이지 알림 설정 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    웹페이지 알림 설정
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="checkbox"
+                      id="web-notifications"
+                      checked={editedInfo?.notificationEnabled || false}
+                      onChange={(e) =>
+                        setEditedInfo((prev) =>
+                          prev
+                            ? { ...prev, notificationsEnabled: e.target.checked }
+                            : null
+                        )
+                      }
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label
+                      htmlFor="web-notifications"
+                      className="text-sm text-gray-700"
+                    >
+                      웹페이지 알림 받기
+                    </label>
+                  </div>
+                </div>
+
                 <div className="flex gap-4">
                   <button
                     onClick={() => {
@@ -459,47 +572,48 @@ export const MyProfile = () => {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    닉네임
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">닉네임</h3>
                   <p className="text-gray-900">{userInfo?.nickname}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    이메일
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">이메일</h3>
                   <p className="text-gray-900">{userInfo?.userEmail}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    성별
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">성별</h3>
                   <p className="text-gray-900">
                     {userInfo?.gender === "MALE"
                       ? "남성"
                       : userInfo?.gender === "FEMALE"
-                      ? "여성"
-                      : userInfo?.gender === "OTHER"
-                      ? "기타"
-                      : "미설정"}
+                        ? "여성"
+                        : userInfo?.gender === "OTHER"
+                          ? "기타"
+                          : "미설정"}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    나이
-                  </h3>
-                  <p className="text-gray-900">
-                    {userInfo?.userAge || "미설정"}
-                  </p>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">나이</h3>
+                  <p className="text-gray-900">{userInfo?.userAge || "미설정"}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    소개
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">소개</h3>
                   <p className="text-gray-900 whitespace-pre-wrap">
                     {userInfo?.bio || "소개가 없습니다."}
                   </p>
                 </div>
+
+                {/* 웹페이지 알림 설정 표시 */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    웹페이지 알림 설정
+                  </h3>
+                  <p className="text-gray-900">
+                    {userInfo?.notificationEnabled
+                      ? "알림이 활성화되어 있습니다."
+                      : "알림이 비활성화되어 있습니다."}
+                  </p>
+                </div>
+
                 <button
                   onClick={() => {
                     setIsEditing(true);
@@ -636,18 +750,22 @@ export const MyProfile = () => {
     }
   };
 
+  // 로딩 상태 처리
   if (loading) {
     return <div>로딩 중...</div>;
   }
 
+  // 에러 상태 처리
   if (error) {
     return <div>에러: {error}</div>;
   }
 
+  // 사용자 정보가 없는 경우 처리
   if (!userInfo) {
     return <div>사용자 정보를 찾을 수 없습니다.</div>;
   }
 
+  // 메인 컴포넌트 렌더링
   return (
     <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
       <div className="flex flex-col md:flex-row gap-8">
@@ -756,6 +874,17 @@ export const MyProfile = () => {
                 프로필 개요
               </button>
               <button
+                onClick={() => setActiveTab("recommendation-settings")}
+                className={clsx(
+                  "w-full px-4 py-2 text-left rounded-md",
+                  activeTab === "recommendation-settings"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                추천 기준 설정
+              </button>
+              <button
                 onClick={() => setActiveTab("settings")}
                 className={clsx(
                   "w-full px-4 py-2 text-left rounded-md",
@@ -787,6 +916,28 @@ export const MyProfile = () => {
                 )}
               >
                 공개 범위
+              </button>
+              <button
+                onClick={() => setActiveTab("followers")}
+                className={clsx(
+                  "w-full px-4 py-2 text-left rounded-md",
+                  activeTab === "followers"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                팔로워 목록
+              </button>
+              <button
+                onClick={() => setActiveTab("followees")}
+                className={clsx(
+                  "w-full px-4 py-2 text-left rounded-md",
+                  activeTab === "followees"
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                팔로잉 목록
               </button>
             </nav>
           </div>

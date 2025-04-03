@@ -12,6 +12,8 @@ export interface UserInfo {
   bio?: string;
   followers?: FollowUser[];
   followees?: FollowUser[];
+  notificationEnabled?: boolean;
+
 }
 
 // 사용자 댓글 인터페이스
