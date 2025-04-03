@@ -13,7 +13,7 @@ export interface UserInfo {
   followers?: FollowUser[];
   followees?: FollowUser[];
   notificationEnabled?: boolean;
-
+  userRole: 'USER' | 'ADMIN';
 }
 
 // 사용자 댓글 인터페이스
