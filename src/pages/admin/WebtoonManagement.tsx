@@ -64,6 +64,10 @@ const WebtoonManagement: FC = () => {
   const isGroupOpen = (groupTitle: string) => openGroups.includes(groupTitle);
   const isActivePath = (path: string) => location.pathname === path;
 
+  const handleAddWebtoon = () => {
+    navigate('/admin/webtoon/add');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
       <div className="flex flex-col md:flex-row gap-8">
@@ -141,10 +145,17 @@ const WebtoonManagement: FC = () => {
           {/* 웹툰 관리 헤더 */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">웹툰 관리</h2>
+              <h2 className="text-xl font-bold text-gray-800">웹툰 관리</h2>
               <div className="flex gap-4">
-                <Button variant="outline">엑셀 다운로드</Button>
-                <Button>새 웹툰 등록</Button>
+                <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
+                  엑셀 다운로드
+                </Button>
+                <Button 
+                  onClick={handleAddWebtoon}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  새 웹툰 등록
+                </Button>
               </div>
             </div>
 
