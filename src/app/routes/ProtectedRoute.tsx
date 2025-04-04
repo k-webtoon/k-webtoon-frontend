@@ -5,6 +5,7 @@ import useAuthStore from '@/entities/auth/model/userStore.ts';
 /**
  * 인증이 필요한 라우트를 보호하는 컴포넌트입니다.
  * 인증되지 않은 사용자는 로그인 페이지로 리다이렉트됩니다.
+ * 일단 이거 관리자 아니여도 접근 가능 로그인만 가능하면 가능하게 구현이 되어있음
  */
 const ProtectedRoute: React.FC = () => {
     const location = useLocation();
