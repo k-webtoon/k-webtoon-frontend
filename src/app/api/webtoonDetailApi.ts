@@ -4,7 +4,7 @@ import {
   Comment,
   CommentRequest,
   CommentPageResponse,
-} from "@/entities/webtoondetail/types";
+} from "@/entities/webtoondetail/model/types";
 
 const BASE_URL = "http://localhost:8080";
 
