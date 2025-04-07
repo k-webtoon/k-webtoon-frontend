@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useWebtoonDetailStore } from "@/entities/webtoondetail/model/store";
 import { getWebtoonDetail, commentApi } from "@/app/api/webtoonDetailApi";
-import { CommentRequest } from "@/entities/webtoondetail/types";
+import { CommentRequest } from "@/entities/webtoondetail/model/types";
 import useAuthStore from "@/entities/auth/model/userStore.ts";
 
 function WebtoonDetail() {
@@ -196,7 +196,7 @@ function WebtoonDetail() {
                 <div className="relative aspect-[3/4] w-full rounded-3xl overflow-hidden bg-gradient-to-br from-gray-100 to-white p-1">
                   <div className="absolute inset-0 bg-white rounded-3xl overflow-hidden">
                     <img
-                      src={webtoon.url}
+                      src={webtoon.thumbnailUrl}
                       alt={webtoon.titleName}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
