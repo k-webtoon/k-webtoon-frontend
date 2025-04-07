@@ -3,7 +3,7 @@ import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Search, X } from "lucide-react";
 import { useSearchStore } from "@/entities/search/model/searchStore.ts";
-import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
+import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts";
 import { searchWebtoons } from "@/app/api/webtoonsApi.ts";
 import { useNavigate } from "react-router-dom";
 
@@ -23,22 +23,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
 
+  const emptyResults: WebtoonPaginatedResponse = { content: [] };
+
   useEffect(() => {
     if (query.trim() === "") {
-      setResults([]);
+      setResults(emptyResults);
       setShowResults(false);
       return;
     }
 
     const fetchData = async () => {
       try {
-        const data = await searchWebtoons(query);
-        setResults([data]);
+        const data: WebtoonPaginatedResponse = await searchWebtoons(query);
+        setResults(data);
         // 결과가 있을 때 showResults를 true로 설정
         setShowResults(true);
       } catch (error) {
         console.error("웹툰 검색 중 오류 발생:", error);
-        setResults([]);
+        setResults(emptyResults);
         setShowResults(false);
       }
     };
@@ -49,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   // 입력 필드에 포커스가 있을 때 검색 결과 표시
   const handleFocus = () => {
-    if (query.trim() !== "" && results.length > 0) {
+    if (query.trim() !== "" && results.content.length > 0) { // content 배열 접근
       setShowResults(true);
     }
   };
@@ -115,14 +117,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </div>
 
           {/* 검색 결과 */}
-          {showResults && results.length > 0 && (
+          {showResults && results.content.length > 0 && ( // content 배열 접근
               <div className={`relative ${isMobile ? "mt-2 z-50" : ""}`}>
                 <ul
                     className={`${
                         isMobile ? "fixed inset-x-0 mx-4" : "absolute z-10 w-full"
                     } bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1`}
                 >
-                  {results.map((item: WebtoonInfo) => (
+                  {results.content.map((item: WebtoonInfo) => ( // content 배열 접근
                       <li
                           key={item.id}
                           className="flex items-center p-2 hover:bg-gray-100 transition duration-150 cursor-pointer"

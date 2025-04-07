@@ -1,8 +1,11 @@
 import { create } from "zustand";
 import { SearchState } from "./types.ts";
-import { WebtoonInfo } from "@/entities/webtoon/model/types";
+import {WebtoonPaginatedResponse} from "@/entities/webtoon/model/types";
 
+const emptyResults: WebtoonPaginatedResponse = {
+  content: []
+};
 export const useSearchStore = create<SearchState>((set) => ({
-  results: [],
-  setResults: (results: WebtoonInfo[]) => set({ results }),
+  results: emptyResults,
+  setResults: (results: WebtoonPaginatedResponse) => set({ results }),
 }));
