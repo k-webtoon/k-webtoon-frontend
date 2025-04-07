@@ -1,5 +1,5 @@
 import { Badge } from "@/shared/ui/shadcn/badge.tsx"
-import { WebtoonInfo, mapGenre } from "@/entities/webtoon/model/types.ts"
+import { WebtoonInfo, mapGenre, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts"
 import { useSearchStore } from "@/entities/search/model/searchStore.ts"
 import { useEffect, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
@@ -19,10 +19,13 @@ export default function Search() {
 
             const fetchSearchResults = async () => {
                 try {
-                    const data: WebtoonInfo = await searchWebtoons(searchQuery)
-                    setResults([data])
+                    const data: WebtoonPaginatedResponse = await searchWebtoons(searchQuery)
+                    setResults(data)
                 } catch (error) {
                     console.error("웹툰 검색 중 오류 발생:", error)
+                    // 빈 결과 객체 생성
+                    const emptyResults: WebtoonPaginatedResponse = { content: [] }
+                    setResults(emptyResults)
                 } finally {
                     setIsLoading(false)
                 }
@@ -40,7 +43,7 @@ export default function Search() {
                     <span className="text-green-500">'{searchQuery}'</span> 에 대한 검색결과 입니다.
                 </h1>
                 <h2 className="text-lg font-medium mt-2">
-                    웹툰 <span className="text-sm text-gray-500">총 {results.length}</span>
+                    웹툰 <span className="text-sm text-gray-500">총 {results.content.length}</span>
                 </h2>
             </div>
 
@@ -49,9 +52,9 @@ export default function Search() {
                     <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
                     </div>
-                ) : results.length > 0 ? (
+                ) : results.content.length > 0 ? (
                     <div className="space-y-6">
-                        {results.map((webtoon: WebtoonInfo) => (
+                        {results.content.map((webtoon: WebtoonInfo) => (
                             <div key={webtoon.id} className="flex gap-6 pb-6 border-b">
                                 <div className="flex-shrink-0">
                                     <Link to={`/webtoon/${webtoon.id}`}>

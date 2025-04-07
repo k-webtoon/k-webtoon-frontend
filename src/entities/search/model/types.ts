@@ -1,6 +1,6 @@
-import { WebtoonInfo } from "@/entities/webtoon/model/types";
+import {WebtoonPaginatedResponse} from "@/entities/webtoon/model/types";
 
 export interface SearchState {
-    results: WebtoonInfo[];
-    setResults: (results: WebtoonInfo[]) => void;
+    results: WebtoonPaginatedResponse;
+    setResults: (results: WebtoonPaginatedResponse) => void;
 }
