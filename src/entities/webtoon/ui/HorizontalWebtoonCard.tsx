@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { Badge } from "@/shared/ui/shadcn/badge.tsx"
-import { WebtoonInfo, mapGenre } from "@/entities/webtoon/model/types.ts"
+import { WebtoonInfo, mapGenre } from "@/entities/webtoon/ui/types.ts"
 
 interface HorizontalWebtoonCardProps {
     webtoon: WebtoonInfo;

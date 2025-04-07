@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import WebtoonCard from '@/entities/webtoon/ui/WebtoonCard.tsx';
-import {WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
+import {WebtoonPaginatedResponse} from '@/entities/webtoon/ui/types.ts';
 
 // 상수 정의 - 컴포넌트 외부에 위치
 const ITEMS_PER_ROW = 3;

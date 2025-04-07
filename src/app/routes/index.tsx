@@ -15,7 +15,7 @@ import UserComments from "@/pages/user/userpage/UserComments.tsx";
 import UserFollowers from "@/pages/user/userpage/UserFollowers.tsx";
 import UserFollowees from "@/pages/user/userpage/UserFollowees.tsx";
 import MyPage from "@/pages/user/MyPage";
-import Search from "@/pages/search/Search.tsx";
+import WebtoonSearchResults from "@/pages/search/WebtoonSearchResults.tsx";
 import Error from "@/pages/error/Error.tsx";
 import MyProfile from "@/pages/user/mypage/MyProfile";
 import AdminMain from "@/pages/admin/AdminMain";
@@ -25,6 +25,7 @@ import UserStats from "@/pages/admin/user/UserStats";
 import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
+import TextBasedRecommendations from "@/pages/text-based-recommendations/TextBasedRecommendations.tsx";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -70,7 +71,8 @@ const RoutesConfig = () => (
       {/* 🌐 웹툰 */}
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
-      <Route path="/search" element={<Search />} />
+      <Route path="/search" element={<WebtoonSearchResults />} />
+      <Route path="/text-based-recommendations" element={<TextBasedRecommendations />} />
 
       {/* 🔐 회원만 접근 가능 ====================== */}
       <Route element={<ProtectedRoute />}>

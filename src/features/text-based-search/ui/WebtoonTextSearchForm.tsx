@@ -1,24 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
+import { useTextBasedRecommendationStore } from "@/entities/text-based-search/model/store.ts";
 
-interface AISearchSectionProps {
+interface TextSearchSectionProps {
     title?: string;
     subtitle?: string;
 }
 
-const AISearchSection: React.FC<AISearchSectionProps> = ({
-                                                             title = "AI 기반 맞춤 웹툰 추천",
-                                                             subtitle = "좋아하는 웹툰과 비슷한 작품을 찾고 싶으신가요?"
-                                                         }) => {
+const WebtoonTextSearchForm: React.FC<TextSearchSectionProps> = ({
+                                                                 title = "AI 기반 맞춤 웹툰 추천",
+                                                                 subtitle = "좋아하는 웹툰과 비슷한 작품을 찾고 싶으신가요?"
+                                                             }) => {
     const [query, setQuery] = useState('');
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    const handleSearch = (e: React.FormEvent) => {
+    const { setSearchOptions } = useTextBasedRecommendationStore();
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const urlQuery = queryParams.get('query');
+
+        if (urlQuery) {
+            setQuery(decodeURIComponent(urlQuery));
+        }
+    }, [location.search]);
+
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Searching for:", query);
-        // 실제 검색 로직 추가
+
+        if (!query.trim()) return;
+
+        // 기본 검색 옵션 설정
+        setSearchOptions({
+            filterThreshold: 0.3,
+            limit: 20,
+            includeDetails: true
+        });
+
+        try {
+            const encodedQuery = encodeURIComponent(query);
+
+            navigate(`/text-based-recommendations?query=${encodedQuery}`);
+        } catch (error) {
+            console.error('검색 처리 중 오류 발생:', error);
+        }
     };
 
     return (
@@ -31,7 +61,7 @@ const AISearchSection: React.FC<AISearchSectionProps> = ({
                     <div className="relative flex-grow">
                         <Input
                             type="text"
-                            placeholder="키워드, 장면, 대사를 입력하시면 AI가 검색해 드립니다."
+                            placeholder="키워드, 장면, 대사를 입력하시면 텍스트 기반으로 검색해 드립니다."
                             className="h-12 pl-4 pr-10 rounded-full border-gray-200 w-full"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -40,13 +70,6 @@ const AISearchSection: React.FC<AISearchSectionProps> = ({
                     </div>
 
                     <div className="flex space-x-3">
-                        {/*<Button*/}
-                        {/*    type="submit"*/}
-                        {/*    className="h-12 px-6 rounded-full bg-yellow-400 hover:bg-yellow-500 text-gray-800"*/}
-                        {/*>*/}
-                        {/*    AI 검색*/}
-                        {/*</Button>*/}
-
                         <Button
                             type="button"
                             variant="outline"
@@ -62,4 +85,4 @@ const AISearchSection: React.FC<AISearchSectionProps> = ({
     );
 };
 
-export default AISearchSection;
+export default WebtoonTextSearchForm;

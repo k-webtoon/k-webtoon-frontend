@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Search, X } from "lucide-react";
-import { useSearchStore } from "@/entities/search/model/searchStore.ts";
-import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts";
-import { searchWebtoons } from "@/app/api/webtoonsApi.ts";
-import { useNavigate } from "react-router-dom";
+import { useSearchStore } from "@/entities/search/model/store.ts";
+import { searchWebtoons } from "@/entities/webtoon/api/api.ts";
+import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/ui/types.ts";
 
 interface SearchBarProps {
   isMobile?: boolean;
@@ -22,8 +22,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const { results, setResults } = useSearchStore();
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const emptyResults: WebtoonPaginatedResponse = { content: [] };
+
+  // location이 변경될 때마다 query 상태 초기화
+  useEffect(() => {
+    setQuery("");
+    setShowResults(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (query.trim() === "") {
@@ -59,6 +66,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleResultClick = (id: string) => {
     navigate(`/webtoon/${id}`);
     setShowResults(false);
+    // 검색 결과 클릭 시 query 초기화
+    setQuery("");
   };
 
   // 엔터 키를 누를 때 검색 페이지로 이동
@@ -75,6 +84,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (query.trim() !== '') {
       navigate(`/search?query=${encodeURIComponent(query)}`);
       setShowResults(false);
+      // 페이지 이동 시 query 값을 초기화하지 않음 (검색 페이지에서는 유지)
       if (onClose) onClose();
     }
   };
@@ -117,14 +127,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </div>
 
           {/* 검색 결과 */}
-          {showResults && results.content.length > 0 && ( // content 배열 접근
+          {showResults && results.content.length > 0 && (
               <div className={`relative ${isMobile ? "mt-2 z-50" : ""}`}>
                 <ul
                     className={`${
                         isMobile ? "fixed inset-x-0 mx-4" : "absolute z-10 w-full"
                     } bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1`}
                 >
-                  {results.content.map((item: WebtoonInfo) => ( // content 배열 접근
+                  {results.content.map((item: WebtoonInfo) => (
                       <li
                           key={item.id}
                           className="flex items-center p-2 hover:bg-gray-100 transition duration-150 cursor-pointer"
