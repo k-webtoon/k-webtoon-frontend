@@ -5,7 +5,7 @@ import AdminProtectedRoute from "@/app/routes/AdminProtectedRoute.tsx";
 import Layout from "@/widgets/layout/ui/Layout.tsx";
 import Main from "@/pages/main/Main.tsx";
 import Login from "@/pages/auth/Login.tsx";
-import Signup from "@/pages/auth/Signup.tsx";
+import Signup from "@/pages/auth/signup/Signup";
 import FindPassword from "@/pages/auth/FindPassword.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
