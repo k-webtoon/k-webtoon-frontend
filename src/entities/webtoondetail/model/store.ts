@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { WebtoonDetail, Comment } from "../types";
+import { WebtoonDetail, Comment } from "@/entities/webtoondetail/model/types.ts";
 
 interface WebtoonDetailState {
   webtoon: WebtoonDetail | null;

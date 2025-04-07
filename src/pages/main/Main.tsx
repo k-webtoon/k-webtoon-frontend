@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
 import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
-import AISearchSection from "@/features/webtoon-search/ui/AISearchSection.tsx";
+import WebtoonTextSearchForm from "@/features/text-based-search/ui/WebtoonTextSearchForm.tsx";
 import CharacterChat from "@/features/CharacterChat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
 import josuck from "@/shared/assets/josuck.png";
@@ -83,7 +83,7 @@ const Main: React.FC = () => {
                             <AIAnalysisBanner />
                         </section>
                         <section id="section2" className="pt-5">
-                            <AISearchSection />
+                            <WebtoonTextSearchForm />
                         </section>
                         <section id="section3" className="pt-5">
                             <WebtoonSlider
@@ -106,7 +106,7 @@ const Main: React.FC = () => {
                     :
                     <>
                         <section id="section1" className="pt-10">
-                            <AISearchSection />
+                            <WebtoonTextSearchForm />
                         </section>
                         <section id="section2" className="pt-5">
                             <WebtoonSlider

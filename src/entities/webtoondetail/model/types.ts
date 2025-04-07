@@ -2,7 +2,7 @@ export interface WebtoonDetail {
   id: number;
   titleName: string;
   author: string;
-  url: string;
+  thumbnailUrl: string;
   synopsis: string;
   age: string;
   starScore: string;
