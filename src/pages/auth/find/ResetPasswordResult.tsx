@@ -58,7 +58,7 @@ const ResetPasswordResultPage: React.FC = () => {
               <p className="text-xl font-semibold text-primary">{email}</p>
             </div>
             <div className="space-y-3">
-              <Link to="/auth/login">
+              <Link to="/login">
                 <Button className="w-full">새 비밀번호로 로그인</Button>
               </Link>
               <Link to="/">

@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/shadcn/button';
 import { Label } from '@/shared/ui/shadcn/label';
 import { Alert, AlertDescription } from '@/shared/ui/shadcn/alert';
 import { AlertCircle } from 'lucide-react';
+import { authApi } from '@/entities/auth/api/auth';
 
 const FindIdPage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -50,15 +51,14 @@ const FindIdPage: React.FC = () => {
     setError(null);
 
     try {
-      // TODO: API 연동 - 전화번호 검증 및 보안 질문 조회
-      const mockSecurityQuestion = "당신이 태어난 도시는 어디인가요?"; // 임시 데이터
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 임시 딜레이
+      // API 호출 - 전화번호 검증 및 보안 질문 조회
+      const securityQuestion = await authApi.verifyPhoneNumber({ phoneNumber });
       
       // 보안 질문 페이지로 이동
       navigate('/auth/find/id/security-question', { 
         state: { 
           phoneNumber,
-          question: mockSecurityQuestion,
+          question: securityQuestion.securityQuestion,
           type: 'findId'
         } 
       });

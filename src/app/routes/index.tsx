@@ -9,7 +9,6 @@ import Signup from "@/pages/auth/signup/Signup";
 import FindPassword from "@/pages/auth/find/FindPassword.tsx";
 import FindId from "@/pages/auth/find/FindId.tsx";
 import Find from "@/pages/auth/find/Find";
-import SecurityQuestion from "@/pages/auth/find/SecurityQuestion.tsx";
 import ResetPassword from "@/pages/auth/find/ResetPassword.tsx";
 import ResetPasswordResult from "@/pages/auth/find/ResetPasswordResult.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
@@ -33,6 +32,8 @@ import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/text-based-recommendations/TextBasedRecommendations.tsx";
 import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
 import IdResult from "@/pages/auth/find/IdResult.tsx";
+import FindIdSecurityQuestion from "@/pages/auth/find/FindIdSecurityQuestion";
+import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurityQuestion";
 
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
@@ -75,10 +76,10 @@ const RoutesConfig = () => (
         <Route path="signup/*" element={<Signup />} />
         <Route path="auth/find" element={<Find />} />
         <Route path="auth/find/id" element={<FindId />} />
-        <Route path="auth/find/id/security-question" element={<SecurityQuestion />} />
+        <Route path="auth/find/id/security-question" element={<FindIdSecurityQuestion />} />
         <Route path="auth/find/id/result" element={<IdResult />} />
         <Route path="auth/find/password" element={<FindPassword />} />
-        <Route path="auth/find/password/security-question" element={<SecurityQuestion />} />
+        <Route path="auth/find/password/security-question" element={<FindPasswordSecurityQuestion />} />
         <Route path="auth/find/reset-password" element={<ResetPassword />} />
         <Route path="auth/find/reset-password/result" element={<ResetPasswordResult />} />
       </Route>
