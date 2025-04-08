@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUserStore } from "@/entities/user/model/userStore";
 import useAuthStore from "@/entities/auth/model/userStore";
+import { usePasswordStore } from "@/entities/auth/model/newPasswordStore";
+import { useProfileStore } from "@/entities/user/model/profileStore";
 import {
   UserInfo,
   UserComment,
@@ -14,6 +16,7 @@ import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { clsx } from "clsx";
+import { useUserActivityStore } from "@/entities/user/model/profileStore";
 
 // 탭 타입 정의
 type TabType =
@@ -45,15 +48,16 @@ export const MyProfile = () => {
   const location = useLocation();
   const locationUserInfo = location.state?.userInfo;
 
+  const { updateProfileImage, loading: imageLoading } = useProfileStore();
   // @ts-ignore
   const { user } = useAuthStore();
+  const { changePassword, loading } = usePasswordStore();
   const {
     userInfo,
     comments,
     likedWebtoons,
     followers,
     followees,
-    loading,
     error,
     fetchMyInfo,
     fetchMyLikedWebtoons,
@@ -74,7 +78,7 @@ export const MyProfile = () => {
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
+    confirmNewPassword: "",
   });
   const [privacySettings, setPrivacySettings] = useState({
     profileVisibility: "public",
@@ -99,7 +103,10 @@ export const MyProfile = () => {
       fetchFollowers(userId);
       fetchFollowees(userId);
     } else {
-      console.error("사용자 ID를 찾을 수 없습니다:", { locationUserInfo, user });
+      console.error("사용자 ID를 찾을 수 없습니다:", {
+        locationUserInfo,
+        user,
+      });
     }
   }, [
     locationUserInfo,
@@ -111,6 +118,46 @@ export const MyProfile = () => {
     fetchFollowees,
   ]);
 
+  //이미지 업로드
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+
+    const file = e.target.files[0];
+
+    // 파일 유효성 검사 (예: 2MB 이하 이미지)
+    if (!file.type.startsWith("image/")) {
+      setMessage({ type: "error", text: "이미지 파일만 업로드 가능합니다." });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({
+        type: "error",
+        text: "2MB 이하 이미지만 업로드 가능합니다.",
+      });
+      return;
+    }
+
+    try {
+      await updateProfileImage(file);
+      setMessage({
+        type: "success",
+        text: "프로필 이미지가 업데이트되었습니다",
+      });
+
+      // 프로필 정보 갱신
+      if (userInfo) {
+        const newUserInfo = { ...userInfo };
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          newUserInfo.profileImage = e.target?.result as string;
+          setUserInfo(newUserInfo);
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (error: any) {
+      setMessage({ type: "error", text: error.message });
+    }
+  };
   // 프로필 업데이트 핸들러
   const handleProfileUpdate = async () => {
     try {
@@ -132,6 +179,21 @@ export const MyProfile = () => {
     }
   };
 
+  const {
+    userActivityInfo,
+    fetchUserActivity,
+    updateUserActivityBio,
+    loading: activityLoading,
+  } = useUserActivityStore();
+
+  useEffect(() => {
+    const userId = locationUserInfo?.indexId || user?.indexId;
+
+    if (userId) {
+      fetchUserActivity(userId);
+    }
+  }, [locationUserInfo, user, fetchUserActivity]);
+
   // 댓글 삭제 핸들러
   const handleCommentDelete = async (commentId: number) => {
     // TODO: 댓글 삭제 API 호출 구현
@@ -140,17 +202,24 @@ export const MyProfile = () => {
   // 비밀번호 변경 핸들러
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setMessage({ type: "error", text: "새 비밀번호가 일치하지 않습니다." });
-      return;
+
+    try {
+      await changePassword(passwordData);
+      setMessage({
+        type: "success",
+        text: "비밀번호가 성공적으로 변경되었습니다.",
+      });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+    } catch (error: undefined | any) {
+      setMessage({
+        type: "error",
+        text: error.message || "비밀번호 변경 중 오류가 발생했습니다.",
+      });
     }
-    // TODO: 비밀번호 변경 API 호출
-    setMessage({ type: "success", text: "비밀번호가 변경되었습니다." });
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
   };
 
   // 공개 범위 설정 핸들러
@@ -282,9 +351,7 @@ export const MyProfile = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   선호 장르
                 </label>
-                <select
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="drama">드라마</option>
                   <option value="action">액션</option>
                   <option value="romance">로맨스</option>
@@ -295,9 +362,7 @@ export const MyProfile = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   완결 여부
                 </label>
-                <select
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="all">모두</option>
                   <option value="completed">완결</option>
                   <option value="ongoing">연재 중</option>
@@ -307,9 +372,7 @@ export const MyProfile = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   연령가
                 </label>
-                <select
-                  className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="all">전체 연령가</option>
                   <option value="teen">청소년</option>
                   <option value="adult">성인</option>
@@ -536,7 +599,10 @@ export const MyProfile = () => {
                       onChange={(e) =>
                         setEditedInfo((prev) =>
                           prev
-                            ? { ...prev, notificationsEnabled: e.target.checked }
+                            ? {
+                                ...prev,
+                                notificationsEnabled: e.target.checked,
+                              }
                             : null
                         )
                       }
@@ -572,31 +638,43 @@ export const MyProfile = () => {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">닉네임</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    닉네임
+                  </h3>
                   <p className="text-gray-900">{userInfo?.nickname}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">이메일</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    이메일
+                  </h3>
                   <p className="text-gray-900">{userInfo?.userEmail}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">성별</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    성별
+                  </h3>
                   <p className="text-gray-900">
                     {userInfo?.gender === "MALE"
                       ? "남성"
                       : userInfo?.gender === "FEMALE"
-                        ? "여성"
-                        : userInfo?.gender === "OTHER"
-                          ? "기타"
-                          : "미설정"}
+                      ? "여성"
+                      : userInfo?.gender === "OTHER"
+                      ? "기타"
+                      : "미설정"}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">나이</h3>
-                  <p className="text-gray-900">{userInfo?.userAge || "미설정"}</p>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    나이
+                  </h3>
+                  <p className="text-gray-900">
+                    {userInfo?.userAge || "미설정"}
+                  </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">소개</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    소개
+                  </h3>
                   <p className="text-gray-900 whitespace-pre-wrap">
                     {userInfo?.bio || "소개가 없습니다."}
                   </p>
@@ -670,11 +748,11 @@ export const MyProfile = () => {
                 </label>
                 <input
                   type="password"
-                  value={passwordData.confirmPassword}
+                  value={passwordData.confirmNewPassword}
                   onChange={(e) =>
                     setPasswordData((prev) => ({
                       ...prev,
-                      confirmPassword: e.target.value,
+                      confirmNewPassword: e.target.value,
                     }))
                   }
                   className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -772,15 +850,30 @@ export const MyProfile = () => {
         {/* 왼쪽 프로필 섹션 */}
         <div className="w-full md:w-1/4">
           <div className="sticky top-24">
+            {/* 프로필 이미지 영역 시작 */}
             <div className="mb-4">
-              <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
+              <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4 relative group">
                 <img
                   src={
-                    userInfo.profileImage || "/images/profile-placeholder.jpg"
+                    userActivityInfo?.profileImage ||
+                    userInfo.profileImage ||
+                    "/images/profile-placeholder.jpg"
                   }
                   alt="프로필"
                   className="w-full h-full object-cover"
                 />
+                {/* File input button remains the same */}
+                <label className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <span className="text-white text-sm">
+                    {imageLoading ? "업로드 중..." : "이미지 변경"}
+                  </span>
+                </label>
               </div>
               <h1 className="text-2xl font-bold mb-1">{userInfo.nickname}</h1>
               <p className="text-gray-600 mb-4">{userInfo.userEmail}</p>
@@ -833,7 +926,7 @@ export const MyProfile = () => {
                 />
               ) : (
                 <p className="text-gray-900 whitespace-pre-wrap">
-                  {userInfo.bio || "소개가 없습니다."}
+                  {userActivityInfo?.bio || userInfo.bio || "소개가 없습니다."}
                 </p>
               )}
             </div>

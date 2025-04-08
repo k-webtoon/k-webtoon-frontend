@@ -63,7 +63,7 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="signup/*" element={<Signup />} />
+        <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="find/password" element={<FindPassword />} />
       </Route>
