@@ -63,7 +63,7 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="signup" element={<Signup />} />
+        <Route path="signup/*" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="find/password" element={<FindPassword />} />
       </Route>
@@ -72,7 +72,10 @@ const RoutesConfig = () => (
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
       <Route path="/search" element={<WebtoonSearchResults />} />
-      <Route path="/text-based-recommendations" element={<TextBasedRecommendations />} />
+      <Route
+        path="/text-based-recommendations"
+        element={<TextBasedRecommendations />}
+      />
 
       {/* 🔐 회원만 접근 가능 ====================== */}
       <Route element={<ProtectedRoute />}>
@@ -102,16 +105,34 @@ const RoutesConfig = () => (
           <Route path="user-stats" element={<UserStats />} />
           <Route path="webtoon" element={<WebtoonManagement />} />
           <Route path="feedback" element={<FeedbackStatus />} />
-          <Route path="algorithm" element={<PlaceholderComponent title="알고리즘 설정" />} />
-          <Route path="accuracy" element={<PlaceholderComponent title="정확도 분석" />} />
+          <Route
+            path="algorithm"
+            element={<PlaceholderComponent title="알고리즘 설정" />}
+          />
+          <Route
+            path="accuracy"
+            element={<PlaceholderComponent title="정확도 분석" />}
+          />
           <Route path="visualization">
             <Route path="users" element={<UserAnalysis />} />
-            <Route path="webtoons" element={<PlaceholderComponent title="웹툰 분석" />} />
-            <Route path="trends" element={<PlaceholderComponent title="트렌드 분석" />} />
+            <Route
+              path="webtoons"
+              element={<PlaceholderComponent title="웹툰 분석" />}
+            />
+            <Route
+              path="trends"
+              element={<PlaceholderComponent title="트렌드 분석" />}
+            />
           </Route>
           <Route path="tags" element={<TagManagement />} />
-          <Route path="notifications" element={<PlaceholderComponent title="알림 관리" />} />
-          <Route path="announcements" element={<PlaceholderComponent title="공지사항 관리" />} />
+          <Route
+            path="notifications"
+            element={<PlaceholderComponent title="알림 관리" />}
+          />
+          <Route
+            path="announcements"
+            element={<PlaceholderComponent title="공지사항 관리" />}
+          />
         </Route>
       </Route>
 
