@@ -1,36 +1,32 @@
-import React, { useState } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import AgeVerification from './steps/AgeVerification';
-import TermsAgreement from './steps/TermsAgreement';
-import UserInfo from './steps/UserInfo';
-import Complete from './steps/Complete';
-import AIRecommendation from '@/pages/AIRecommendation/AIRecommendation';
-
-export type SignupData = {
-  birthYear: string;
-  terms: {
-    required: boolean;
-    privacy: boolean;
-    marketing: boolean;
-  };
-  email: string;
-  password: string;
-  confirmPassword: string;
-  nickname: string;
-};
+import React, { useState } from "react";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
+import AgeVerification from "./steps/AgeVerification";
+import TermsAgreement from "./steps/TermsAgreement";
+import UserInfo from "./steps/UserInfo";
+import Complete from "./steps/Complete";
+import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
+import { SignupData } from "@/entities/auth/model/types";
 
 const steps = [
-  { path: '', name: '연령 확인' },
-  { path: 'terms', name: '약관 동의' },
-  { path: 'user-info', name: '정보 입력' },
-  { path: 'complete', name: '가입 완료' }
+  { path: "", name: "연령 확인" },
+  { path: "terms", name: "약관 동의" },
+  { path: "user-info", name: "정보 입력" },
+  { path: "complete", name: "가입 완료" },
 ];
 
-const SignupLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const SignupLayout: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const location = useLocation();
-  const currentPath = location.pathname.split('/signup/')[1] || '';
-  const currentStepIndex = steps.findIndex(step => step.path === currentPath);
-  const isAIRecommendation = currentPath === 'ai-recommendation';
+  const currentPath = location.pathname.split("/signup/")[1] || "";
+  const currentStepIndex = steps.findIndex((step) => step.path === currentPath);
+  const isAIRecommendation = currentPath === "ai-recommendation";
 
   return (
     <div className="min-h-screen bg-background pt-10">
@@ -44,14 +40,18 @@ const SignupLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               </h2>
               <div className="flex justify-between items-center">
                 {steps.map((step, index) => (
-                  <div key={step.path} className="flex flex-col items-center flex-1">
+                  <div
+                    key={step.path}
+                    className="flex flex-col items-center flex-1"
+                  >
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-2
-                        ${index === currentStepIndex
-                          ? 'bg-indigo-600 text-white'
-                          : index < currentStepIndex
-                          ? 'bg-indigo-200 text-indigo-700'
-                          : 'bg-gray-200 text-gray-500'
+                        ${
+                          index === currentStepIndex
+                            ? "bg-indigo-600 text-white"
+                            : index < currentStepIndex
+                            ? "bg-indigo-200 text-indigo-700"
+                            : "bg-gray-200 text-gray-500"
                         }`}
                     >
                       {index + 1}
@@ -60,7 +60,11 @@ const SignupLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     {index < steps.length - 1 && (
                       <div
                         className={`h-0.5 w-full mt-4
-                          ${index < currentStepIndex ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                          ${
+                            index < currentStepIndex
+                              ? "bg-indigo-600"
+                              : "bg-gray-200"
+                          }`}
                       />
                     )}
                   </div>
@@ -70,7 +74,9 @@ const SignupLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         )}
 
-        <div className={`w-full ${isAIRecommendation ? 'max-w-4xl' : 'max-w-md'}`}>
+        <div
+          className={`w-full ${isAIRecommendation ? "max-w-4xl" : "max-w-md"}`}
+        >
           {children}
         </div>
       </div>
@@ -81,16 +87,20 @@ const SignupLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<SignupData>({
-    birthYear: '',
+    birthYear: "",
     terms: {
       required: false,
       privacy: false,
       marketing: false,
     },
-    email: '',
-    password: '',
-    confirmPassword: '',
-    nickname: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    nickname: "",
+    securityQuestion: "",
+    securityAnswer: "",
+    phoneNumber: "",
+    gender: "",
   });
 
   const updateFormData = (data: Partial<SignupData>) => {
@@ -106,7 +116,7 @@ const Signup: React.FC = () => {
             <AgeVerification
               formData={formData}
               updateFormData={updateFormData}
-              nextStep={() => navigate('/signup/terms')}
+              nextStep={() => navigate("/signup/terms")}
             />
           </SignupLayout>
         }
@@ -118,8 +128,8 @@ const Signup: React.FC = () => {
             <TermsAgreement
               formData={formData}
               updateFormData={updateFormData}
-              nextStep={() => navigate('/signup/user-info')}
-              prevStep={() => navigate('/signup')}
+              nextStep={() => navigate("/signup/user-info")}
+              prevStep={() => navigate("/signup")}
             />
           </SignupLayout>
         }
@@ -131,8 +141,8 @@ const Signup: React.FC = () => {
             <UserInfo
               formData={formData}
               updateFormData={updateFormData}
-              nextStep={() => navigate('/signup/complete')}
-              prevStep={() => navigate('/signup/terms')}
+              nextStep={() => navigate("/signup/complete")}
+              prevStep={() => navigate("/signup/terms")}
             />
           </SignupLayout>
         }
@@ -158,4 +168,4 @@ const Signup: React.FC = () => {
   );
 };
 
-export default Signup; 
+export default Signup;
