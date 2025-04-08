@@ -79,15 +79,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">비밀번호</Label>
-            {/*<Button variant="link" className="p-0 h-auto text-sm" type="button">*/}
-            {/*    비밀번호 찾기*/}
-            {/*</Button>*/}
-            <Link to="/find/password" className="p-0 h-auto text-sm">
-              비밀번호 찾기
-            </Link>
-          </div>
+          <Label htmlFor="password">비밀번호</Label>
           <Input
             id="password"
             type="password"
@@ -106,6 +98,20 @@ const LoginForm: React.FC<LoginFormProps> = ({
           {loading ? "로그인 중..." : "로그인"}
         </Button>
       </form>
+
+      <div className="text-center">
+        <Link 
+          to="/auth/find" 
+          className="inline-flex items-center justify-center text-sm text-muted-foreground hover:text-primary transition-colors gap-1.5"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <path d="M12 17h.01"/>
+          </svg>
+          로그인에 도움이 필요하신가요?
+        </Link>
+      </div>
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
@@ -180,7 +186,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <div className="text-center pt-4">
         <p className="text-sm text-muted-foreground">
           계정이 없으신가요?{" "}
-          <Link to="/signup" className="text-sm text-primary hover:underline">
+          <Link to="/auth/signup" className="text-sm text-primary hover:underline">
             회원가입
           </Link>
         </p>

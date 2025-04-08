@@ -6,7 +6,12 @@ import Layout from "@/widgets/layout/ui/Layout.tsx";
 import Main from "@/pages/main/Main.tsx";
 import Login from "@/pages/auth/Login.tsx";
 import Signup from "@/pages/auth/signup/Signup";
-import FindPassword from "@/pages/auth/FindPassword.tsx";
+import FindPassword from "@/pages/auth/find/FindPassword.tsx";
+import FindId from "@/pages/auth/find/FindId.tsx";
+import Find from "@/pages/auth/find/Find";
+import SecurityQuestion from "@/pages/auth/find/SecurityQuestion.tsx";
+import ResetPassword from "@/pages/auth/find/ResetPassword.tsx";
+import ResetPasswordResult from "@/pages/auth/find/ResetPasswordResult.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
@@ -26,6 +31,9 @@ import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/text-based-recommendations/TextBasedRecommendations.tsx";
+import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
+import IdResult from "@/pages/auth/find/IdResult.tsx";
+
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -63,12 +71,22 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="signup/*" element={<Signup />} />
         <Route path="login" element={<Login />} />
-        <Route path="find/password" element={<FindPassword />} />
+        <Route path="signup/*" element={<Signup />} />
+        <Route path="auth/find" element={<Find />} />
+        <Route path="auth/find/id" element={<FindId />} />
+        <Route path="auth/find/id/security-question" element={<SecurityQuestion />} />
+        <Route path="auth/find/id/result" element={<IdResult />} />
+        <Route path="auth/find/password" element={<FindPassword />} />
+        <Route path="auth/find/password/security-question" element={<SecurityQuestion />} />
+        <Route path="auth/find/reset-password" element={<ResetPassword />} />
+        <Route path="auth/find/reset-password/result" element={<ResetPasswordResult />} />
       </Route>
 
-      {/* 🌐 웹툰 */}
+      {/* 🤖 AI 추천 ====================== */}
+      <Route path="/ai-recommendation" element={<AIRecommendation />} />
+      
+      {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
       <Route path="/search" element={<WebtoonSearchResults />} />

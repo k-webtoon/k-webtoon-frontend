@@ -1,10 +1,11 @@
 import React, { useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LoginForm from '@/entities/auth/ui/LoginForm';
 import {useUserStore} from '@/entities/auth/model/userStore.ts';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { isAuthenticated, checkAuth } = useUserStore();
     // const [socialLoading, setSocialLoading] = useState(false);
 
