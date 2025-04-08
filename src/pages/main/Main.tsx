@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
-import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
 import WebtoonTextSearchForm from "@/features/text-based-search/ui/WebtoonTextSearchForm.tsx";
-import CharacterChat from "@/features/CharacterChat/ui/CharacterChat.tsx";
+import CharacterChat from "@/features/character-chat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
-import josuck from "@/shared/assets/josuck.png";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
 import { useUserStore } from '@/entities/auth/model/userStore.ts';
+import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
 
 const Main: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(useUserStore.getState().isAuthenticated);
@@ -16,7 +15,6 @@ const Main: React.FC = () => {
         // 초기 상태 설정
         setIsAuthenticated(useUserStore.getState().isAuthenticated);
 
-        // 상태 변화를 구독
         const unsubscribe = useUserStore.subscribe(
             (state) => {
                 setIsAuthenticated(state.isAuthenticated);
@@ -37,12 +35,6 @@ const Main: React.FC = () => {
         }
     }, [topWebtoonList]);
 
-    const sampleCharacter = {
-        id: '1',
-        name: '조석',
-        avatar: josuck,
-        webtoonTitle: '마음의소리'
-    };
 
     const sampleReviews: Review[] = [
         {
@@ -96,7 +88,7 @@ const Main: React.FC = () => {
                             />
                         </section>
                         <section id="section4" className="pt-5">
-                            <CharacterChat character={sampleCharacter} />
+                            <CharacterChat />
                         </section>
 
                         <section id="section5" className="pt-5">
@@ -118,7 +110,7 @@ const Main: React.FC = () => {
                             />
                         </section>
                         <section id="section3" className="pt-5">
-                            <CharacterChat character={sampleCharacter} />
+                            <CharacterChat />
                         </section>
                         <section id="section4" className="pt-5">
                             <CommunityReviews reviews={sampleReviews} />

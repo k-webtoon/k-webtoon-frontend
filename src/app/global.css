@@ -40,3 +40,83 @@
 .read-the-docs {
   color: #888;
 }
+
+/* 채팅 컴포넌트를 위한 애니메이션 - 스코프 적용 */
+@keyframes cc-fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cc-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.cc-avatar-hover {
+  transition: transform 0.3s ease;
+}
+
+.cc-avatar-hover:hover {
+  transform: scale(1.05);
+}
+
+.cc-button-active {
+  transition: transform 0.1s ease;
+}
+
+.cc-button-active:active {
+  transform: scale(0.95);
+}
+
+.cc-typing-indicator {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+  padding: 8px 12px;
+  background-color: #e5e7eb;
+  border-radius: 8px;
+}
+
+.cc-typing-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+}
+
+.cc-typing-dot:nth-child(1) {
+  animation: cc-bounce 0.6s infinite;
+}
+
+.cc-typing-dot:nth-child(2) {
+  animation: cc-bounce 0.6s infinite 0.15s;
+}
+
+.cc-typing-dot:nth-child(3) {
+  animation: cc-bounce 0.6s infinite 0.3s;
+}
+
+/* 메시지 전환 효과 */
+.cc-message-container {
+  transition: all 0.3s ease;
+}
+
+/* 입력 필드 포커스 효과 */
+.cc-input-focus {
+  transition: all 0.2s ease;
+}
+
+.cc-input-focus:focus {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+}
