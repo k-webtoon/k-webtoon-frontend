@@ -1,4 +1,3 @@
-// ProfileImageUploader.tsx
 import React, { useEffect } from "react";
 import {
   useProfileStore,
