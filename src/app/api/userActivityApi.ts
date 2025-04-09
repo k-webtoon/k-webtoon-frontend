@@ -32,13 +32,65 @@ export const getUserActivityInfoApi = async (userId: number) => {
     const response = await axios.get(
       `${USER_ACTIVITY_BASE_URL}/${userId}/info`
     );
+    console.log("API 응답 데이터:", response.data); // 응답 데이터 확인
+
     return {
       ...response.data,
-      profileImageUrl: `/img/${response.data.profileImagePath}`, // 프론트엔드 URL 생성
+      profileImageUrl: response.data.profileImageUrl
+        ? `${response.data.profileImageUrl}`
+        : null, // 프로필 이미지가 없는 경우
     };
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message || "프로필 정보 조회에 실패했습니다."
     );
+  }
+};
+
+// 이미지만 가져오기
+export const getUserProfileImageApi = async (userId: number) => {
+  try {
+    const response = await axios.get(
+      `${USER_ACTIVITY_BASE_URL}/${userId}/profile-image`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response.data.profileImageUrl
+      ? `http://localhost:8080${response.data.profileImageUrl}`
+      : null;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "프로필 이미지 조회 실패");
+  }
+};
+
+// 소개 조회
+export const getBioApi = async (userId: number) => {
+  try {
+    const response = await axios.get(`${USER_ACTIVITY_BASE_URL}/${userId}/bio`);
+    console.log("response: ", response.data);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "소개 조회 실패");
+  }
+};
+
+// 소개 수정
+export const updateBioApi = async (bio: string) => {
+  try {
+    const response = await axios.put(
+      `${USER_ACTIVITY_BASE_URL}/bio`,
+      { bio },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "소개 업데이트 실패");
   }
 };

@@ -30,3 +30,9 @@ export interface UserRegisterDTO {
   securityQuestion: string;
   securityAnswer: string;
 }
+
+export interface termsContentType {
+  required: string;
+  privacy: string;
+  marketing: string;
+}

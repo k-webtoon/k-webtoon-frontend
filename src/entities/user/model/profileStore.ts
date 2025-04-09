@@ -1,6 +1,8 @@
+// profileStore.ts
 import { create } from "zustand";
 import { updateProfileImageApi } from "@/app/api/userActivityApi";
 import { getUserActivityInfoApi } from "@/app/api/userActivityApi";
+import { useUserStore } from "./userStore";
 
 interface ProfileState {
   loading: boolean;
@@ -10,15 +12,14 @@ interface ProfileState {
 
 interface UserActivityState {
   profileData: {
-    profileImagePath: string | null;
+    profileImageUrl: string | null;
     bio: string | null;
-  } | null;
+  };
   loading: boolean;
   error: string | null;
   fetchUserActivity: (userId: number) => Promise<void>;
 }
 
-// 프로필 사진 올리기
 export const useProfileStore = create<ProfileState>((set) => ({
   loading: false,
   error: null,
@@ -26,7 +27,23 @@ export const useProfileStore = create<ProfileState>((set) => ({
   updateProfileImage: async (file) => {
     set({ loading: true, error: null });
     try {
-      await updateProfileImageApi(file);
+      const fileName = await updateProfileImageApi(file);
+
+      // 모든 관련 스토어 동기화
+      const userStore = useUserStore.getState();
+      if (userStore.userInfo) {
+        userStore.setUserInfo({
+          ...userStore.userInfo,
+          profileImageUrl: fileName,
+        });
+      }
+
+      // 사용자 활동 스토어 강제 갱신
+      const activityStore = useUserActivityStore.getState();
+      if (userStore.userInfo?.indexId) {
+        await activityStore.fetchUserActivity(userStore.userInfo.indexId);
+      }
+
       set({ loading: false });
     } catch (error: any) {
       set({ loading: false, error: error.message });
@@ -36,7 +53,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
 }));
 
 export const useUserActivityStore = create<UserActivityState>((set) => ({
-  profileData: null,
+  profileData: { profileImageUrl: null, bio: null },
   loading: false,
   error: null,
 
@@ -44,9 +61,10 @@ export const useUserActivityStore = create<UserActivityState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await getUserActivityInfoApi(userId);
+
       set({
         profileData: {
-          profileImagePath: data.profileImagePath,
+          profileImageUrl: data.profileImageUrl,
           bio: data.bio,
         },
         loading: false,
@@ -56,6 +74,7 @@ export const useUserActivityStore = create<UserActivityState>((set) => ({
         loading: false,
         error: error.message,
       });
+      throw error;
     }
   },
 }));

@@ -46,7 +46,10 @@ interface UserState {
   updateUserBio: (bio: string) => Promise<void>;
 
   // 새로운 액션
-  checkFollowStatusAction: (followerId: number, followeeId: number) => Promise<boolean>;
+  checkFollowStatusAction: (
+    followerId: number,
+    followeeId: number
+  ) => Promise<boolean>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -109,7 +112,10 @@ export const useUserStore = create<UserState>((set) => ({
       set({ followers, loading: false });
     } catch (error) {
       console.error("팔로워 로딩 오류:", error);
-      set({ error: "팔로워를 불러오는 중 오류가 발생했습니다.", loading: false });
+      set({
+        error: "팔로워를 불러오는 중 오류가 발생했습니다.",
+        loading: false,
+      });
     }
   },
 
@@ -121,7 +127,10 @@ export const useUserStore = create<UserState>((set) => ({
       set({ followees, loading: false });
     } catch (error) {
       console.error("팔로잉 로딩 오류:", error);
-      set({ error: "팔로잉을 불러오는 중 오류가 발생했습니다.", loading: false });
+      set({
+        error: "팔로잉을 불러오는 중 오류가 발생했습니다.",
+        loading: false,
+      });
     }
   },
 
@@ -133,13 +142,16 @@ export const useUserStore = create<UserState>((set) => ({
         throw new Error("로그인이 필요합니다.");
       }
 
-      const response = await fetch(`/api/follow/${followerId}/follow/${followeeId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `/api/follow/${followerId}/follow/${followeeId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("팔로우에 실패했습니다.");
@@ -148,7 +160,10 @@ export const useUserStore = create<UserState>((set) => ({
       // 팔로우 상태 업데이트
       set((state) => ({
         userInfo: state.userInfo
-          ? { ...state.userInfo, followerCount: (state.userInfo.followerCount || 0) + 1 }
+          ? {
+              ...state.userInfo,
+              followerCount: (state.userInfo.followerCount || 0) + 1,
+            }
           : null,
       }));
     } catch (error) {
@@ -165,13 +180,16 @@ export const useUserStore = create<UserState>((set) => ({
         throw new Error("로그인이 필요합니다.");
       }
 
-      const response = await fetch(`/api/follow/${followerId}/unfollow/${followeeId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `/api/follow/${followerId}/unfollow/${followeeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("언팔로우에 실패했습니다.");
@@ -180,7 +198,13 @@ export const useUserStore = create<UserState>((set) => ({
       // 언팔로우 상태 업데이트
       set((state) => ({
         userInfo: state.userInfo
-          ? { ...state.userInfo, followerCount: Math.max(0, (state.userInfo.followerCount || 0) - 1) }
+          ? {
+              ...state.userInfo,
+              followerCount: Math.max(
+                0,
+                (state.userInfo.followerCount || 0) - 1
+              ),
+            }
           : null,
       }));
     } catch (error) {
@@ -238,7 +262,10 @@ export const useUserStore = create<UserState>((set) => ({
       set({ comments, loading: false });
     } catch (error) {
       console.error("내 댓글 로딩 오류:", error);
-      set({ error: "내 댓글을 불러오는 중 오류가 발생했습니다.", loading: false });
+      set({
+        error: "내 댓글을 불러오는 중 오류가 발생했습니다.",
+        loading: false,
+      });
     }
   },
 
@@ -263,7 +290,9 @@ export const useUserStore = create<UserState>((set) => ({
 
       const updatedUserInfo = await response.json();
       set((state) => ({
-        userInfo: state.userInfo ? { ...state.userInfo, ...updatedUserInfo } : null,
+        userInfo: state.userInfo
+          ? { ...state.userInfo, ...updatedUserInfo }
+          : null,
       }));
     } catch (error) {
       console.error("프로필 업데이트 오류:", error);
@@ -284,20 +313,26 @@ export const useUserStore = create<UserState>((set) => ({
   },
 
   // 새로운 액션
-  checkFollowStatusAction: async (followerId: number, followeeId: number): Promise<boolean> => {
+  checkFollowStatusAction: async (
+    followerId: number,
+    followeeId: number
+  ): Promise<boolean> => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("로그인이 필요합니다.");
       }
 
-      const response = await fetch(`/api/follow/${followerId}/status/${followeeId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `/api/follow/${followerId}/status/${followeeId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("팔로우 상태 확인에 실패했습니다.");
