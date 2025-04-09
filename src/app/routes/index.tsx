@@ -6,7 +6,11 @@ import Layout from "@/widgets/layout/ui/Layout.tsx";
 import Main from "@/pages/main/Main.tsx";
 import Login from "@/pages/auth/Login.tsx";
 import Signup from "@/pages/auth/signup/Signup";
-import FindPassword from "@/pages/auth/FindPassword.tsx";
+import FindPassword from "@/pages/auth/find/FindPassword.tsx";
+import FindId from "@/pages/auth/find/FindId.tsx";
+import Find from "@/pages/auth/find/Find";
+import ResetPassword from "@/pages/auth/find/ResetPassword.tsx";
+import ResetPasswordResult from "@/pages/auth/find/ResetPasswordResult.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
@@ -26,6 +30,11 @@ import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/text-based-recommendations/TextBasedRecommendations.tsx";
+import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
+import IdResult from "@/pages/auth/find/IdResult.tsx";
+import FindIdSecurityQuestion from "@/pages/auth/find/FindIdSecurityQuestion";
+import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurityQuestion";
+
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -63,16 +72,29 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="signup/*" element={<Signup />} />
         <Route path="login" element={<Login />} />
-        <Route path="find/password" element={<FindPassword />} />
+        <Route path="signup/*" element={<Signup />} />
+        <Route path="auth/find" element={<Find />} />
+        <Route path="auth/find/id" element={<FindId />} />
+        <Route path="auth/find/id/security-question" element={<FindIdSecurityQuestion />} />
+        <Route path="auth/find/id/result" element={<IdResult />} />
+        <Route path="auth/find/password" element={<FindPassword />} />
+        <Route path="auth/find/password/security-question" element={<FindPasswordSecurityQuestion />} />
+        <Route path="auth/find/reset-password" element={<ResetPassword />} />
+        <Route path="auth/find/reset-password/result" element={<ResetPasswordResult />} />
       </Route>
 
-      {/* 🌐 웹툰 */}
+      {/* 🤖 AI 추천 ====================== */}
+      <Route path="/ai-recommendation" element={<AIRecommendation />} />
+      
+      {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
       <Route path="/search" element={<WebtoonSearchResults />} />
-      <Route path="/text-based-recommendations" element={<TextBasedRecommendations />} />
+      <Route
+        path="/text-based-recommendations"
+        element={<TextBasedRecommendations />}
+      />
 
       {/* 🔐 회원만 접근 가능 ====================== */}
       <Route element={<ProtectedRoute />}>
@@ -102,16 +124,34 @@ const RoutesConfig = () => (
           <Route path="user-stats" element={<UserStats />} />
           <Route path="webtoon" element={<WebtoonManagement />} />
           <Route path="feedback" element={<FeedbackStatus />} />
-          <Route path="algorithm" element={<PlaceholderComponent title="알고리즘 설정" />} />
-          <Route path="accuracy" element={<PlaceholderComponent title="정확도 분석" />} />
+          <Route
+            path="algorithm"
+            element={<PlaceholderComponent title="알고리즘 설정" />}
+          />
+          <Route
+            path="accuracy"
+            element={<PlaceholderComponent title="정확도 분석" />}
+          />
           <Route path="visualization">
             <Route path="users" element={<UserAnalysis />} />
-            <Route path="webtoons" element={<PlaceholderComponent title="웹툰 분석" />} />
-            <Route path="trends" element={<PlaceholderComponent title="트렌드 분석" />} />
+            <Route
+              path="webtoons"
+              element={<PlaceholderComponent title="웹툰 분석" />}
+            />
+            <Route
+              path="trends"
+              element={<PlaceholderComponent title="트렌드 분석" />}
+            />
           </Route>
           <Route path="tags" element={<TagManagement />} />
-          <Route path="notifications" element={<PlaceholderComponent title="알림 관리" />} />
-          <Route path="announcements" element={<PlaceholderComponent title="공지사항 관리" />} />
+          <Route
+            path="notifications"
+            element={<PlaceholderComponent title="알림 관리" />}
+          />
+          <Route
+            path="announcements"
+            element={<PlaceholderComponent title="공지사항 관리" />}
+          />
         </Route>
       </Route>
 
