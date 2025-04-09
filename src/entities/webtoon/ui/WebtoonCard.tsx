@@ -4,7 +4,7 @@ import { Badge } from "@/shared/ui/shadcn/badge.tsx"
 import { Star } from "lucide-react"
 import {mapGenre, WebtoonInfo} from "@/entities/webtoon/ui/types.ts";
 import { cn } from "@/shared/lib/cn";
-import LikeButton from "@/features/like/ui/LikeButton.tsx";
+import WebtoonLikeButton from "@/features/webtoon-like/ui/WebtoonLikeButton.tsx";
 import BookmarkButton from "@/features/bookmark/ui/BookmarkButton.tsx";
 import WatchedButton from "@/features/watched-status/ui/WatchedButton.tsx";
 
@@ -109,7 +109,7 @@ export default function WebtoonCard({
                 {/* 액션 버튼 */}
                 {showActionButtons && (
                     <CardFooter className="p-0 flex justify-end gap-2">
-                        <LikeButton />
+                        <WebtoonLikeButton webtoonId={webtoon.id}/>
                         <BookmarkButton />
                         <WatchedButton />
                     </CardFooter>

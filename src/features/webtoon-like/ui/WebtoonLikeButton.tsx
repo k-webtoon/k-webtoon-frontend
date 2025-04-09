@@ -1,15 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
+import { useWebtoonLikeStore } from "@/entities/webtoon-like/model/store";
+import { WebtoonLikeRequest } from "@/entities/webtoon-like/ui/types.ts";
 
-const LikeButton = () => {
+const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     // 0: 중립 상태, 1: 좋아요, 2: 싫어요
     const [state, setState] = useState(0);
-    // 툴팁 표시 상태
     const [showText, setShowText] = useState(false);
 
-    const handleClick = () => {
-        setState((prevState) => (prevState + 1) % 3);
+    const toggleLike = useWebtoonLikeStore(state => state.toggleLike);
+    const likedWebtoons = useWebtoonLikeStore(state => state.likedWebtoons);
+
+    useEffect(() => {
+        if (webtoonId && likedWebtoons.has(webtoonId)) {
+            const isLiked = likedWebtoons.get(webtoonId);
+            setState(isLiked ? 1 : 2);
+        } else {
+            setState(0); // 좋아요 정보가 없는 경우 중립 상태로 설정
+        }
+    }, [likedWebtoons, webtoonId]);
+
+    const handleClick = async () => {
+        if (webtoonId) {
+            try {
+                // API 호출 - API가 자동으로 좋아요 상태를 토글
+                await toggleLike({ webtoonId });
+                // API 호출 후 상태는 useEffect에 의해 자동으로 업데이트됨
+            } catch (error) {
+                console.error('좋아요 처리 중 오류 발생:', error);
+            }
+        } else {
+            // webtoonId가 없는 경우 로컬 상태만 변경
+            setState((prevState) => {
+                if (prevState === 0) return 1;  // 중립 -> 좋아요
+                if (prevState === 1) return 2;  // 좋아요 -> 싫어요
+                return 1;  // 싫어요 -> 좋아요
+            });
+        }
     };
 
     const getButtonContent = () => {
@@ -63,4 +91,4 @@ const LikeButton = () => {
     );
 };
 
-export default LikeButton;
+export default WebtoonLikeButton;
