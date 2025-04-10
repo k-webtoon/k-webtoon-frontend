@@ -3,11 +3,11 @@ import { Card, CardContent } from "@/shared/ui/shadcn/card";
 
 const FeedbackStatus: FC = () => {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">피드백 현황</h1>
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-bold mb-6">피드백 현황</h2>
       
       {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-medium text-gray-600">전체 피드백</h3>
