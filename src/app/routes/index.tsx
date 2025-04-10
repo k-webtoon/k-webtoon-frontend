@@ -41,7 +41,6 @@ import FindIdSecurityQuestion from "@/pages/auth/find/FindIdSecurityQuestion";
 import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurityQuestion";
 import AdminLayout from "@/pages/admin/common/AdminLayout";
 
-
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
   <div className="bg-white rounded-lg shadow-sm p-6">
@@ -57,16 +56,25 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="login" element={<Login />} />
         <Route path="signup/*" element={<Signup />} />
+        <Route path="login" element={<Login />} />
         <Route path="auth/find" element={<Find />} />
         <Route path="auth/find/id" element={<FindId />} />
-        <Route path="auth/find/id/security-question" element={<FindIdSecurityQuestion />} />
+        <Route
+          path="auth/find/id/security-question"
+          element={<FindIdSecurityQuestion />}
+        />
         <Route path="auth/find/id/result" element={<IdResult />} />
         <Route path="auth/find/password" element={<FindPassword />} />
-        <Route path="auth/find/password/security-question" element={<FindPasswordSecurityQuestion />} />
+        <Route
+          path="auth/find/password/security-question"
+          element={<FindPasswordSecurityQuestion />}
+        />
         <Route path="auth/find/reset-password" element={<ResetPassword />} />
-        <Route path="auth/find/reset-password/result" element={<ResetPasswordResult />} />
+        <Route
+          path="auth/find/reset-password/result"
+          element={<ResetPasswordResult />}
+        />
       </Route>
 
       {/* 🤖 AI 추천 ====================== */}
@@ -87,17 +95,11 @@ const RoutesConfig = () => (
         <Route path="/mypage/profile" element={<MyProfile />} />
         {/* 추가적인 마이페이지 관련 라우트들 */}
         <Route path="/mypage/liked-webtoons" element={<UserLikeWebtoon />} />
-        <Route path="/mypage/comments" element={<UserComments />} />
-        <Route path="/mypage/followers" element={<UserFollowers />} />
-        <Route path="/mypage/followees" element={<UserFollowees />} />
       </Route>
 
       {/* 👤 다른 유저 프로필 */}
       <Route path="/user/:userId">
         <Route path="profile" element={<UserProfile />} />
-        <Route path="comments" element={<UserComments />} />
-        <Route path="followees" element={<UserFollowees />} />
-        <Route path="followers" element={<UserFollowers />} />
         <Route path="liked-webtoons" element={<UserLikeWebtoon />} />
       </Route>
 

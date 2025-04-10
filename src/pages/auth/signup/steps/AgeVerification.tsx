@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { SignupData } from '../Signup';
-import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import type { SignupData } from "@/entities/auth/model/types";
+import { ChevronUpIcon, ChevronDownIcon } from "lucide-react";
 
 interface AgeVerificationProps {
   formData: SignupData;
@@ -15,7 +15,7 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
   nextStep,
 }) => {
   const navigate = useNavigate();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const currentYear = new Date().getFullYear();
   const [isUnderAge, setIsUnderAge] = useState(false);
 
@@ -26,7 +26,7 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
     const age = currentYear - Number(year);
     const isUnder = age < 14;
     setIsUnderAge(isUnder);
-    setError(isUnder ? '만 14세 이상만 가입할 수 있습니다.' : '');
+    setError(isUnder ? "만 14세 이상만 가입할 수 있습니다." : "");
   };
 
   const handleYearChange = (year: string) => {
@@ -44,7 +44,7 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
     e.preventDefault();
     if (isUnderAge) {
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 2000);
       return;
     }
@@ -64,7 +64,10 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="relative">
-          <label htmlFor="birthYear" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="birthYear"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             출생연도
           </label>
           <div className="relative">
@@ -109,12 +112,13 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
             type="submit"
             disabled={!formData.birthYear || isUnderAge}
             className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-              ${!formData.birthYear || isUnderAge
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              ${
+                !formData.birthYear || isUnderAge
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               }`}
           >
-            {isUnderAge ? '가입 불가' : '다음'}
+            {isUnderAge ? "가입 불가" : "다음"}
           </button>
         </div>
       </form>
@@ -122,4 +126,4 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({
   );
 };
 
-export default AgeVerification; 
+export default AgeVerification;

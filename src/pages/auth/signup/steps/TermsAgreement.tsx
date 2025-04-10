@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { Checkbox } from '@/shared/ui/shadcn/checkbox';
-import type { SignupData } from '../Signup';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/shadcn/dialog';
-import { ScrollArea } from '@/shared/ui/shadcn/scroll-area';
+import React, { useState } from "react";
+import { Checkbox } from "@/shared/ui/shadcn/checkbox";
+import type { SignupData } from "@/entities/auth/model/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/shadcn/dialog";
+import { ScrollArea } from "@/shared/ui/shadcn/scroll-area";
+import { termsContentType } from "@/entities/auth/model/types";
 
 interface TermsAgreementProps {
   formData: SignupData;
@@ -12,7 +18,7 @@ interface TermsAgreementProps {
 }
 
 // 약관 내용 (실제로는 API에서 가져오거나 별도 파일로 관리)
-const termsContent = {
+const termsContent: termsContentType = {
   required: `
 제1조 (목적)
 이 약관은 K-Webtoon(이하 "회사")이 제공하는 웹툰 서비스(이하 "서비스")의 이용조건 및 절차, 회사와 회원 간의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.
@@ -64,7 +70,9 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
   nextStep,
   prevStep,
 }) => {
-  const [openTerms, setOpenTerms] = useState<keyof SignupData['terms'] | null>(null);
+  const [openTerms, setOpenTerms] = useState<keyof SignupData["terms"] | null>(
+    null
+  );
   const [hasViewedRequired, setHasViewedRequired] = useState(false);
   const [hasViewedPrivacy, setHasViewedPrivacy] = useState(false);
 
@@ -78,7 +86,10 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
     });
   };
 
-  const handleIndividualAgree = (key: keyof SignupData['terms'], checked: boolean) => {
+  const handleIndividualAgree = (
+    key: keyof SignupData["terms"],
+    checked: boolean
+  ) => {
     updateFormData({
       terms: {
         ...formData.terms,
@@ -87,10 +98,10 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
     });
   };
 
-  const handleOpenTerms = (key: keyof SignupData['terms']) => {
+  const handleOpenTerms = (key: keyof SignupData["terms"]) => {
     setOpenTerms(key);
-    if (key === 'required') setHasViewedRequired(true);
-    if (key === 'privacy') setHasViewedPrivacy(true);
+    if (key === "required") setHasViewedRequired(true);
+    if (key === "privacy") setHasViewedPrivacy(true);
   };
 
   const isAllAgreed = formData.terms.required && formData.terms.privacy;
@@ -129,7 +140,7 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
                 id="required"
                 checked={formData.terms.required}
                 onCheckedChange={(checked) =>
-                  handleIndividualAgree('required', checked as boolean)
+                  handleIndividualAgree("required", checked as boolean)
                 }
               />
               <label
@@ -140,10 +151,10 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
               </label>
             </div>
             <button
-              onClick={() => handleOpenTerms('required')}
+              onClick={() => handleOpenTerms("required")}
               className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500"
             >
-              {hasViewedRequired ? '다시 보기' : '보기 *'}
+              {hasViewedRequired ? "다시 보기" : "보기 *"}
             </button>
           </div>
 
@@ -153,7 +164,7 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
                 id="privacy"
                 checked={formData.terms.privacy}
                 onCheckedChange={(checked) =>
-                  handleIndividualAgree('privacy', checked as boolean)
+                  handleIndividualAgree("privacy", checked as boolean)
                 }
               />
               <label
@@ -164,10 +175,10 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
               </label>
             </div>
             <button
-              onClick={() => handleOpenTerms('privacy')}
+              onClick={() => handleOpenTerms("privacy")}
               className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500"
             >
-              {hasViewedPrivacy ? '다시 보기' : '보기 *'}
+              {hasViewedPrivacy ? "다시 보기" : "보기 *"}
             </button>
           </div>
 
@@ -177,7 +188,7 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
                 id="marketing"
                 checked={formData.terms.marketing}
                 onCheckedChange={(checked) =>
-                  handleIndividualAgree('marketing', checked as boolean)
+                  handleIndividualAgree("marketing", checked as boolean)
                 }
               />
               <label
@@ -188,7 +199,7 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
               </label>
             </div>
             <button
-              onClick={() => handleOpenTerms('marketing')}
+              onClick={() => handleOpenTerms("marketing")}
               className="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-500"
             >
               보기
@@ -207,9 +218,9 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {openTerms === 'required' && '서비스 이용약관'}
-              {openTerms === 'privacy' && '개인정보 수집 및 이용'}
-              {openTerms === 'marketing' && '마케팅 정보 수신'}
+              {openTerms === "required" && "서비스 이용약관"}
+              {openTerms === "privacy" && "개인정보 수집 및 이용"}
+              {openTerms === "marketing" && "마케팅 정보 수신"}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh]">
@@ -231,9 +242,11 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
           onClick={nextStep}
           disabled={!canProceed}
           className={`flex-1 px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-            ${canProceed 
-              ? 'bg-indigo-600 hover:bg-indigo-700' 
-              : 'bg-indigo-300 cursor-not-allowed'}`}
+            ${
+              canProceed
+                ? "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-indigo-300 cursor-not-allowed"
+            }`}
         >
           다음
         </button>
@@ -242,4 +255,4 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({
   );
 };
 
-export default TermsAgreement; 
+export default TermsAgreement;

@@ -38,18 +38,18 @@ interface ValidationState {
   };
 }
 
-const genres = [
-  "액션",
-  "로맨스",
-  "판타지",
-  "스포츠",
-  "일상",
-  "드라마",
-  "코미디",
-  "스릴러",
-  "미스터리",
-  "SF",
-];
+// const genres = [
+//   "액션",
+//   "로맨스",
+//   "판타지",
+//   "스포츠",
+//   "일상",
+//   "드라마",
+//   "코미디",
+//   "스릴러",
+//   "미스터리",
+//   "SF",
+// ];
 
 const UserInfo: React.FC<UserInfoProps> = ({
   formData,
@@ -66,6 +66,8 @@ const UserInfo: React.FC<UserInfoProps> = ({
     phoneNumber: { isValid: false, message: "" },
     gender: { isValid: false, message: "" },
   });
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -169,6 +171,7 @@ const UserInfo: React.FC<UserInfoProps> = ({
       nextStep();
     } catch (error) {
       console.error("회원가입 에러:", error);
+      setErrorMessage("회원가입 중 문제가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -203,6 +206,17 @@ const UserInfo: React.FC<UserInfoProps> = ({
           웹툰 서비스 이용을 위한 기본 정보를 입력해주세요.
         </p>
       </div>
+
+      {/* 에러 메시지 표시 */}
+      {errorMessage && (
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong className="font-bold">오류:</strong>
+          <span className="block sm:inline"> {errorMessage}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -405,17 +419,15 @@ const UserInfo: React.FC<UserInfoProps> = ({
               value={formData.phoneNumber}
               onChange={(e) => updateFormData({ phoneNumber: e.target.value })}
               placeholder="010-1234-5678"
-              pattern="[0]{1}[1]{1}[0]{1}[-]{1}[0]{3,4}[-]{1}[0]{4}"
+              pattern="^01[016789]-\d{3,4}-\d{4}$"
               required
               className={`block w-full px3 py2 border rounded-md shadow-sm 
-                ${
-                  validation.phoneNumber.isValid
-                    ? "border-green-"
-                    : "border-gray-"
-                }`}
+      ${
+        validation.phoneNumber.isValid ? "border-green-500" : "border-gray-300"
+      }`}
             />
             {validation.phoneNumber.message && (
-              <p className="mt1 text-sm text-red600">
+              <p className="mt-1 text-sm text-red-600">
                 {validation.phoneNumber.message}
               </p>
             )}
