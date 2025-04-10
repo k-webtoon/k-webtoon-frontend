@@ -8,10 +8,10 @@ import {
   commentStatusColors,
   commentStatusLabels,
   Comment
-} from '@/entities/admin/model/types';
+} from '@/entities/admin/model/commentStatus';
 
 const CommentManagement: React.FC = () => {
-  const [statusFilter, setStatusFilter] = useState<CommentStatus | ''>('');
+  const [statusFilter, setStatusFilter] = useState<CommentStatus | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -62,7 +62,7 @@ const CommentManagement: React.FC = () => {
       title: '전체 댓글',
       value: stats.total,
       description: '총 댓글 수',
-      onClick: () => setStatusFilter('')
+      onClick: () => setStatusFilter(null)
     },
     {
       title: '신고된 댓글',
@@ -137,11 +137,6 @@ const CommentManagement: React.FC = () => {
     },
   ];
 
-  const statusOptions = Object.values(CommentStatusEnum).map(status => ({
-    value: status,
-    label: commentStatusLabels[status]
-  }));
-
   const paginatedData = filteredComments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -157,7 +152,7 @@ const CommentManagement: React.FC = () => {
         {
           title: "전체 댓글",
           value: stats.total,
-          onClick: () => setStatusFilter('')
+          onClick: () => setStatusFilter(null)
         },
         {
           title: "신고된 댓글",
@@ -176,19 +171,20 @@ const CommentManagement: React.FC = () => {
         }
       ]}
       statusOptions={[
-        { value: 'active', label: '활성' },
-        { value: 'reported', label: '신고됨' },
-        { value: 'hidden', label: '숨김' },
-        { value: 'resolved', label: '해결됨' },
+        { value: 'ALL', label: '전체' },
+        ...Object.values(CommentStatusEnum).map(status => ({
+          value: status,
+          label: commentStatusLabels[status]
+        }))
       ]}
       columns={columns}
       data={paginatedData}
       filter={{
-        status: statusFilter,
+        status: statusFilter || 'ALL',
         search: searchTerm,
       }}
       onFilterChange={(newFilter) => {
-        setStatusFilter(newFilter.status);
+        setStatusFilter(newFilter.status === 'ALL' ? null : newFilter.status as CommentStatus);
         setSearchTerm(newFilter.search);
       }}
       pagination={{
