@@ -4,30 +4,32 @@ import { Link, useParams } from "react-router-dom";
 import { useUserStore } from "@/entities/user/model/userStore";
 import useAuthStore from "@/entities/auth/model/userStore";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
-import { CommentCard } from "@/entities/user/ui/CommentCard";
-import { FollowUserCard } from "@/entities/user/ui/FollowUserCard";
-import FollowButton from "@/components/FollowButton";
 import { clsx } from "clsx";
 import { LikedWebtoon } from "@/entities/user/model/types";
+import UserComments from "./UserComments";
+import ProfileImageDisplay from "./UserProfileImage";
+import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
+import FollowersList from "../mypage/FollowersList";
+import FolloweesList from "../mypage/FolloweesList";
+import UserBioSection from "./UserBioSection";
+import FollowButton from "./FollowButton";
 
 type TabType = "overview" | "followers" | "followees";
 
 // LikedWebtoon을 TopWebtoonInfo로 변환하는 함수
-const convertToTopWebtoonInfo = (likedWebtoon: LikedWebtoon) => {
-  return {
-    id: likedWebtoon.id,
-    titleId: likedWebtoon.id,
-    titleName: likedWebtoon.title,
-    author: "작가명", // API에서 제공하지 않는 경우 기본값
-    adult: false,
-    age: "전체연령가",
-    finish: false,
-    thumbnailUrl: likedWebtoon.thumbnailUrl,
-    synopsis: "",
-    rankGenreTypes: ["DRAMA"],
-    starScore: 0
-  };
-};
+const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): WebtoonInfo => ({
+  id: webtoon.id,
+  titleId: webtoon.id,
+  titleName: webtoon.title,
+  author: "작가명", // API에서 제공하지 않는 경우 기본값
+  adult: false,
+  age: "전체연령가",
+  finish: false,
+  thumbnailUrl: webtoon.thumbnailUrl,
+  synopsis: "",
+  rankGenreTypes: ["DRAMA"],
+  starScore: 0,
+});
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const numericUserId = parseInt(userId || "0", 10);
@@ -51,9 +53,10 @@ const UserProfile = () => {
     fetchFollowees,
     followUserAction,
     unfollowUserAction,
-    checkFollowStatusAction
+    checkFollowStatusAction,
   } = useUserStore();
 
+  // @ts-ignore
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -71,7 +74,10 @@ const UserProfile = () => {
     const checkFollowStatus = async () => {
       if (user && numericUserId) {
         try {
-          const isFollowing = await checkFollowStatusAction(user.indexId, numericUserId);
+          const isFollowing = await checkFollowStatusAction(
+            user.indexId,
+            numericUserId
+          );
           setIsFollowing(isFollowing);
         } catch (error) {
           console.error("팔로우 상태 확인 중 오류 발생:", error);
@@ -108,43 +114,9 @@ const UserProfile = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "followers":
-        return (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-6">팔로워 목록</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {followers?.map((follower) => (
-                <FollowUserCard key={follower.indexId} user={follower} />
-              ))}
-              {(!followers || followers.length === 0) && (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <p className="text-lg font-medium">아직 팔로워가 없습니다</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return <FollowersList followers={followers || []} />;
       case "followees":
-        return (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-6">팔로잉 목록</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {followees?.map((followee) => (
-                <FollowUserCard key={followee.indexId} user={followee} />
-              ))}
-              {(!followees || followees.length === 0) && (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <p className="text-lg font-medium">아직 팔로잉하는 사용자가 없습니다</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return <FolloweesList followees={followees || []} />;
       default:
         return (
           <>
@@ -153,45 +125,56 @@ const UserProfile = () => {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">좋아요한 웹툰</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {likedWebtoons?.slice(0, 6).map((webtoon) => (
-                  <WebtoonCard
-                    key={webtoon.id}
-                    webtoon={convertToTopWebtoonInfo(webtoon)}
-                    size="sm"
-                    showActionButtons={false}
-                  />
-                ))}
-                {(!likedWebtoons || likedWebtoons.length === 0) && (
-                  <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <p className="text-lg font-medium">아직 좋아요한 웹툰이 없습니다</p>
-                  </div>
-                )}
-              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse"
+                    ></div>
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="text-red-500 text-center py-12">
+                  좋아요한 웹툰을 불러오는 중 오류가 발생했습니다.
+                </div>
+              ) : likedWebtoons.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  <p className="text-lg font-medium">
+                    아직 좋아요한 웹툰이 없습니다
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {likedWebtoons.map((webtoon) => (
+                    <WebtoonCard
+                      key={webtoon.id}
+                      webtoon={convertToTopWebtoonInfo(webtoon)}
+                      size="sm"
+                      showActionButtons={false}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 작성한 댓글 섹션 */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">작성한 댓글</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {comments?.slice(0, 6).map((comment) => (
-                  <CommentCard key={comment.id} comment={comment} webtoonId={comment.webtoonId} />
-                ))}
-                {(!comments || comments.length === 0) && (
-                  <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <p className="text-lg font-medium">아직 작성한 댓글이 없습니다</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <UserComments comments={comments} loading={loading} error={error} />
           </>
         );
     }
@@ -233,44 +216,13 @@ const UserProfile = () => {
         {/* 왼쪽 프로필 섹션 */}
         <div className="w-full md:w-1/4">
           <div className="sticky top-24">
-            <div className="mb-4">
-              <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
-                <img
-                  src={userInfo?.profileImage || "/images/profile-placeholder.jpg"}
-                  alt="프로필"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <h1 className="text-2xl font-bold mb-1">{userInfo?.nickname || "사용자"}</h1>
-              <p className="text-gray-600 mb-4">{userInfo?.userEmail}</p>
-              {user && user.indexId !== numericUserId && (
-                <div className="relative">
-                  <button
-                    onClick={toggleFollow}
-                    disabled={followLoading}
-                    className={clsx(
-                      "w-full px-4 py-2 rounded-md transition-colors",
-                      isFollowing
-                        ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        : "bg-blue-500 text-white hover:bg-blue-600",
-                      followLoading && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    {followLoading ? "처리 중..." : isFollowing ? "팔로우 취소" : "팔로우"}
-                  </button>
-                  {followError && (
-                    <p className="mt-2 text-sm text-red-500">{followError}</p>
-                  )}
-                </div>
-              )}
-            </div>
+            <ProfileImageDisplay userId={numericUserId} />
 
             {/* 소개 섹션 */}
-            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">소개</h3>
-              <p className="text-gray-900 whitespace-pre-wrap">
-                {userInfo?.bio || "소개가 없습니다."}
-              </p>
+            <UserBioSection userId={numericUserId} />
+
+            <div className="mb-6">
+              <FollowButton userId={numericUserId} />
             </div>
 
             {/* 팔로우 통계 */}
@@ -279,13 +231,19 @@ const UserProfile = () => {
                 onClick={() => setActiveTab("followers")}
                 className="flex items-center gap-2 hover:text-blue-500 mb-2 w-full text-left"
               >
-                <span className="font-semibold">{userInfo?.followerCount || 0}</span> 팔로워
+                <span className="font-semibold">
+                  {userInfo?.followerCount || 0}
+                </span>{" "}
+                팔로워
               </button>
               <button
                 onClick={() => setActiveTab("followees")}
                 className="flex items-center gap-2 hover:text-blue-500 w-full text-left"
               >
-                <span className="font-semibold">{userInfo?.followeeCount || 0}</span> 팔로잉
+                <span className="font-semibold">
+                  {userInfo?.followeeCount || 0}
+                </span>{" "}
+                팔로잉
               </button>
             </div>
 
@@ -329,9 +287,7 @@ const UserProfile = () => {
         </div>
 
         {/* 오른쪽 콘텐츠 섹션 */}
-        <div className="flex-1">
-          {renderTabContent()}
-        </div>
+        <div className="flex-1">{renderTabContent()}</div>
       </div>
     </div>
   );

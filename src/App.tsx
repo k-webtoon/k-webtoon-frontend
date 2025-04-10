@@ -1,3 +1,8 @@
+import { useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { useAuthStore } from '@/entities/session';
+import RoutesConfig from '@/app/routes';
+
 function App() {
   const { isAuthenticated, user, fetchUserInfo } = useAuthStore();
 

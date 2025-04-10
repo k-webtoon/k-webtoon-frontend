@@ -4,7 +4,7 @@ import { Wand2, Star, Sparkles, Check, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Card } from '@/shared/ui/shadcn/card';
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
-import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
+import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
 
 const genreTagMap = {
   '액션': ['격투기', '무협', '생존', '복수', '도전', '전투', '사이코패스', '폭력성', '히어로', '전쟁', '암살자', '총기'],

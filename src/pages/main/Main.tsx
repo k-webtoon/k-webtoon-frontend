@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
-import WebtoonTextSearchForm from "@/features/text-based-search/ui/WebtoonTextSearchForm.tsx";
-import CharacterChat from "@/features/character-chat/ui/CharacterChat.tsx";
+import WebtoonTextSearchForm from "@/features/webtoon-search-ai/ui/WebtoonTextSearchForm.tsx";
+import CharacterChat from "@/features/webtoon-character-chat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
 import { useUserStore } from '@/entities/auth/model/userStore.ts';
-import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
+import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
 
 const Main: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(useUserStore.getState().isAuthenticated);

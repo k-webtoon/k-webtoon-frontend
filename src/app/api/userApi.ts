@@ -69,7 +69,7 @@ export const getLikedWebtoons = async (
   userId: number
 ): Promise<LikedWebtoon[]> => {
   const response = await apiClient.get(
-    `${USER_BASE_URL}/${userId}/liked-webtoons`
+    `http://localhost:8080/api/webtoons/reviews/${userId}/likes`
   );
   return response.data;
 };

@@ -67,6 +67,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   // 초기 상태 (인증 + 사용자)
   ...initializeAuthState(),
   userInfo: null,
+  isAuthenticated: false,
   comments: [],
   likedWebtoons: [],
   followers: [],
