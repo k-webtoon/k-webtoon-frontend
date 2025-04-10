@@ -3,12 +3,12 @@ import { devtools } from 'zustand/middleware';
 import {
     WebtoonRecommendationItem,
     TextSearchOptions
-} from '@/entities/text-based-search/ui/types.ts';
+} from '@/entities/webtoon-search-ai/model/types.ts';
 import {
     getTextBasedWebtoonRecommendations,
     filterRecommendationsBySimilarity,
     sortRecommendationsBySimilarity
-} from '@/entities/text-based-search/api/api.ts';
+} from '@/entities/webtoon-search-ai/api/api.ts';
 import { getWebtoonById } from '@/entities/webtoon/api/api.ts';
 import { WebtoonInfo } from '@/entities/webtoon/model/types.ts';
 

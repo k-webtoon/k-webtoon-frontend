@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Search, X } from "lucide-react";
-import { useSearchStore } from "@/entities/search/model/store.ts";
+import { useSearchStore } from "@/entities/webtoon-search/api/store.ts";
 import { searchWebtoons } from "@/entities/webtoon/api/api.ts";
 import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts";
 

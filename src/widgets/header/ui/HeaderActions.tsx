@@ -1,13 +1,15 @@
 import {useUserStore} from '@/entities/auth/model/userStore.ts';
 import { Link, useNavigate } from "react-router-dom";
 import CustomDropdown  from "@/shared/ui/custom/CustomDropdown.tsx";
-import {Notification} from "@/entities/notification/model/types.ts";
 import {User} from "@/entities/user/model/types.ts";
-import SearchBar from "@/features/search/ui/SearchBar.tsx";
+import SearchBar from "@/features/webtoon-search/ui/SearchBar.tsx";
 import {Button} from "@/shared/ui/shadcn/button.tsx";
 import {Search} from "lucide-react";
 
-
+interface Notification {
+    id: number
+    label: string
+}
 interface HeaderActionsProps {
     isSearchOpen: boolean;
     setIsSearchOpen: (isOpen: boolean) => void;

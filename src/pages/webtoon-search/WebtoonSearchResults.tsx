@@ -1,5 +1,5 @@
 import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts"
-import { useSearchStore } from "@/entities/search/model/store.ts"
+import { useSearchStore } from "@/entities/webtoon-search/api/store.ts"
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { searchWebtoons } from "@/entities/webtoon/api/api.ts"

@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
-import { useTextBasedRecommendationStore } from "@/entities/text-based-search/model/store.ts";
+import { useTextBasedRecommendationStore } from "@/entities/webtoon-search-ai/api/store.ts";
 
 interface TextSearchSectionProps {
     title?: string;

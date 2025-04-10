@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { SearchState } from "../ui/types.ts";
+import { SearchState } from "../model/types.ts";
 import {WebtoonPaginatedResponse} from "@/entities/webtoon/model/types.ts";
 
 const emptyResults: WebtoonPaginatedResponse = {
