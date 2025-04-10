@@ -35,7 +35,6 @@ import IdResult from "@/pages/auth/find/IdResult.tsx";
 import FindIdSecurityQuestion from "@/pages/auth/find/FindIdSecurityQuestion";
 import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurityQuestion";
 
-
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
   <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
@@ -72,21 +71,30 @@ const RoutesConfig = () => (
 
       {/* 🔓 비회원만 접근 가능 ====================== */}
       <Route element={<UnprotectedRoute />}>
-        <Route path="signup" element={<Signup />} />
+        <Route path="signup/*" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="auth/find" element={<Find />} />
         <Route path="auth/find/id" element={<FindId />} />
-        <Route path="auth/find/id/security-question" element={<FindIdSecurityQuestion />} />
+        <Route
+          path="auth/find/id/security-question"
+          element={<FindIdSecurityQuestion />}
+        />
         <Route path="auth/find/id/result" element={<IdResult />} />
         <Route path="auth/find/password" element={<FindPassword />} />
-        <Route path="auth/find/password/security-question" element={<FindPasswordSecurityQuestion />} />
+        <Route
+          path="auth/find/password/security-question"
+          element={<FindPasswordSecurityQuestion />}
+        />
         <Route path="auth/find/reset-password" element={<ResetPassword />} />
-        <Route path="auth/find/reset-password/result" element={<ResetPasswordResult />} />
+        <Route
+          path="auth/find/reset-password/result"
+          element={<ResetPasswordResult />}
+        />
       </Route>
 
       {/* 🤖 AI 추천 ====================== */}
       <Route path="/ai-recommendation" element={<AIRecommendation />} />
-      
+
       {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
