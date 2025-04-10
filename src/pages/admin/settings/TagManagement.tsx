@@ -11,11 +11,11 @@ const TagManagement: FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">태그 관리</h1>
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-bold mb-6">태그 관리</h2>
       
       {/* 태그 추가 폼 */}
-      <Card>
+      <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="text-lg font-medium mb-4">새 태그 추가</h3>
           <div className="flex gap-4">
@@ -32,7 +32,7 @@ const TagManagement: FC = () => {
       </Card>
 
       {/* 태그 목록 */}
-      <Card>
+      <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="text-lg font-medium mb-4">태그 목록</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
