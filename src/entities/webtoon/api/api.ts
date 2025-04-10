@@ -1,10 +1,10 @@
 import axios from "axios";
-import {WebtoonInfo, WebtoonPaginatedResponse} from "@/entities/webtoon/ui/types.ts";
+import {WebtoonResponse, WebtoonPaginatedResponse} from "@/entities/webtoon/model/types.ts";
 
 const BASE_URL = 'http://localhost:8080/api/webtoons';
 
 // 아이디로 웹툰 검색 API (단일)
-export const getWebtoonById = async (id: number): Promise<WebtoonInfo> => {
+export const getWebtoonById = async (id: number): Promise<WebtoonResponse> => {
   const response = await axios.get(`${BASE_URL}/${id}`);
   return response.data;
 };

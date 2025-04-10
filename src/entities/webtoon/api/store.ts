@@ -1,28 +1,11 @@
 import { create } from 'zustand';
-import {topWebtoons, searchWebtoons, getWebtoonById} from '@/entities/webtoon/api/api.ts';
-import {WebtoonInfo, WebtoonPaginatedResponse} from '@/entities/webtoon/ui/types.ts';
-
-// 상태 인터페이스 정의
-interface WebtoonState {
-    // 상태 데이터
-    currentWebtoon: WebtoonInfo | null;
-    searchResults: WebtoonPaginatedResponse | null;
-    topWebtoonList: WebtoonPaginatedResponse | null;
-    isLoading: boolean;
-    error: string | null;
-
-    // 액션
-    fetchWebtoonById: (id: number) => Promise<void>;  // 단일 웹툰 조회 액션 추가
-    searchWebtoonsByName: (titleName: string) => Promise<void>;
-    fetchTopWebtoons: (page?: number, size?: number) => Promise<void>;
-    resetCurrentWebtoon: () => void;  // 단일 웹툰 초기화 액션 추가
-    resetSearchResults: () => void;
-}
+import { topWebtoons, searchWebtoons, getWebtoonById } from '@/entities/webtoon/api/api';
+import { WebtoonState } from '@/entities/webtoon/model/types';
 
 // Zustand 스토어 생성
 export const useWebtoonStore = create<WebtoonState>((set) => ({
     // 초기 상태
-    currentWebtoon: null,  // 단일 웹툰 초기 상태 추가
+    currentWebtoon: null,
     searchResults: null,
     topWebtoonList: null,
     isLoading: false,
@@ -59,7 +42,6 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     },
 
     // 작가로 웹툰 검색 API (리스트)
-
 
 
     // 조회수 높은 웹툰 조회 (리스트)

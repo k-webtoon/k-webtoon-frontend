@@ -1,27 +1,12 @@
 import { create } from 'zustand';
-import { sendCharacterChat, processCharacterResponse } from '@/entities/webtoon-character-chat/api/api.ts';
+import { sendCharacterChat, processCharacterResponse } from '@/entities/webtoon-character-chat/api/api';
 import {
     CharacterChatRequest,
-    ProcessedCharacterResponse,
     ChatMessage,
-    Character
-} from '@/entities/webtoon-character-chat/ui/types.ts';
+    Character,
+    CharacterChatState
+} from '@/entities/webtoon-character-chat/model/types';
 import { v4 as uuidv4 } from 'uuid';
-
-interface CharacterChatState {
-    // 상태 데이터
-    currentCharacter: Character | null;
-    messages: ChatMessage[];
-    lastResponse: ProcessedCharacterResponse | null;
-    isLoading: boolean;
-    error: string | null;
-
-    // 액션
-    setCurrentCharacter: (character: Character) => void;
-    sendMessage: (message: string) => Promise<void>;
-    clearChat: () => void;
-    resetError: () => void;
-}
 
 export const useCharacterChatStore = create<CharacterChatState>((set, get) => ({
     currentCharacter: null,
@@ -35,7 +20,7 @@ export const useCharacterChatStore = create<CharacterChatState>((set, get) => ({
         set({ currentCharacter: character });
     },
 
-    // 메시지 전송
+    // 메시지 전송 및 응답 처리
     sendMessage: async (message: string) => {
         const { currentCharacter } = get();
 
@@ -44,7 +29,6 @@ export const useCharacterChatStore = create<CharacterChatState>((set, get) => ({
             return;
         }
 
-        // 사용자 메시지 추가
         const userMessage: ChatMessage = {
             id: uuidv4(),
             sender: 'user',
@@ -65,10 +49,8 @@ export const useCharacterChatStore = create<CharacterChatState>((set, get) => ({
 
         try {
             const response = await sendCharacterChat(requestData);
-
             const processedResponse = processCharacterResponse(response);
 
-            // 랜덤하게 메시지 선택
             const randomIndex = Math.floor(Math.random() * processedResponse.messageOptions.length);
             const selectedMessage = processedResponse.messageOptions[randomIndex];
 
@@ -101,10 +83,12 @@ export const useCharacterChatStore = create<CharacterChatState>((set, get) => ({
         }
     },
 
+    // 채팅 기록 초기화
     clearChat: () => {
         set({ messages: [], lastResponse: null });
     },
 
+    // 오류 상태 초기화
     resetError: () => {
         set({ error: null });
     }

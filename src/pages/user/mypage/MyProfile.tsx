@@ -9,7 +9,7 @@ import {
   LikedWebtoon,
   FollowUser,
 } from "@/entities/user/model/types";
-import { WebtoonInfo } from "@/entities/webtoon/ui/types.ts";
+import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";

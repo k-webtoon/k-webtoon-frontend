@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import {WebtoonPaginatedResponse} from '@/entities/webtoon/ui/types.ts';
+import {WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard.tsx";
 import {Button} from "@/shared/ui/shadcn/button.tsx";
 

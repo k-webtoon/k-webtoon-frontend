@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/car
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/shadcn/avatar.tsx";
-import { useCharacterChatStore } from '@/entities/webtoon-character-chat/model/store.ts';
-import {Character, ChatMessage} from '@/entities/webtoon-character-chat/ui/types.ts';
+import { useCharacterChatStore } from '@/entities/webtoon-character-chat/api/store.ts';
+import {Character, ChatMessage} from '@/entities/webtoon-character-chat/model/types.ts';
 import josuck from "@/shared/assets/josuck.png";
 
 const character: Character = {

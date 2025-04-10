@@ -10,7 +10,7 @@ import {
     sortRecommendationsBySimilarity
 } from '@/entities/text-based-search/api/api.ts';
 import { getWebtoonById } from '@/entities/webtoon/api/api.ts';
-import { WebtoonInfo } from '@/entities/webtoon/ui/types.ts';
+import { WebtoonInfo } from '@/entities/webtoon/model/types.ts';
 
 // 텍스트 기반 웹툰 추천 스토어 상태 인터페이스
 interface TextBasedRecommendationState {

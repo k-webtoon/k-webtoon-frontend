@@ -8,7 +8,7 @@ import { clsx } from "clsx";
 import { LikedWebtoon } from "@/entities/user/model/types";
 import UserComments from "./UserComments";
 import ProfileImageDisplay from "./UserProfileImage";
-import { WebtoonInfo } from "@/entities/webtoon/ui/types";
+import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
 import FollowersList from "../mypage/FollowersList";
 import FolloweesList from "../mypage/FolloweesList";
 import UserBioSection from "./UserBioSection";

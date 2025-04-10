@@ -3,7 +3,7 @@ import {
     CharacterChatRequest,
     CharacterChatResponse,
     ProcessedCharacterResponse
-} from "@/entities/webtoon-character-chat/ui/types";
+} from "@/entities/webtoon-character-chat/model/types.ts";
 
 const BASE_URL = 'http://localhost:8080/api';
 
@@ -23,7 +23,7 @@ export const sendCharacterChat = async (
     return response.data;
 };
 
-// 응답 데이터 처리 함수
+// 응답 데이터 처리
 export const processCharacterResponse = (response: CharacterChatResponse): ProcessedCharacterResponse => {
     return {
         emotions: response["feel Top3"],

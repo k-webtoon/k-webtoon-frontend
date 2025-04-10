@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
-import { useWebtoonLikeStore } from "@/entities/webtoon-like/model/store";
-import { WebtoonLikeRequest } from "@/entities/webtoon-like/ui/types.ts";
+import { useWebtoonLikeStore } from "@/entities/webtoon-like/api/store.ts";
+import { WebtoonLikeRequest } from "@/entities/webtoon-like/model/types.ts";
 
 const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     // 0: 중립 상태, 1: 좋아요, 2: 싫어요

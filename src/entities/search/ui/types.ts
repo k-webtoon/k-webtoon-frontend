@@ -1,4 +1,4 @@
-import {WebtoonPaginatedResponse} from "@/entities/webtoon/ui/types.ts";
+import {WebtoonPaginatedResponse} from "@/entities/webtoon/model/types.ts";
 
 export interface SearchState {
     results: WebtoonPaginatedResponse;

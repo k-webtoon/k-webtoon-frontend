@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Search, X } from "lucide-react";
 import { useSearchStore } from "@/entities/search/model/store.ts";
 import { searchWebtoons } from "@/entities/webtoon/api/api.ts";
-import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/ui/types.ts";
+import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts";
 
 interface SearchBarProps {
   isMobile?: boolean;
