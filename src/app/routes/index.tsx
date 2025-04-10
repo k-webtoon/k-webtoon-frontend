@@ -117,7 +117,7 @@ const RoutesConfig = () => (
       </Route>
 
       {/* 👨‍💼 관리자 페이지 ====================== */}
-      <Route element={<AdminProtectedRoute />}>
+
         <Route path="/admin">
           <Route index element={<AdminMain />} />
           <Route path="user" element={<UserManagement />} />
@@ -153,7 +153,6 @@ const RoutesConfig = () => (
             element={<PlaceholderComponent title="공지사항 관리" />}
           />
         </Route>
-      </Route>
 
       {/* 🚫 오류 */}
       <Route path="*" element={<Error />} />
