@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { webtoonLike, fetchUserLikes } from "@/entities/webtoon-like/api/api.ts";
-import { WebtoonLikeRequest, WebtoonLikeState, WebtoonLikeResponse } from "@/entities/webtoon-like/ui/types.ts";
+import { WebtoonLikeRequest, WebtoonLikeState, WebtoonLikeResponse } from "@/entities/webtoon-like/model/types.ts";
 
 export const useWebtoonLikeStore = create<WebtoonLikeState>((set) => ({
     isLoading: false,
