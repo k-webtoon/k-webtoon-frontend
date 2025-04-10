@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useUserActivityStore } from "@/entities/user/model/profileStore";
+import { UserCircle2 } from "lucide-react"; // Lucide 아이콘 추가
 
 interface ProfileImageDisplayProps {
   userId: number;
@@ -10,46 +11,54 @@ const ProfileImageDisplay: React.FC<ProfileImageDisplayProps> = ({
 }) => {
   const { profileData, fetchUserActivity } = useUserActivityStore();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [imageError, setImageError] = React.useState(false);
 
-  // 프로필 데이터 자동 조회
   useEffect(() => {
     const loadData = async () => {
       try {
         await fetchUserActivity(userId);
+        setImageError(false);
       } catch (error) {
         console.error("프로필 조회 오류:", error);
         setErrorMessage("프로필 데이터를 불러오는 중 오류가 발생했습니다.");
+        setImageError(true);
       }
     };
     loadData();
   }, [userId]);
 
-  // 이미지 URL 생성 함수
   const buildImageUrl = () => {
-    if (!profileData?.profileImageUrl) {
-      return "/images/profile-placeholder.jpg";
+    if (imageError || !profileData?.profileImageUrl) {
+      return null;
     }
 
-    const baseUrl = profileData.profileImageUrl.startsWith("http")
-      ? profileData.profileImageUrl
-      : `http://localhost:8080/img/${profileData.profileImageUrl}`;
+    try {
+      const baseUrl = profileData.profileImageUrl.startsWith("http")
+        ? profileData.profileImageUrl
+        : `http://localhost:8080/img/${profileData.profileImageUrl}`;
 
-    return `${baseUrl}?ts=${Date.now()}`; // 캐시 무효화
+      return `${baseUrl}?ts=${Date.now()}`;
+    } catch (error) {
+      console.error("이미지 URL 생성 오류:", error);
+      return null;
+    }
   };
 
   return (
     <div className="mb-4">
-      <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4 relative">
-        {/* 프로필 이미지 */}
-        <img
-          src={buildImageUrl()}
-          alt="프로필"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.src = "/images/profile-placeholder.jpg";
-            e.currentTarget.onerror = null;
-          }}
-        />
+      <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4 relative bg-gray-100">
+        {buildImageUrl() ? (
+          <img
+            src={buildImageUrl() || undefined}
+            alt="프로필"
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <UserCircle2 className="w-3/4 h-3/4 text-gray-400" />
+          </div>
+        )}
       </div>
 
       {errorMessage && (
