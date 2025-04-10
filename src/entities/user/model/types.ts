@@ -8,12 +8,12 @@ export interface UserInfo {
   commentCount: number;
   followerCount: number;
   followeeCount: number;
-  profileImage?: string;
+  profileImageUrl?: string;
   bio?: string;
   followers?: FollowUser[];
   followees?: FollowUser[];
   notificationEnabled?: boolean;
-  userRole: 'USER' | 'ADMIN';
+  userRole: "USER" | "ADMIN";
 }
 
 // 사용자 댓글 인터페이스
