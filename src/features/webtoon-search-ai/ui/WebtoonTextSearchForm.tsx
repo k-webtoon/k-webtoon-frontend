@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
+import { logTyping } from "@/shared/logging/log";
 import { useTextBasedRecommendationStore } from "@/entities/webtoon-search-ai/api/store.ts";
 
 interface TextSearchSectionProps {
     title?: string;
     subtitle?: string;
+    dataSource?: string; // 👈 추가!
 }
+
 
 const WebtoonTextSearchForm: React.FC<TextSearchSectionProps> = ({
                                                                  title = "AI 기반 맞춤 웹툰 추천",
-                                                                 subtitle = "좋아하는 웹툰과 비슷한 작품을 찾고 싶으신가요?"
+                                                                 subtitle = "좋아하는 웹툰과 비슷한 작품을 찾고 싶으신가요?",
+                                                                 dataSource = "ai" // 👈 기본값
                                                              }) => {
     const [query, setQuery] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const { setSearchOptions } = useTextBasedRecommendationStore();
 
@@ -60,11 +65,13 @@ const WebtoonTextSearchForm: React.FC<TextSearchSectionProps> = ({
                 <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
                     <div className="relative flex-grow">
                         <Input
+                            ref={inputRef}
                             type="text"
                             placeholder="키워드, 장면, 대사를 입력하시면 텍스트 기반으로 검색해 드립니다."
                             className="h-12 pl-4 pr-10 rounded-full border-gray-200 w-full"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
+                            data-source={dataSource} // 👈 여기에 사용
                         />
                         <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     </div>
@@ -74,8 +81,14 @@ const WebtoonTextSearchForm: React.FC<TextSearchSectionProps> = ({
                             type="button"
                             variant="outline"
                             className="h-12 px-6 rounded-full border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-50"
-                            onClick={() => console.log("AI 추천 요청")}
-                        >
+                            onClick={(e) => {
+
+                                const keyword = inputRef.current?.value.trim();
+                                const source = inputRef.current?.getAttribute("data-source");
+
+                                if (keyword && source) logTyping(keyword, source);
+                                handleSearch(e);
+                            }} >
                             AI 검색
                         </Button>
                     </div>

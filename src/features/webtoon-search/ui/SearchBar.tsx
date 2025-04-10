@@ -11,12 +11,14 @@ interface SearchBarProps {
   isMobile?: boolean;
   onClose?: () => void;
   className?: string;
+  dataSource?: string; // 👈 새로 추가
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
                                                isMobile = false,
                                                onClose,
                                                className = "",
+                                               dataSource = "header", // ✅ 이거 누락됐을 수도 있음!
                                              }) => {
   const [query, setQuery] = useState("");
   const { results, setResults } = useSearchStore();
@@ -104,6 +106,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
                 placeholder="웹툰 제목 또는 작가를 검색하세요..."
+                data-source={dataSource} // 👈 이게 핵심!
                 className="w-full border-gray-200 focus:border-gray-300 rounded-full pl-10 pr-4 h-10 focus-visible:ring-gray-200"
                 autoFocus={isMobile}
             />
