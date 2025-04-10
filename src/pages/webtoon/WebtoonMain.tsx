@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
-import { useWebtoonStore } from '@/entities/webtoon/model/store.ts';
+import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
 
 function WebtoonMain() {
     const { topWebtoonList, fetchTopWebtoons } = useWebtoonStore();

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardFooter, CardTitle } from "@/shared/ui/shadcn/card.tsx"
 import { Badge } from "@/shared/ui/shadcn/badge.tsx"
 import { Star } from "lucide-react"
-import {mapGenre, WebtoonInfo} from "@/entities/webtoon/ui/types.ts";
+import {mapGenre, WebtoonInfo} from "@/entities/webtoon/model/types.ts";
 import { cn } from "@/shared/lib/cn";
 import WebtoonLikeButton from "@/features/webtoon-like/ui/WebtoonLikeButton.tsx";
 import BookmarkButton from "@/features/bookmark/ui/BookmarkButton.tsx";
