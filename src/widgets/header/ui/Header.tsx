@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs.tsx"
-import { NavItem, SubTabItem } from "@/entities/navigation/model/types"
-import SearchBar from "@/features/search/ui/SearchBar.tsx"
+import SearchBar from "@/features/webtoon-search/ui/SearchBar.tsx"
 import logo from "@/shared/assets/curatoon.png"
 import HeaderActions from "@/widgets/header/ui/HeaderActions.tsx";
+
+interface NavItem {
+    title: string
+    href: string
+    value: string
+}
+
+interface SubTabItem {
+    title: string
+    href: string
+}
 
 const HEADER_HEIGHT = 120; // 헤더와 서브네비게이션 높이
 const OBSERVER_THRESHOLD = 0.5; // 섹션의 50% 이상이 보일 때 활성화

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
-import { useTextBasedRecommendationStore } from '@/entities/text-based-search/model/store.ts';
-import WebtoonTextSearchForm from "@/features/text-based-search/ui/WebtoonTextSearchForm.tsx";
+import { useTextBasedRecommendationStore } from '@/entities/webtoon-search-ai/api/store.ts';
+import WebtoonTextSearchForm from "@/features/webtoon-search-ai/ui/WebtoonTextSearchForm.tsx";
 import { HorizontalWebtoonCard } from "@/entities/webtoon/ui/HorizontalWebtoonCard.tsx";
 
 const TextBasedRecommendations: React.FC = () => {

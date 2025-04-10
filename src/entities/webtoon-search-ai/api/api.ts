@@ -1,5 +1,5 @@
 import axios from "axios";
-import { TextBasedRecommendationResponse } from "@/entities/text-based-search/ui/types.ts";
+import { TextBasedRecommendationResponse } from "@/entities/webtoon-search-ai/model/types.ts";
 
 const BASE_URL = 'http://localhost:8080/api';
 
