@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { FollowUser } from "@/entities/user/model/types";
-import { useProfileImages } from "@/entities/user/model/useProfileImages";
+import { useProfileImages } from "@/entities/user/api/useProfileImages.ts";
 
 interface FolloweesListProps {
   followees: FollowUser[];

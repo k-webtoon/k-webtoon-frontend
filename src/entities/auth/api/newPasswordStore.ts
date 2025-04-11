@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { changePasswordApi } from "../../../app/api/newPasswordApi";
+import { changePasswordApi } from "@/entities/auth/api/newPasswordApi.ts";
 
 interface PasswordState {
   loading: boolean;

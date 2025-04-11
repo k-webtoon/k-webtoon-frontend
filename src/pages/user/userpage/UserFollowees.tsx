@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore";
+import { useUserStore } from "@/entities/user/api/userStore.ts";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 // import {
 //   Avatar,

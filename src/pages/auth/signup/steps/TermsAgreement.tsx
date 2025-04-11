@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Checkbox } from "@/shared/ui/shadcn/checkbox";
-import type { SignupData } from "@/entities/auth/model/types";
+import type { SignupData } from "@/entities/auth/model/types.ts";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/shared/ui/shadcn/dialog";
 import { ScrollArea } from "@/shared/ui/shadcn/scroll-area";
-import { termsContentType } from "@/entities/auth/model/types";
+import { termsContentType } from "@/entities/auth/model/types.ts";
 
 interface TermsAgreementProps {
   formData: SignupData;

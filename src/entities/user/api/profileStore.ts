@@ -1,8 +1,8 @@
 // profileStore.ts
 import { create } from "zustand";
-import { updateProfileImageApi } from "@/app/api/userActivityApi";
-import { getUserActivityInfoApi } from "@/app/api/userActivityApi";
-import { useUserStore } from "./userStore";
+import { updateProfileImageApi } from "@/entities/user/api/userActivityApi.ts";
+import { getUserActivityInfoApi } from "@/entities/user/api/userActivityApi.ts";
+import { useUserStore } from "./userStore.ts";
 
 interface ProfileState {
   loading: boolean;

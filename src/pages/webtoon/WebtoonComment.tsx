@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Comment } from "@/entities/webtoondetail/model/types";
-import { commentApi } from "@/app/api/webtoonDetailApi";
+import { commentApi } from "@/entities/webtoondetail/api/webtoonDetailApi.ts";
 
 interface CommentSectionProps {
   webtoonId: number;

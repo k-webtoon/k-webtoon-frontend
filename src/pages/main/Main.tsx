@@ -1,40 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
 import WebtoonTextSearchForm from "@/features/webtoon-search-ai/ui/WebtoonTextSearchForm.tsx";
 import CharacterChat from "@/features/webtoon-character-chat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
-import { useUserStore } from '@/entities/auth/model/userStore.ts';
 import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
+import {useAuthStore} from "@/entities/auth/api/store.ts";
 
 const Main: React.FC = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(useUserStore.getState().isAuthenticated);
+    const { isAuthenticated, initialize } = useAuthStore();
     const { topWebtoonList, fetchTopWebtoons } = useWebtoonStore();
 
     useEffect(() => {
-        // 초기 상태 설정
-        setIsAuthenticated(useUserStore.getState().isAuthenticated);
-
-        const unsubscribe = useUserStore.subscribe(
-            (state) => {
-                setIsAuthenticated(state.isAuthenticated);
-                console.log('인증 상태 변경됨:', state.isAuthenticated);
-            }
-        );
-
-        return () => unsubscribe();
-    }, []);
+        initialize();
+    }, [initialize]);
 
     useEffect(() => {
         fetchTopWebtoons(0, 10); // 첫 페이지, 10개 항목 로드
     }, [fetchTopWebtoons]);
-
-    useEffect(() => {
-        if (topWebtoonList) {
-            console.log('topWebtoonList 업데이트됨:', topWebtoonList);
-        }
-    }, [topWebtoonList]);
-
 
     const sampleReviews: Review[] = [
         {

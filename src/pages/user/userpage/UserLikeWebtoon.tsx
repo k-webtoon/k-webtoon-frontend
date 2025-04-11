@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore.ts";
+import { useUserStore } from "@/entities/user/api/userStore.ts";
 import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
 // import { Skeleton } from "@/shared/ui/shadcn/skeleton.tsx"; // 아직 구현되지 않음
 

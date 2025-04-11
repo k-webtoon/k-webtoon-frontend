@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getBioApi, updateBioApi } from "@/app/api/userActivityApi";
+import { getBioApi, updateBioApi } from "@/entities/user/api/userActivityApi.ts";
 
 interface BioState {
   bio: string | null;

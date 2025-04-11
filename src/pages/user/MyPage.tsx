@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import useAuthStore from "@/entities/auth/model/userStore";
-import { userApi } from "@/app/api/userApi";
+import { useAuthStore } from "@/entities/auth/api/store.ts";
+import { getCurrentUserInfo } from "@/entities/user/api/userApi.ts";
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const MyPage = () => {
 
       try {
         // 1. 먼저 /me 엔드포인트로 현재 사용자 정보를 가져옴
-        const userInfo = await userApi.getUserInfo();
+        const userInfo = await getCurrentUserInfo();
         console.log("가져온 사용자 정보:", userInfo);
 
         if (!userInfo || !userInfo.indexId) {

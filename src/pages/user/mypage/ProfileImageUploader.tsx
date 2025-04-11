@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import {
   useProfileStore,
   useUserActivityStore,
-} from "@/entities/user/model/profileStore";
+} from "@/entities/user/api/profileStore.ts";
 import { UserCircle2 } from "lucide-react"; // Lucide 아이콘 추가
 
 interface ProfileImageUploaderProps {

@@ -1,8 +1,6 @@
-// src/pages/user/userpage/UserProfile.tsx
-import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore";
-import useAuthStore from "@/entities/auth/model/userStore";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useUserStore } from "@/entities/user/api/userStore.ts";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
 import { clsx } from "clsx";
 import { LikedWebtoon } from "@/entities/user/model/types";
@@ -56,8 +54,8 @@ const UserProfile = () => {
     checkFollowStatusAction,
   } = useUserStore();
 
-  // @ts-ignore
-  const { user } = useAuthStore();
+  // @ts-ignore 여기 부분 로그인한 사용자 아이디 토큰 전달로 바뀜. 리팩토링할 예정
+  // const { user } = useAuthStore();
 
   useEffect(() => {
     if (numericUserId) {
@@ -72,10 +70,11 @@ const UserProfile = () => {
   // 팔로우 상태 확인
   useEffect(() => {
     const checkFollowStatus = async () => {
-      if (user && numericUserId) {
+      // if (user && numericUserId) {
+      if (numericUserId) {
         try {
           const isFollowing = await checkFollowStatusAction(
-            user.indexId,
+            // user.indexId,
             numericUserId
           );
           setIsFollowing(isFollowing);
@@ -86,18 +85,21 @@ const UserProfile = () => {
     };
 
     checkFollowStatus();
-  }, [user, numericUserId, checkFollowStatusAction]);
+  // }, [user, numericUserId, checkFollowStatusAction]);
+  }, [numericUserId, checkFollowStatusAction]);
 
   const toggleFollow = async () => {
-    if (!user) return;
+    // if (!user) return;
     setFollowLoading(true);
     setFollowError(null);
 
     try {
       if (isFollowing) {
-        await unfollowUserAction(user.indexId, numericUserId);
+        // await unfollowUserAction(user.indexId, numericUserId);
+        await unfollowUserAction(numericUserId);
       } else {
-        await followUserAction(user.indexId, numericUserId);
+        // await followUserAction(user.indexId, numericUserId);
+        await followUserAction(numericUserId);
       }
       setIsFollowing(!isFollowing);
 

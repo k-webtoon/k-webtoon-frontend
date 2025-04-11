@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { registerUser } from "@/app/api/signup";
-import { UserRegisterDTO } from "./types";
+import { authApi } from "@/entities/auth/api/api.ts";
+import { UserRegisterDTO } from "../model/types.ts";
 
 interface SignupState {
   loading: boolean;
@@ -15,7 +15,7 @@ export const useSignupStore = create<SignupState>((set) => ({
   register: async (userData) => {
     set({ loading: true, error: null });
     try {
-      await registerUser(userData);
+      await authApi.registerUser(userData);
       set({ loading: false });
     } catch (error: any) {
       set({

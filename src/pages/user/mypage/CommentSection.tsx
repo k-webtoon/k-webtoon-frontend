@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { UserComment } from "@/entities/user/model/types";
-import { commentApi } from "@/app/api/webtoonDetailApi"; // 댓글 API 호출
+import { commentApi } from "@/entities/webtoondetail/api/webtoonDetailApi.ts"; // 댓글 API 호출
 import { useWebtoonDetailStore } from "@/entities/webtoondetail/model/store"; // Zustand 스토어
 import { clsx } from "clsx";
 
