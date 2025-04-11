@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePasswordStore } from "@/entities/auth/model/newPasswordStore";
+import { usePasswordStore } from "@/entities/auth/api/newPasswordStore.ts";
 
 const ChangePassword = () => {
   const { changePassword, loading } = usePasswordStore();

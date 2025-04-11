@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {useUserStore} from "@/entities/auth/model/userStore.ts";
+import {useAuthStore} from "@/entities/auth/api/store.ts";
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Label } from "@/shared/ui/shadcn/label.tsx";
@@ -22,7 +22,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loading, error } = useUserStore();
+  const { login, loading, error } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

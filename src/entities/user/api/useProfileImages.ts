@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getUserProfileImageApi } from "@/app/api/userActivityApi";
+import { getUserProfileImageApi } from "@/entities/user/api/userActivityApi.ts";
 
 const cachedProfileImages: Record<number, string | null> = {}; // 캐시 저장소
 

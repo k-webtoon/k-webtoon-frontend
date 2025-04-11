@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import type { SignupData } from "@/entities/auth/model/types";
+import type { SignupData } from "@/entities/auth/model/types.ts";
 import { Eye, EyeOff } from "lucide-react";
-import { useSignupStore } from "@/entities/auth/model/signupStore";
+import { useSignupStore } from "@/entities/auth/api/signupStore.ts";
 
 interface UserInfoProps {
   formData: SignupData;

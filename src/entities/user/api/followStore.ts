@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { followUserApi, unfollowUserApi } from "@/app/api/followApi";
+import { followUserApi, unfollowUserApi } from "@/entities/user/api/followApi.ts";
 
 interface FollowState {
   isFollowing: boolean;

@@ -1,4 +1,5 @@
-import {useUserStore} from '@/entities/auth/model/userStore.ts';
+import {useAuthStore} from '@/entities/auth/api/store.ts';
+import {useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CustomDropdown  from "@/shared/ui/custom/CustomDropdown.tsx";
 import {User} from "@/entities/user/model/types.ts";
@@ -17,7 +18,11 @@ interface HeaderActionsProps {
 
 const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) => {
     const navigate = useNavigate();
-    const currentState = useUserStore.getState();
+    const { isAuthenticated, initialize, logout } = useAuthStore();
+
+    useEffect(() => {
+        initialize();
+    }, [initialize]);
 
     // 알림 데이터
     const publicNotifications: Notification[] = [
@@ -45,8 +50,7 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
             id: 3,
             label: "로그아웃",
             onClick: () => {
-                localStorage.removeItem('token');
-                useUserStore.setState({ isAuthenticated: false });
+                logout();
                 console.log("로그아웃 처리 완료");
                 navigate('/');
             }
@@ -180,7 +184,7 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
 
     return (
         <>
-            {!currentState.isAuthenticated ? <BeforeLogin /> : <AfterLogin />}
+            {!isAuthenticated ? <BeforeLogin /> : <AfterLogin />}
         </>
     );
 }

@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/shadcn/button';
 import { Label } from '@/shared/ui/shadcn/label';
 import { Alert, AlertDescription } from '@/shared/ui/shadcn/alert';
 import { AlertCircle } from 'lucide-react';
-import { authApi } from '@/entities/auth/api/auth';
+import { authApi } from '@/entities/auth/api/api.ts';
 
 const FindPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
