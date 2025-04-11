@@ -1,7 +1,24 @@
 // ===============
 // 도메인 엔티티 타입
 // ===============
+export interface UserInfo {
+  email: string;
+  role: string;
+  userId: number;
+}
 
+// ===============
+// 상수 및 유틸리티
+// ===============
+
+// JWT 페이로드 타입
+export interface JwtPayload {
+  sub: string;
+  role: string;
+  id: number;
+  iat: number;
+  exp: number;
+}
 
 // ===============
 // API 요청/응답 타입
@@ -77,6 +94,26 @@ export interface AuthResponse {
 }
 
 
+// ===============
+// 상태 관리 타입
+// ===============
+export interface AuthState {
+  token: string | null;
+  userInfo: UserInfo | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+
+  initialize: () => void;
+  login: (userEmail: string, userPassword: string) => Promise<void>;
+  logout: () => void;
+  getUserInfo: () => UserInfo | null;
+}
+
+
+
+
+
 
 
 
@@ -115,21 +152,4 @@ export interface termsContentType {
   privacy: string;
   marketing: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===============
-// 상태 관리 타입
-// ===============
 
