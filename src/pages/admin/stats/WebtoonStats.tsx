@@ -1,6 +1,8 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
+import { statsApi } from '@/entities/admin/api/stats';
+import { WebtoonStatsResponse } from '@/entities/admin/api/stats/types';
 import {
   BarChart,
   Bar,
@@ -18,40 +20,61 @@ import {
 } from 'recharts';
 
 const WebtoonStats: FC = () => {
-  // 더미 데이터 - 웹툰 상태별 수
-  const statusData = [
-    { name: 'ACTIVE', value: 120 },
-    { name: 'INACTIVE', value: 30 },
-    { name: 'DRAFT', value: 15 },
-    { name: 'REPORTED', value: 5 },
-  ];
+  const [webtoonStats, setWebtoonStats] = useState<WebtoonStatsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 더미 데이터 - 별점 평균 상위
-  const ratingData = [
-    { name: '연애혁명', rating: 4.9, episodes: 150 },
-    { name: '화산귀환', rating: 4.8, episodes: 89 },
-    { name: '독립일기', rating: 4.7, episodes: 220 },
-    { name: '여신강림', rating: 4.7, episodes: 190 },
-    { name: '전지적 독자 시점', rating: 4.6, episodes: 102 },
-  ];
+  useEffect(() => {
+    const fetchWebtoonStats = async () => {
+      try {
+        const response = await statsApi.getWebtoonStats({
+          startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString(),
+          endDate: new Date().toISOString(),
+          type: 'webtoons'
+        });
+        setWebtoonStats(response.data);
+      } catch (err) {
+        setError('웹툰 통계를 불러오는데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 더미 데이터 - 최근 등록된 웹툰
-  const recentData = [
-    { name: '신규웹툰1', date: '2024-03-14', genre: '로맨스' },
-    { name: '신규웹툰2', date: '2024-03-13', genre: '액션' },
-    { name: '신규웹툰3', date: '2024-03-12', genre: '판타지' },
-    { name: '신규웹툰4', date: '2024-03-11', genre: '일상' },
-    { name: '신규웹툰5', date: '2024-03-10', genre: '스릴러' },
-  ];
+    fetchWebtoonStats();
+  }, []);
 
-  // 더미 데이터 - 활동량 상위
-  const activityData = [
-    { name: '연애혁명', comments: 1200, likes: 5000, views: 120000 },
-    { name: '화산귀환', comments: 980, likes: 4500, views: 100000 },
-    { name: '독립일기', comments: 850, likes: 4000, views: 95000 },
-    { name: '여신강림', comments: 820, likes: 3800, views: 90000 },
-    { name: '전지적 독자 시점', comments: 780, likes: 3500, views: 85000 },
-  ];
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+  if (!webtoonStats) return <div>데이터가 없습니다.</div>;
+
+  // 웹툰 상태별 분포 데이터 변환
+  const statusData = webtoonStats.statusDistribution.map(item => ({
+    name: item.status,
+    value: item.count
+  }));
+
+  // 상위 평점 웹툰 데이터 변환
+  const topRatedData = webtoonStats.topRatedWebtoons.map(item => ({
+    name: item.name,
+    rating: item.rating,
+    episodes: item.episodes
+  }));
+
+  // 최근 등록 웹툰 데이터 변환
+  const recentData = webtoonStats.recentWebtoons.map(item => ({
+    name: item.name,
+    date: item.date,
+    genre: item.genre
+  }));
+
+  // 활동 통계 데이터 변환
+  const activityData = webtoonStats.activityStats.map(item => ({
+    name: item.name,
+    comments: item.comments,
+    likes: item.likes,
+    views: item.views
+  }));
 
   const COLORS = {
     primary: '#3B82F6',
@@ -191,7 +214,7 @@ const WebtoonStats: FC = () => {
               <TabsContent value="rating" className="mt-4">
                 <div className="h-[350px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ratingData} layout="vertical">
+                    <BarChart data={topRatedData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" domain={[0, 5]} />
                       <YAxis dataKey="name" type="category" width={100} />

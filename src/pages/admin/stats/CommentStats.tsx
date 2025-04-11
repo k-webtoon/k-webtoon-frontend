@@ -1,48 +1,70 @@
-import { FC } from 'react';
-import { Card, CardContent } from "@/shared/ui/shadcn/card";
+import { FC, useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
+import { statsApi } from '@/entities/admin/api/stats';
+import { CommentStatsResponse } from '@/entities/admin/api/stats/types';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  BarChart,
-  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
 } from 'recharts';
 
 const CommentStats: FC = () => {
-  // 더미 데이터 - 일별 댓글 수
-  const dailyData = [
-    { date: '03/15', comments: 120 },
-    { date: '03/16', comments: 150 },
-    { date: '03/17', comments: 180 },
-    { date: '03/18', comments: 140 },
-    { date: '03/19', comments: 160 },
-    { date: '03/20', comments: 200 },
-    { date: '03/21', comments: 190 },
-  ];
+  const [commentStats, setCommentStats] = useState<CommentStatsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 더미 데이터 - 시간대별 댓글 분포
-  const hourlyData = [
-    { hour: '00-04', count: 50 },
-    { hour: '04-08', count: 30 },
-    { hour: '08-12', count: 120 },
-    { hour: '12-16', count: 180 },
-    { hour: '16-20', count: 220 },
-    { hour: '20-24', count: 150 },
-  ];
+  useEffect(() => {
+    const fetchCommentStats = async () => {
+      try {
+        const response = await statsApi.getCommentStats({
+          startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString(),
+          endDate: new Date().toISOString(),
+          type: 'comments'
+        });
+        setCommentStats(response.data);
+      } catch (err) {
+        setError('댓글 통계를 불러오는데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 더미 데이터 - 댓글이 많은 웹툰 TOP 5
-  const topWebtoons = [
-    { name: '연애혁명', comments: 1200, avgLength: 25 },
-    { name: '화산귀환', comments: 980, avgLength: 22 },
-    { name: '독립일기', comments: 850, avgLength: 18 },
-    { name: '여신강림', comments: 820, avgLength: 20 },
-    { name: '전지적 독자 시점', comments: 780, avgLength: 24 },
-  ];
+    fetchCommentStats();
+  }, []);
+
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+  if (!commentStats) return <div>데이터가 없습니다.</div>;
+
+  // 일별 댓글 수 데이터 변환
+  const dailyData = commentStats.dailyComments.map(item => ({
+    name: item.date,
+    comments: item.comments
+  }));
+
+  // 시간대별 댓글 분포 데이터 변환
+  const hourlyData = commentStats.hourlyDistribution.map(item => ({
+    name: `${item.hour}시`,
+    count: item.count
+  }));
+
+  // 댓글 많은 웹툰 TOP 5 데이터 변환
+  const topWebtoonsData = commentStats.topWebtoonsByComments.map(item => ({
+    name: item.name,
+    comments: item.comments,
+    avgLength: item.avgLength
+  }));
 
   return (
     <div className="space-y-8">
@@ -53,7 +75,7 @@ const CommentStats: FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
@@ -72,7 +94,7 @@ const CommentStats: FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={hourlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
+                  <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
@@ -87,7 +109,7 @@ const CommentStats: FC = () => {
           <CardContent className="p-6">
             <h2 className="text-xl font-bold mb-6">댓글이 많은 웹툰 TOP 5</h2>
             <div className="space-y-4">
-              {topWebtoons.map((webtoon, index) => (
+              {topWebtoonsData.map((webtoon, index) => (
                 <div key={webtoon.name} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center">

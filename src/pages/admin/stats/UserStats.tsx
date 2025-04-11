@@ -1,6 +1,8 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
+import { statsApi } from '@/entities/admin/api/stats';
+import { UserStatsResponse } from '@/entities/admin/api/stats/types';
 import {
   LineChart,
   Line,
@@ -20,63 +22,57 @@ import {
 } from 'recharts';
 
 const UserStats: FC = () => {
-  // 더미 데이터 - 월별 사용자 증가
-  const monthlyData = [
-    { name: '1월', users: 400 },
-    { name: '2월', users: 600 },
-    { name: '3월', users: 800 },
-    { name: '4월', users: 1000 },
-    { name: '5월', users: 1200 },
-    { name: '6월', users: 1234 },
-  ];
+  const [userStats, setUserStats] = useState<UserStatsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 더미 데이터 - 사용자 연령대 분포
-  const ageData = [
-    { name: '10대', value: 200 },
-    { name: '20대', value: 500 },
-    { name: '30대', value: 300 },
-    { name: '40대', value: 150 },
-    { name: '50대 이상', value: 84 },
-  ];
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const response = await statsApi.getUserStats({
+          startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString(),
+          endDate: new Date().toISOString(),
+          type: 'users'
+        });
+        setUserStats(response.data);
+      } catch (err) {
+        setError('사용자 통계를 불러오는데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 더미 데이터 - 일별 신규 가입자 수
-  const dailyNewUsersData = [
-    { date: '2023-06-01', newUsers: 12 },
-    { date: '2023-06-02', newUsers: 19 },
-    { date: '2023-06-03', newUsers: 15 },
-    { date: '2023-06-04', newUsers: 22 },
-    { date: '2023-06-05', newUsers: 18 },
-    { date: '2023-06-06', newUsers: 25 },
-    { date: '2023-06-07', newUsers: 30 },
-  ];
+    fetchUserStats();
+  }, []);
 
-  // 더미 데이터 - 유입 많은 시간대
-  const hourlyTrafficData = [
-    { hour: '00시', users: 50 },
-    { hour: '01시', users: 30 },
-    { hour: '02시', users: 20 },
-    { hour: '03시', users: 10 },
-    { hour: '04시', users: 5 },
-    { hour: '05시', users: 8 },
-    { hour: '06시', users: 15 },
-    { hour: '07시', users: 40 },
-    { hour: '08시', users: 80 },
-    { hour: '09시', users: 120 },
-    { hour: '10시', users: 150 },
-    { hour: '11시', users: 180 },
-    { hour: '12시', users: 200 },
-    { hour: '13시', users: 190 },
-    { hour: '14시', users: 210 },
-    { hour: '15시', users: 230 },
-    { hour: '16시', users: 250 },
-    { hour: '17시', users: 270 },
-    { hour: '18시', users: 290 },
-    { hour: '19시', users: 310 },
-    { hour: '20시', users: 330 },
-    { hour: '21시', users: 280 },
-    { hour: '22시', users: 200 },
-    { hour: '23시', users: 100 },
-  ];
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+  if (!userStats) return <div>데이터가 없습니다.</div>;
+
+  // 월별 사용자 증가 데이터 변환
+  const monthlyData = userStats.monthlyGrowth.map(item => ({
+    name: `${item.month}월`,
+    users: item.users
+  }));
+
+  // 사용자 연령대 분포 데이터 변환
+  const ageData = userStats.ageDistribution.map(item => ({
+    name: item.ageGroup,
+    value: item.count
+  }));
+
+  // 일별 신규 가입자 수 데이터 변환
+  const dailyData = userStats.dailyNewUsers.map(item => ({
+    name: item.date,
+    users: item.newUsers
+  }));
+
+  // 시간대별 트래픽 데이터 변환
+  const hourlyData = userStats.hourlyTraffic.map(item => ({
+    name: `${item.hour}시`,
+    users: item.users
+  }));
 
   // 더미 데이터 - 활동 많은 유저 TOP 5
   const activeUsersData = [
@@ -207,7 +203,7 @@ const UserStats: FC = () => {
           <CardContent className="p-4">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={dailyNewUsersData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart data={dailyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorNewUsers" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={GRADIENT_COLORS.success[0]} stopOpacity={0.8}/>
@@ -215,12 +211,12 @@ const UserStats: FC = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" stroke="#6B7280" />
+                  <XAxis dataKey="name" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
                   <Tooltip {...tooltipStyle} />
                   <Area 
                     type="monotone" 
-                    dataKey="newUsers" 
+                    dataKey="users" 
                     stroke={GRADIENT_COLORS.success[0]} 
                     fillOpacity={1} 
                     fill="url(#colorNewUsers)" 
