@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useFollowStore } from "@/entities/user/model/followStore";
+import { useFollowStore } from "@/entities/user/api/followStore.ts";
 
 interface FollowButtonProps {
   userId: number;

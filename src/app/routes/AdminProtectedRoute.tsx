@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useUserStore } from '@/entities/auth/model/userStore';
+import { useAuthStore } from '@/entities/auth/api/store.ts';
+import { useUserStore } from '@/entities/user/api/userStore.ts';
 
 /**
  * 관리자 페이지를 보호하는 컴포넌트입니다.
@@ -8,22 +9,24 @@ import { useUserStore } from '@/entities/auth/model/userStore';
  */
 const AdminProtectedRoute: FC = () => {
   const location = useLocation();
-  const { isAuthenticated, userInfo, checkAuth } = useUserStore();
+  const { isAuthenticated } = useAuthStore();
+  const { userInfo, fetchCurrentUserInfo } = useUserStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        await checkAuth();
+        if (!userInfo) {
+          await fetchCurrentUserInfo();
+        }
       } catch (error) {
         console.error('인증 확인 중 오류 발생:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     verifyAuth();
-  }, [checkAuth]);
+  }, [userInfo, fetchCurrentUserInfo]);
 
   if (isLoading) {
     return (

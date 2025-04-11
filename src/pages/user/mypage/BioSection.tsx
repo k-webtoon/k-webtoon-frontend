@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { clsx } from "clsx";
-import { getBioApi, updateBioApi } from "@/app/api/userActivityApi";
+import { getBioApi, updateBioApi } from "@/entities/user/api/userActivityApi.ts";
 
 interface BioSectionProps {
   userId: number;

@@ -1,27 +1,21 @@
-// src/pages/user/mypage/MyProfile.tsx
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useUserStore } from "@/entities/user/model/userStore";
-import useAuthStore from "@/entities/auth/model/userStore";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useUserStore } from "@/entities/user/api/userStore.ts";
 import {
   UserInfo,
-  UserComment,
   LikedWebtoon,
-  FollowUser,
 } from "@/entities/user/model/types";
 import { WebtoonInfo } from "@/entities/webtoon/model/types.ts";
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard";
-import { CommentCard } from "@/entities/user/ui/CommentCard";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { clsx } from "clsx";
-import { useUserActivityStore } from "@/entities/user/model/profileStore";
+import { useUserActivityStore } from "@/entities/user/api/profileStore.ts";
 import ChangePassword from "./ChangePassword";
 import ProfileImageUploader from "./ProfileImageUploader";
 import FollowersList from "./FollowersList";
 import FolloweesList from "./FolloweesList";
 import { BioSection } from "./BioSection";
 import { CommentSection } from "./CommentSection";
-import { commentApi } from "@/app/api/webtoonDetailApi";
 
 // 탭 타입 정의
 type TabType =
@@ -54,7 +48,6 @@ export const MyProfile = () => {
   const locationUserInfo = location.state?.userInfo;
 
   // @ts-ignore
-  const { user } = useAuthStore();
   const {
     userInfo,
     comments,
@@ -62,6 +55,7 @@ export const MyProfile = () => {
     followers,
     followees,
     error,
+    fetchCurrentUserInfo,
     fetchMyInfo,
     fetchMyLikedWebtoons,
     fetchMyComments,
@@ -86,7 +80,7 @@ export const MyProfile = () => {
   // 컴포넌트 마운트 시 사용자 정보 로드
   useEffect(() => {
     // location.state에서 사용자 정보가 넘어왔는지 확인
-    const userId = locationUserInfo?.indexId || user?.indexId;
+    const userId = locationUserInfo?.indexId;
 
     if (userId) {
       console.log("프로필 페이지에서 사용할 사용자 ID:", userId);
@@ -97,13 +91,11 @@ export const MyProfile = () => {
       fetchFollowees(userId);
     } else {
       console.error("사용자 ID를 찾을 수 없습니다:", {
-        locationUserInfo,
-        user,
+        locationUserInfo
       });
     }
   }, [
     locationUserInfo,
-    user,
     fetchMyInfo,
     fetchMyLikedWebtoons,
     fetchMyComments,
@@ -115,12 +107,12 @@ export const MyProfile = () => {
     useUserActivityStore();
 
   useEffect(() => {
-    const userId = locationUserInfo?.indexId || user?.indexId;
+    const userId = locationUserInfo?.indexId;
 
     if (userId) {
       fetchUserActivity(userId);
     }
-  }, [locationUserInfo, user, fetchUserActivity]);
+  }, [locationUserInfo, fetchUserActivity]);
 
   // 공개 범위 설정 핸들러
   const handlePrivacyChange = async (setting: string, value: string) => {

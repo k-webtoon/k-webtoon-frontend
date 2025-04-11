@@ -7,7 +7,8 @@ import {
   getFollowers,
   followUser,
   unfollowUser,
-} from "@/app/api/userApi.ts";
+  getCurrentUserInfo,
+} from "@/entities/user/api/userApi.ts";
 import {
   UserInfo,
   UserComment,
@@ -26,6 +27,7 @@ interface UserState {
   error: string | null;
 
   // 액션
+  fetchCurrentUserInfo: () => Promise<void>;
   fetchUserInfo: (userId: number) => Promise<void>;
   fetchUserComments: (userId: number) => Promise<void>;
   fetchLikedWebtoons: (userId: number) => Promise<void>;
@@ -61,6 +63,21 @@ export const useUserStore = create<UserState>((set) => ({
   followees: [],
   loading: false,
   error: null,
+
+  // 현재 로그인한 사용자 정보 조회
+  fetchCurrentUserInfo: async () => {
+    set({ loading: true, error: null });
+    try {
+      const info = await getCurrentUserInfo();
+      set({userInfo: info, loading: false})
+    } catch (error) {
+      console.error('현재 사용자 정보 가져오기 실패:', error);
+      set({
+        error: "현재 사용자 정보를 불러오는 중 오류가 발생했습니다.",
+        loading: false,
+      });
+    }
+  },
 
   // 사용자 정보 가져오기
   fetchUserInfo: async (userId: number) => {

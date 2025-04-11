@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { SignupData } from "@/entities/auth/model/types";
+import type { SignupData } from "@/entities/auth/model/types.ts";
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react";
 
 interface AgeVerificationProps {

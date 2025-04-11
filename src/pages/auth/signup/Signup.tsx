@@ -11,7 +11,7 @@ import TermsAgreement from "./steps/TermsAgreement";
 import UserInfo from "./steps/UserInfo";
 import Complete from "./steps/Complete";
 import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
-import { SignupData } from "@/entities/auth/model/types";
+import { SignupData } from "@/entities/auth/model/types.ts";
 
 const steps = [
   { path: "", name: "연령 확인" },

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useWebtoonDetailStore } from "@/entities/webtoondetail/model/store";
-import { getWebtoonDetail, commentApi } from "@/app/api/webtoonDetailApi";
+import { getWebtoonDetail, commentApi } from "@/entities/webtoondetail/api/webtoonDetailApi.ts";
 import { CommentRequest } from "@/entities/webtoondetail/model/types";
-import useAuthStore from "@/entities/auth/model/userStore.ts";
+import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { CommentSection } from "@/pages/webtoon/WebtoonComment.tsx";
 
 function WebtoonDetail() {
@@ -26,8 +26,7 @@ function WebtoonDetail() {
     updateCommentLike,
   } = useWebtoonDetailStore();
 
-  // @ts-ignore
-  const { user, isAuthenticated } = useAuthStore(); // 로그인 사용자 정보와 인증 상태
+  const { isAuthenticated } = useAuthStore(); // 로그인 사용자 정보와 인증 상태
 
   // 웹툰 상세 정보 조회
   useEffect(() => {
