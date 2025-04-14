@@ -75,9 +75,6 @@ const RoutesConfig = () => (
         />
       </Route>
 
-      {/* 🤖 AI 추천 ====================== */}
-      <Route path="/ai-recommendation" element={<AIRecommendation />} />
-
       {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
@@ -93,6 +90,8 @@ const RoutesConfig = () => (
         <Route path="/mypage/profile" element={<MyProfile />} />
         {/* 추가적인 마이페이지 관련 라우트들 */}
         <Route path="/mypage/liked-webtoons" element={<UserLikeWebtoon />} />
+        {/* 🤖 AI 추천 ====================== */}
+        <Route path="/ai-recommendation" element={<AIRecommendation />} />
       </Route>
 
       {/* 👤 다른 유저 프로필 */}

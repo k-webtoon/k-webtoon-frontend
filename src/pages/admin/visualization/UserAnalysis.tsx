@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
 import { Scatter } from 'react-chartjs-2';
 import { Chart as ChartJS, ScatterController, LinearScale, PointElement, Tooltip, Legend, Title, ChartOptions } from 'chart.js';
-import { fetchPcaData, fetchAvgScatterData } from '@/pages/admin/api';
+import { fetchPcaData, fetchAvgScatterData } from '@/entities/admin-visualization/api/api';
 
 ChartJS.register(PointElement, LinearScale, Tooltip, Legend, Title);
 
