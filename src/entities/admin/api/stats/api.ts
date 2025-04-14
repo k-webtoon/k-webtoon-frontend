@@ -2,7 +2,6 @@ import axios from 'axios';
 import { 
   UserStatsResponse, 
   WebtoonStatsResponse, 
-  AuthorStatsResponse, 
   CommentStatsResponse,
   StatsParams   
 } from './types';
@@ -37,13 +36,6 @@ export const statsApi = {
     const response = await api.get('/api/admin/stats/webtoons', { params });
     console.log('웹툰 통계 응답:', response.data);
     return { ...response, data: statsMapper.toWebtoonStats(response.data) };
-  },
-
-  // 작가 통계 조회
-  getAuthorStats: async (params: StatsParams) => {
-    const response = await api.get('/api/admin/stats/authors', { params });
-    console.log('작가 통계 응답:', response.data);
-    return { ...response, data: statsMapper.toAuthorStats(response.data) };
   },
 
   // 댓글 통계 조회

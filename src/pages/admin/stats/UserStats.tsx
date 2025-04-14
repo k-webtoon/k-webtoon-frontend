@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
 import { statsApi } from '@/entities/admin/api/stats';
-import { UserStatsResponse } from '@/entities/admin/api/stats/types';
+import { UserStatsResponse, DateRange } from '@/entities/admin/api/stats/types';
 import {
   LineChart,
   Line,
@@ -21,7 +21,11 @@ import {
   Area,
 } from 'recharts';
 
-const UserStats: FC = () => {
+interface UserStatsProps {
+  dateRange: DateRange;
+}
+
+const UserStats: FC<UserStatsProps> = ({ dateRange }) => {
   const [userStats, setUserStats] = useState<UserStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +34,12 @@ const UserStats: FC = () => {
     const fetchUserStats = async () => {
       try {
         const response = await statsApi.getUserStats({
-          startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString(),
-          endDate: new Date().toISOString(),
+          ...dateRange,
           type: 'users'
         });
         setUserStats(response.data);
-      } catch (err) {
-        setError('사용자 통계를 불러오는데 실패했습니다.');
+      } catch (err: any) {
+        setError(err.response?.data?.message || '사용자 통계를 불러오는데 실패했습니다.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -44,11 +47,25 @@ const UserStats: FC = () => {
     };
 
     fetchUserStats();
-  }, []);
+  }, [dateRange]);
 
-  if (loading) return <div>로딩 중...</div>;
-  if (error) return <div>{error}</div>;
-  if (!userStats) return <div>데이터가 없습니다.</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">로딩 중...</div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg text-red-500">{error}</div>
+    </div>
+  );
+  
+  if (!userStats) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">데이터가 없습니다.</div>
+    </div>
+  );
 
   // 월별 사용자 증가 데이터 변환
   const monthlyData = userStats.monthlyGrowth.map(item => ({
@@ -126,23 +143,20 @@ const UserStats: FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">일일 활성 사용자</p>
-                <p className="text-2xl font-bold text-gray-800">856</p>
-                <p className="text-sm text-green-600">+5.3% 증가</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.dailyActiveUsers}</p>
+                <p className="text-sm text-green-600">평균 {userStats.summary.averageSessionDuration}분</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">월간 활성 사용자</p>
-                <p className="text-2xl font-bold text-gray-800">1,234</p>
-                <p className="text-sm text-green-600">+12.8% 증가</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.monthlyActiveUsers}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">평균 체류 시간</p>
-                <p className="text-2xl font-bold text-gray-800">25분</p>
-                <p className="text-sm text-gray-500">전월 대비 동일</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.averageSessionDuration}분</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">신규 가입률</p>
-                <p className="text-2xl font-bold text-gray-800">+12.5%</p>
-                <p className="text-sm text-green-600">목표 달성률 95%</p>
+                <p className="text-2xl font-bold text-gray-800">▲ {userStats.summary.newUserRate}%</p>
               </div>
             </div>
           </CardContent>
@@ -158,7 +172,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">전체 사용자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">5,678</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.totalUsers}</p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +183,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">최근 7일 접속자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">1,234</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.recent7DaysUsers}</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +194,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">최근 30일 접속자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">4,567</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.recent30DaysUsers}</p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

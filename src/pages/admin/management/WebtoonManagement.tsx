@@ -58,14 +58,6 @@ const WebtoonManagement: FC<ManagementPageProps> = ({ title = '웹툰 관리', d
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [webtoonStats, setWebtoonStats] = useState({
-    total: 0,
-    active: 0,
-    inactive: 0,
-    deleted: 0,
-    pending: 0,
-    blocked: 0
-  });
 
   const loadWebtoons = async () => {
     try {
@@ -80,14 +72,6 @@ const WebtoonManagement: FC<ManagementPageProps> = ({ title = '웹툰 관리', d
 
       setWebtoons(response.data);
       setTotalPages(response.totalPages);
-      setWebtoonStats({
-        total: response.total,
-        active: response.stats.active || 0,
-        inactive: response.stats.inactive || 0,
-        deleted: response.stats.deleted || 0,
-        pending: response.stats.pending || 0,
-        blocked: response.stats.blocked || 0
-      });
     } catch (error) {
       console.error('웹툰 목록을 불러오는데 실패했습니다:', error);
     } finally {
@@ -142,46 +126,6 @@ const WebtoonManagement: FC<ManagementPageProps> = ({ title = '웹툰 관리', d
 
   return (
     <div className="space-y-6">
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(null)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">전체</h3>
-            <p className="text-2xl font-bold mt-1">{webtoonStats.total}</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(WebtoonStatus.ACTIVE)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">연재중</h3>
-            <p className="text-2xl font-bold mt-1 text-blue-600">{webtoonStats.active}</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(WebtoonStatus.INACTIVE)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">완결/휴재</h3>
-            <p className="text-2xl font-bold mt-1 text-gray-600">{webtoonStats.inactive}</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(WebtoonStatus.DELETED)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">삭제됨</h3>
-            <p className="text-2xl font-bold mt-1 text-red-600">{webtoonStats.deleted}</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(WebtoonStatus.PENDING)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">승인대기</h3>
-            <p className="text-2xl font-bold mt-1 text-yellow-600">{webtoonStats.pending}</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setStatusFilter(WebtoonStatus.BLOCKED)}>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-600">블라인드</h3>
-            <p className="text-2xl font-bold mt-1 text-purple-600">{webtoonStats.blocked}</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* 메인 컨텐츠 */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-6">

@@ -8,10 +8,13 @@ export interface DateRange {
 export interface UserStatsResponse {
   summary: {
     totalUsers: number;
+    totalViews: number;
     dailyActiveUsers: number;
     monthlyActiveUsers: number;
     averageSessionDuration: number;
     newUserRate: number;
+    recent7DaysUsers: number;
+    recent30DaysUsers: number;
   };
   monthlyGrowth: Array<{
     month: string;
@@ -45,7 +48,7 @@ export interface WebtoonStatsResponse {
     totalWebtoons: number;
     reportedWebtoons: number;
     osmConversions: number;
-    averageRating: number;
+    totalViews: number;
   };
   statusDistribution: Array<{
     status: string;
@@ -73,28 +76,6 @@ export interface WebtoonStatsResponse {
   };
 }
 
-// 작가 통계
-export interface AuthorStatsResponse {
-  summary: {
-    totalAuthors: number;
-    averageWorksPerAuthor: number;
-    averageRating: number;
-  };
-  monthlyNewAuthors: Array<{
-    month: string;
-    authors: number;
-  }>;
-  worksDistribution: Array<{
-    works: string;
-    count: number;
-  }>;
-  topAuthors: Array<{
-    name: string;
-    totalViews: number;
-    avgRating: number;
-  }>;
-}
-
 // 댓글 통계
 export interface CommentStatsResponse {
   summary: {
@@ -119,5 +100,5 @@ export interface CommentStatsResponse {
 
 // API 요청 파라미터
 export interface StatsParams extends DateRange {
-  type: 'users' | 'webtoons' | 'authors' | 'comments';
+  type: 'users' | 'webtoons' | 'comments';
 } 

@@ -15,7 +15,6 @@ const pageTitles: Record<string, string> = {
   '/admin/management/comments': '댓글 관리',
   '/admin/stats/users': '사용자 통계',
   '/admin/stats/webtoons': '웹툰 통계',
-  '/admin/stats/authors': '작가 통계',
   '/admin/stats/comments': '댓글 통계',
   '/admin/visualization/users': '사용자 분석',
   '/admin/settings/tags': '태그 관리',
@@ -42,7 +41,7 @@ export const AdminLayout: FC<AdminLayoutProps> = memo(({
     <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
       <div className="flex flex-col md:flex-row gap-8">
         <AdminSidebar onPageChange={handlePageChange} activePage={location.pathname} />
-        
+
         {/* 오른쪽 콘텐츠 섹션 */}
         <div className="flex-1">
           {/* 헤더 */}

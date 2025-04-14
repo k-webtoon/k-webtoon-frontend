@@ -1,8 +1,7 @@
-import { 
-  UserStatsResponse, 
-  WebtoonStatsResponse, 
-  AuthorStatsResponse, 
-  CommentStatsResponse 
+import {
+  UserStatsResponse,
+  WebtoonStatsResponse,
+  CommentStatsResponse
 } from './types';
 
 // 백엔드 응답을 프론트엔드 타입으로 변환하는 맵퍼
@@ -12,10 +11,13 @@ export const statsMapper = {
     return {
       summary: {
         totalUsers: backendResponse.totalUserCount || 0,
+        totalViews: backendResponse.totalViews || 0,
         dailyActiveUsers: backendResponse.dailyActiveCount || 0,
         monthlyActiveUsers: backendResponse.monthlyActiveCount || 0,
         averageSessionDuration: backendResponse.avgSessionTime || 0,
-        newUserRate: backendResponse.newUserGrowthRate || 0
+        newUserRate: backendResponse.newUserGrowthRate || 0,
+        recent7DaysUsers: backendResponse.recent7DaysUsers || 0,
+        recent30DaysUsers: backendResponse.recent30DaysUsers || 0
       },
       monthlyGrowth: (backendResponse.monthlyUserGrowth || []).map((item: any) => ({
         month: item.yearMonth,
@@ -51,7 +53,7 @@ export const statsMapper = {
         totalWebtoons: backendResponse.totalWebtoonCount || 0,
         reportedWebtoons: backendResponse.reportedCount || 0,
         osmConversions: backendResponse.osmConversionCount || 0,
-        averageRating: backendResponse.avgRating || 0
+        totalViews: backendResponse.totalViews || 0
       },
       statusDistribution: (backendResponse.statusStats || []).map((item: any) => ({
         status: item.status,
@@ -77,30 +79,6 @@ export const statsMapper = {
         totalViews: backendResponse.monthlyViewCount || 0,
         totalActivity: backendResponse.monthlyActivityCount || 0
       }
-    };
-  },
-
-  // 작가 통계 맵퍼
-  toAuthorStats(backendResponse: any): AuthorStatsResponse {
-    return {
-      summary: {
-        totalAuthors: backendResponse.totalAuthorCount || 0,
-        averageWorksPerAuthor: backendResponse.avgWorksPerAuthor || 0,
-        averageRating: backendResponse.avgAuthorRating || 0
-      },
-      monthlyNewAuthors: (backendResponse.monthlyNewAuthors || []).map((item: any) => ({
-        month: item.yearMonth,
-        authors: item.count
-      })),
-      worksDistribution: (backendResponse.workCountDistribution || []).map((item: any) => ({
-        works: item.workCount.toString(),
-        count: item.authorCount
-      })),
-      topAuthors: (backendResponse.topAuthorsList || []).map((item: any) => ({
-        name: item.authorName,
-        totalViews: item.totalViewCount,
-        avgRating: item.averageRating
-      }))
     };
   },
 

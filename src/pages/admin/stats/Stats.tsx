@@ -1,60 +1,54 @@
-import { FC } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from "@/shared/ui/shadcn/card";
-import { Button } from "@/shared/ui/shadcn/button";
+import { FC, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
+import UserStats from './UserStats';
+import WebtoonStats from './WebtoonStats';
+import CommentStats from './CommentStats';
+import { DateRangePicker } from '@/shared/ui/date-range-picker';
+import { DateRange } from '@/entities/admin/api/stats/types';
+import { format } from 'date-fns';
 
-const Stats: FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface StatsProps { }
 
-  const statsMenu = [
-    { title: '사용자 통계', path: '/admin/stats/users' },
-    { title: '작가 통계', path: '/admin/stats/authors' },
-    { title: '웹툰 통계', path: '/admin/stats/webtoons' },
-    { title: '댓글 통계', path: '/admin/stats/comments' },
-  ];
+export const Stats: FC<StatsProps> = () => {
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: format(new Date(new Date().setMonth(new Date().getMonth() - 6)), 'yyyy-MM-dd'),
+    endDate: format(new Date(), 'yyyy-MM-dd')
+  });
+
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRange(range);
+  };
 
   return (
-    <>
-      {/* 통계 요약 */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <h2 className="text-xl font-bold mb-4">통계 요약</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium text-gray-600">전체 사용자</h3>
-              <p className="text-3xl font-bold mt-2">1,234</p>
-              <p className="text-sm text-green-600 mt-2">▲ 123 이번 주</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium text-gray-600">전체 작가</h3>
-              <p className="text-3xl font-bold mt-2">56</p>
-              <p className="text-sm text-green-600 mt-2">▲ 5 이번 주</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium text-gray-600">전체 웹툰</h3>
-              <p className="text-3xl font-bold mt-2">128</p>
-              <p className="text-sm text-green-600 mt-2">▲ 15 이번 주</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium text-gray-600">전체 댓글</h3>
-              <p className="text-3xl font-bold mt-2">3,456</p>
-              <p className="text-sm text-green-600 mt-2">▲ 456 이번 주</p>
-            </CardContent>
-          </Card>
-        </div>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">통계</h1>
+        <DateRangePicker
+          value={dateRange}
+          onChange={handleDateRangeChange}
+        />
       </div>
 
-      {/* 자식 라우트 렌더링 */}
-      <Outlet />
-    </>
-  );
-};
+      <Tabs defaultValue="users" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="users">사용자</TabsTrigger>
+          <TabsTrigger value="webtoons">웹툰</TabsTrigger>
+          <TabsTrigger value="comments">댓글</TabsTrigger>
+        </TabsList>
 
-export default Stats; 
+        <TabsContent value="users">
+          <UserStats dateRange={dateRange} />
+        </TabsContent>
+
+        <TabsContent value="webtoons">
+          <WebtoonStats dateRange={dateRange} />
+        </TabsContent>
+
+        <TabsContent value="comments">
+          <CommentStats dateRange={dateRange} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}; 
