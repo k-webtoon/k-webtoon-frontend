@@ -28,7 +28,6 @@ import UserManagement from "@/pages/admin/management/UserManagement";
 import CommentManagement from "@/pages/admin/management/CommentManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
-import AuthorStats from "@/pages/admin/stats/AuthorStats";
 import CommentStats from "@/pages/admin/stats/CommentStats";
 import Stats from "@/pages/admin/stats/Stats";
 import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
@@ -106,7 +105,7 @@ const RoutesConfig = () => (
       {/* 👨‍💼 관리자 페이지 ====================== */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminMain />} />
-        
+
         {/* 관리 */}
         <Route path="management">
           <Route path="users" element={<UserManagement />} />
@@ -118,7 +117,6 @@ const RoutesConfig = () => (
         <Route path="stats">
           <Route path="users" element={<UserStats />} />
           <Route path="webtoons" element={<WebtoonStats />} />
-          <Route path="authors" element={<AuthorStats />} />
           <Route path="comments" element={<CommentStats />} />
         </Route>
 

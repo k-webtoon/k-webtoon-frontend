@@ -32,7 +32,6 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: '사용자 통계', path: '/admin/stats/users' },
       { title: '웹툰 통계', path: '/admin/stats/webtoons' },
-      { title: '작가 통계', path: '/admin/stats/authors' },
       { title: '댓글 통계', path: '/admin/stats/comments' },
     ],
   },
@@ -94,13 +93,12 @@ export const AdminSidebar: FC<AdminSidebarProps> = memo(({ onPageChange, activeP
         {/* 관리자 메뉴 네비게이션 */}
         <nav className="space-y-1">
           {/* 대시보드 버튼 */}
-          <button 
+          <button
             onClick={() => onPageChange('/admin')}
-            className={`w-full px-4 py-2 text-left rounded-md ${
-              activePage === '/admin' 
-                ? 'bg-blue-50 text-blue-600' 
+            className={`w-full px-4 py-2 text-left rounded-md ${activePage === '/admin'
+                ? 'bg-blue-50 text-blue-600'
                 : 'text-gray-600 hover:bg-gray-50'
-            }`}
+              }`}
           >
             대시보드
           </button>
@@ -128,11 +126,10 @@ export const AdminSidebar: FC<AdminSidebarProps> = memo(({ onPageChange, activeP
                     <button
                       key={item.path}
                       onClick={() => onPageChange(item.path)}
-                      className={`w-full px-4 py-2 text-left rounded-md ${
-                        isActivePath(item.path)
+                      className={`w-full px-4 py-2 text-left rounded-md ${isActivePath(item.path)
                           ? 'bg-blue-50 text-blue-600'
                           : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {item.title}
                     </button>

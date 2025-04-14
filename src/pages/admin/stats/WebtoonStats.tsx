@@ -1,6 +1,7 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
+import { statsApi } from '@/entities/admin/api/stats';
+import { WebtoonStatsResponse, DateRange } from '@/entities/admin/api/stats/types';
 import {
   BarChart,
   Bar,
@@ -17,159 +18,157 @@ import {
   Line,
 } from 'recharts';
 
-const WebtoonStats: FC = () => {
-  // 더미 데이터 - 웹툰 상태별 수
-  const statusData = [
-    { name: 'ACTIVE', value: 120 },
-    { name: 'INACTIVE', value: 30 },
-    { name: 'DRAFT', value: 15 },
-    { name: 'REPORTED', value: 5 },
-  ];
+// WebtoonStatsResponse 타입 예시:
+/*
+{
+  summary: {
+    totalWebtoons: number;      // 전체 웹툰 수
+    reportedWebtoons: number;   // 신고된 웹툰 수
+    osmConversions: number;     // OSM 전환 수
+    averageRating: number;      // 평균 평점
+  },
+  statusDistribution: Array<{   // 상태별 분포
+    status: string;            // 상태 (연재중, 완결, 휴재 등)
+    count: number;             // 해당 상태의 웹툰 수
+  }>,
+  topRatedWebtoons: Array<{    // 인기 웹툰 TOP 5
+    name: string;              // 웹툰 제목
+  }>,
+  recentWebtoons: Array<{      // 최근 등록된 웹툰
+    name: string;              // 웹툰 제목
+    date: string;              // 등록일
+    genre: string;             // 장르
+  }>,
+  activityStats: Array<{       // 활동 통계
+    name: string;              // 웹툰 제목
+    comments: number;          // 댓글 수
+    likes: number;             // 좋아요 수
+    views: number;             // 조회수
+  }>
+}
+*/
 
-  // 더미 데이터 - 별점 평균 상위
-  const ratingData = [
-    { name: '연애혁명', rating: 4.9, episodes: 150 },
-    { name: '화산귀환', rating: 4.8, episodes: 89 },
-    { name: '독립일기', rating: 4.7, episodes: 220 },
-    { name: '여신강림', rating: 4.7, episodes: 190 },
-    { name: '전지적 독자 시점', rating: 4.6, episodes: 102 },
-  ];
+interface WebtoonStatsProps {
+  dateRange: DateRange;
+}
 
-  // 더미 데이터 - 최근 등록된 웹툰
-  const recentData = [
-    { name: '신규웹툰1', date: '2024-03-14', genre: '로맨스' },
-    { name: '신규웹툰2', date: '2024-03-13', genre: '액션' },
-    { name: '신규웹툰3', date: '2024-03-12', genre: '판타지' },
-    { name: '신규웹툰4', date: '2024-03-11', genre: '일상' },
-    { name: '신규웹툰5', date: '2024-03-10', genre: '스릴러' },
-  ];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-  // 더미 데이터 - 활동량 상위
-  const activityData = [
-    { name: '연애혁명', comments: 1200, likes: 5000, views: 120000 },
-    { name: '화산귀환', comments: 980, likes: 4500, views: 100000 },
-    { name: '독립일기', comments: 850, likes: 4000, views: 95000 },
-    { name: '여신강림', comments: 820, likes: 3800, views: 90000 },
-    { name: '전지적 독자 시점', comments: 780, likes: 3500, views: 85000 },
-  ];
+const WebtoonStats: FC<WebtoonStatsProps> = ({ dateRange }) => {
+  const [webtoonStats, setWebtoonStats] = useState<WebtoonStatsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const COLORS = {
-    primary: '#3B82F6',
-    secondary: '#10B981',
-    warning: '#F59E0B',
-    danger: '#EF4444',
-    purple: '#8B5CF6',
-  };
+  useEffect(() => {
+    const fetchWebtoonStats = async () => {
+      try {
+        const response = await statsApi.getWebtoonStats({
+          ...dateRange,
+          type: 'webtoons'
+        });
+        setWebtoonStats(response.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || '웹툰 통계를 불러오는데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const tooltipStyle = {
-    contentStyle: {
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: '8px',
-      border: 'none',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-    }
-  };
+    fetchWebtoonStats();
+  }, [dateRange]);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">로딩 중...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg text-red-500">{error}</div>
+    </div>
+  );
+
+  if (!webtoonStats) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">데이터가 없습니다.</div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 p-4 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">웹툰 통계</h1>
-      
-      {/* 주요 통계 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 웹툰 현황 */}
-        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold text-gray-800">웹툰 현황</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">전체 웹툰 수</p>
-                <p className="text-2xl font-bold text-gray-800">170</p>
-                <p className="text-sm text-green-600">▲ 15 이번 달</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">신고된 웹툰</p>
-                <p className="text-2xl font-bold text-gray-800">5</p>
-                <p className="text-sm text-red-600">긴급 검토 필요</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">OSMU 전환</p>
-                <p className="text-2xl font-bold text-gray-800">12</p>
-                <p className="text-sm text-blue-600">전체의 7%</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">평균 별점</p>
-                <p className="text-2xl font-bold text-gray-800">4.5</p>
-                <p className="text-sm text-green-600">▲ 0.2 상승</p>
-              </div>
-            </div>
+    <div className="space-y-8">
+      {/* 주요 통계 카드 */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-medium text-gray-600">전체 웹툰</h3>
+            <p className="text-3xl font-bold mt-2">{webtoonStats.summary.totalWebtoons}</p>
           </CardContent>
         </Card>
-
-        {/* 활동 현황 */}
-        <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold text-gray-800">활동 현황</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-500">월간 총 조회수</p>
-                  <p className="text-2xl font-bold text-gray-800">5.2M</p>
-                  <p className="text-sm text-green-600">▲ 12% 전월 대비</p>
-                </div>
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-500">월간 총 활동량</p>
-                  <p className="text-2xl font-bold text-gray-800">89.5K</p>
-                  <p className="text-sm text-green-600">▲ 8% 전월 대비</p>
-                </div>
-                <div className="bg-green-100 p-3 rounded-full">
-                  <svg className="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-medium text-gray-600">신고된 웹툰</h3>
+            <p className="text-3xl font-bold mt-2">{webtoonStats.summary.reportedWebtoons}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-medium text-gray-600">OSM 전환</h3>
+            <p className="text-3xl font-bold mt-2">{webtoonStats.summary.osmConversions}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-medium text-gray-600">총 조회수</h3>
+            <p className="text-3xl font-bold mt-2">{webtoonStats.summary.totalViews}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* 메인 차트와 탭 차트 */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* 메인 차트 (상태별 웹툰 분포) */}
-        <Card className="lg:col-span-3 bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold text-gray-800">상태별 웹툰 분포</CardTitle>
+      {/* 월간 통계 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>월간 통계</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-600">월간 조회수</h3>
+              <p className="text-3xl font-bold mt-2">{webtoonStats.monthlyStats.totalViews}</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-600">월간 활동량</h3>
+              <p className="text-3xl font-bold mt-2">{webtoonStats.monthlyStats.totalActivity}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 상태별 분포와 인기 웹툰 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>상태별 분포</CardTitle>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="h-[400px]">
+          <CardContent className="p-6">
+            <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={statusData}
+                    data={webtoonStats.statusDistribution}
+                    dataKey="count"
+                    nameKey="status"
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    label={({ name, value, percent }) => `${name} (${value}개, ${(percent * 100).toFixed(0)}%)`}
-                    outerRadius={150}
-                    fill="#8884d8"
-                    dataKey="value"
+                    outerRadius={80}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={Object.values(COLORS)[index % Object.values(COLORS).length]} />
+                    {webtoonStats.statusDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip {...tooltipStyle} />
+                  <Tooltip />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -177,73 +176,78 @@ const WebtoonStats: FC = () => {
           </CardContent>
         </Card>
 
-        {/* 탭으로 전환되는 차트들 */}
-        <Card className="lg:col-span-2 bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardContent className="p-4">
-            <Tabs defaultValue="rating" className="space-y-4">
-              <TabsList className="grid grid-cols-4 gap-4 bg-gray-100 p-1 rounded-lg">
-                <TabsTrigger value="rating" className="data-[state=active]:bg-white">별점</TabsTrigger>
-                <TabsTrigger value="recent" className="data-[state=active]:bg-white">최신</TabsTrigger>
-                <TabsTrigger value="comments" className="data-[state=active]:bg-white">댓글</TabsTrigger>
-                <TabsTrigger value="likes" className="data-[state=active]:bg-white">좋아요</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="rating" className="mt-4">
-                <div className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ratingData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" domain={[0, 5]} />
-                      <YAxis dataKey="name" type="category" width={100} />
-                      <Tooltip {...tooltipStyle} />
-                      <Bar dataKey="rating" fill={COLORS.primary} name="평균 별점" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="recent" className="mt-4">
-                <div className="space-y-2">
-                  {recentData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-gray-500">{item.genre}</p>
-                      </div>
-                      <p className="text-sm text-gray-500">{item.date}</p>
+        <Card>
+          <CardHeader>
+            <CardTitle>인기 웹툰 TOP 5</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {webtoonStats.topRatedWebtoons.map((webtoon, index) => (
+                <div key={webtoon.name} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-xl font-bold text-gray-600 mr-2">#{index + 1}</span>
+                      <span className="font-medium">{webtoon.name}</span>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-gray-500">평점 {webtoon.rating.toFixed(1)}</span>
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-              <TabsContent value="comments" className="mt-4">
-                <div className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={activityData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" width={100} />
-                      <Tooltip {...tooltipStyle} />
-                      <Bar dataKey="comments" fill={COLORS.secondary} name="댓글 수" />
-                    </BarChart>
-                  </ResponsiveContainer>
+      {/* 최근 등록된 웹툰과 활동 통계 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>최근 등록된 웹툰</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {webtoonStats.recentWebtoons.map((webtoon, index) => (
+                <div key={webtoon.name} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-xl font-bold text-gray-600 mr-2">#{index + 1}</span>
+                      <span className="font-medium">{webtoon.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-gray-500">{webtoon.date}</span>
+                      <span className="text-sm text-gray-500">{webtoon.genre}</span>
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-              <TabsContent value="likes" className="mt-4">
-                <div className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={activityData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" width={100} />
-                      <Tooltip {...tooltipStyle} />
-                      <Bar dataKey="likes" fill={COLORS.purple} name="좋아요 수" />
-                    </BarChart>
-                  </ResponsiveContainer>
+        <Card>
+          <CardHeader>
+            <CardTitle>활동 통계</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {webtoonStats.activityStats.map((webtoon, index) => (
+                <div key={webtoon.name} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-xl font-bold text-gray-600 mr-2">#{index + 1}</span>
+                      <span className="font-medium">{webtoon.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-gray-500">댓글 {webtoon.comments}</span>
+                      <span className="text-sm text-gray-500">좋아요 {webtoon.likes}</span>
+                      <span className="text-sm text-gray-500">조회수 {webtoon.views}</span>
+                    </div>
+                  </div>
                 </div>
-              </TabsContent>
-            </Tabs>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

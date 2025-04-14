@@ -1,6 +1,8 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/shadcn/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs";
+import { statsApi } from '@/entities/admin/api/stats';
+import { UserStatsResponse, DateRange } from '@/entities/admin/api/stats/types';
 import {
   LineChart,
   Line,
@@ -19,64 +21,75 @@ import {
   Area,
 } from 'recharts';
 
-const UserStats: FC = () => {
-  // 더미 데이터 - 월별 사용자 증가
-  const monthlyData = [
-    { name: '1월', users: 400 },
-    { name: '2월', users: 600 },
-    { name: '3월', users: 800 },
-    { name: '4월', users: 1000 },
-    { name: '5월', users: 1200 },
-    { name: '6월', users: 1234 },
-  ];
+interface UserStatsProps {
+  dateRange: DateRange;
+}
 
-  // 더미 데이터 - 사용자 연령대 분포
-  const ageData = [
-    { name: '10대', value: 200 },
-    { name: '20대', value: 500 },
-    { name: '30대', value: 300 },
-    { name: '40대', value: 150 },
-    { name: '50대 이상', value: 84 },
-  ];
+const UserStats: FC<UserStatsProps> = ({ dateRange }) => {
+  const [userStats, setUserStats] = useState<UserStatsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 더미 데이터 - 일별 신규 가입자 수
-  const dailyNewUsersData = [
-    { date: '2023-06-01', newUsers: 12 },
-    { date: '2023-06-02', newUsers: 19 },
-    { date: '2023-06-03', newUsers: 15 },
-    { date: '2023-06-04', newUsers: 22 },
-    { date: '2023-06-05', newUsers: 18 },
-    { date: '2023-06-06', newUsers: 25 },
-    { date: '2023-06-07', newUsers: 30 },
-  ];
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const response = await statsApi.getUserStats({
+          ...dateRange,
+          type: 'users'
+        });
+        setUserStats(response.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || '사용자 통계를 불러오는데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 더미 데이터 - 유입 많은 시간대
-  const hourlyTrafficData = [
-    { hour: '00시', users: 50 },
-    { hour: '01시', users: 30 },
-    { hour: '02시', users: 20 },
-    { hour: '03시', users: 10 },
-    { hour: '04시', users: 5 },
-    { hour: '05시', users: 8 },
-    { hour: '06시', users: 15 },
-    { hour: '07시', users: 40 },
-    { hour: '08시', users: 80 },
-    { hour: '09시', users: 120 },
-    { hour: '10시', users: 150 },
-    { hour: '11시', users: 180 },
-    { hour: '12시', users: 200 },
-    { hour: '13시', users: 190 },
-    { hour: '14시', users: 210 },
-    { hour: '15시', users: 230 },
-    { hour: '16시', users: 250 },
-    { hour: '17시', users: 270 },
-    { hour: '18시', users: 290 },
-    { hour: '19시', users: 310 },
-    { hour: '20시', users: 330 },
-    { hour: '21시', users: 280 },
-    { hour: '22시', users: 200 },
-    { hour: '23시', users: 100 },
-  ];
+    fetchUserStats();
+  }, [dateRange]);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">로딩 중...</div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg text-red-500">{error}</div>
+    </div>
+  );
+  
+  if (!userStats) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-lg">데이터가 없습니다.</div>
+    </div>
+  );
+
+  // 월별 사용자 증가 데이터 변환
+  const monthlyData = userStats.monthlyGrowth.map(item => ({
+    name: `${item.month}월`,
+    users: item.users
+  }));
+
+  // 사용자 연령대 분포 데이터 변환
+  const ageData = userStats.ageDistribution.map(item => ({
+    name: item.ageGroup,
+    value: item.count
+  }));
+
+  // 일별 신규 가입자 수 데이터 변환
+  const dailyData = userStats.dailyNewUsers.map(item => ({
+    name: item.date,
+    users: item.newUsers
+  }));
+
+  // 시간대별 트래픽 데이터 변환
+  const hourlyData = userStats.hourlyTraffic.map(item => ({
+    name: `${item.hour}시`,
+    users: item.users
+  }));
 
   // 더미 데이터 - 활동 많은 유저 TOP 5
   const activeUsersData = [
@@ -130,23 +143,20 @@ const UserStats: FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">일일 활성 사용자</p>
-                <p className="text-2xl font-bold text-gray-800">856</p>
-                <p className="text-sm text-green-600">+5.3% 증가</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.dailyActiveUsers}</p>
+                <p className="text-sm text-green-600">평균 {userStats.summary.averageSessionDuration}분</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">월간 활성 사용자</p>
-                <p className="text-2xl font-bold text-gray-800">1,234</p>
-                <p className="text-sm text-green-600">+12.8% 증가</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.monthlyActiveUsers}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">평균 체류 시간</p>
-                <p className="text-2xl font-bold text-gray-800">25분</p>
-                <p className="text-sm text-gray-500">전월 대비 동일</p>
+                <p className="text-2xl font-bold text-gray-800">{userStats.summary.averageSessionDuration}분</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">신규 가입률</p>
-                <p className="text-2xl font-bold text-gray-800">+12.5%</p>
-                <p className="text-sm text-green-600">목표 달성률 95%</p>
+                <p className="text-2xl font-bold text-gray-800">▲ {userStats.summary.newUserRate}%</p>
               </div>
             </div>
           </CardContent>
@@ -162,7 +172,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">전체 사용자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">5,678</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.totalUsers}</p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +183,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">최근 7일 접속자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">1,234</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.recent7DaysUsers}</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +194,7 @@ const UserStats: FC = () => {
               <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">최근 30일 접속자 수</p>
-                  <p className="text-2xl font-bold text-gray-800">4,567</p>
+                  <p className="text-2xl font-bold text-gray-800">{userStats.summary.recent30DaysUsers}</p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-full">
                   <svg className="h-6 w-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +217,7 @@ const UserStats: FC = () => {
           <CardContent className="p-4">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={dailyNewUsersData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart data={dailyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorNewUsers" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={GRADIENT_COLORS.success[0]} stopOpacity={0.8}/>
@@ -215,12 +225,12 @@ const UserStats: FC = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" stroke="#6B7280" />
+                  <XAxis dataKey="name" stroke="#6B7280" />
                   <YAxis stroke="#6B7280" />
                   <Tooltip {...tooltipStyle} />
                   <Area 
                     type="monotone" 
-                    dataKey="newUsers" 
+                    dataKey="users" 
                     stroke={GRADIENT_COLORS.success[0]} 
                     fillOpacity={1} 
                     fill="url(#colorNewUsers)" 
