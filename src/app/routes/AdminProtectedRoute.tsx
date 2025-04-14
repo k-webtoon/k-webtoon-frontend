@@ -1,48 +1,42 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/entities/auth/api/store.ts';
-import { useUserStore } from '@/entities/user/api/userStore.ts';
 
-/**
- * 관리자 페이지를 보호하는 컴포넌트입니다.
- * 인증되지 않은 사용자는 로그인 페이지로 리다이렉트됩니다.
- */
-const AdminProtectedRoute: FC = () => {
+// 관리자 페이지를 보호하는 라우트 가드
+// 관리자가 아닌 모든 사용자는 not-admin 페이지로 리다이렉트됩니다.
+const AdminProtectedRoute = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuthStore();
-  const { userInfo, fetchCurrentUserInfo } = useUserStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { getUserInfo, initialize, isAuthenticated } = useAuthStore();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        if (!userInfo) {
-          await fetchCurrentUserInfo();
-        }
-      } catch (error) {
-        console.error('인증 확인 중 오류 발생:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    verifyAuth();
-  }, [userInfo, fetchCurrentUserInfo]);
+    initialize();
+    setIsChecking(false);
+  }, [initialize]);
 
-  if (isLoading) {
+  if (isChecking) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
     );
   }
 
-  // 인증되지 않았거나 관리자가 아닌 경우 로그인 페이지로 리다이렉트
-  if (!isAuthenticated || !userInfo || userInfo.userRole !== 'ADMIN') {
-    console.log('접근 거부:', { isAuthenticated, userRole: userInfo?.userRole });
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  const userInfo = getUserInfo();
+  console.log('라우트 검사:', {
+    isAuthenticated,
+    userInfo,
+    role: userInfo?.role,
+    isAdmin: userInfo?.role === 'ADMIN'
+  });
+
+  // 관리자가 아닌 경우(로그인하지 않았거나 권한이 없는 경우 모두) not-admin 페이지로 리다이렉트
+  if (!userInfo || userInfo.role !== 'ADMIN') {
+    console.log('관리자 권한 없음:', { 인증여부: !!userInfo, 역할: userInfo?.role });
+    return <Navigate to="/not-admin" state={{ from: location }} replace />;
   }
 
   return <Outlet />;
 };
 
-export default AdminProtectedRoute; 
+export default AdminProtectedRoute;
