@@ -1,177 +1,319 @@
-import { FC, useState, useMemo } from 'react';
-import { ManagementLayout } from '@/components/admin/ManagementLayout';
-import { ColumnDef } from '@tanstack/react-table';
-import { format } from 'date-fns';
+import { FC, useState, useEffect } from 'react';
+import { Button } from '@/shared/ui/shadcn/button';
+import { Card, CardContent } from "@/shared/ui/shadcn/card";
+import { Search } from 'lucide-react';
+import { Input } from "@/shared/ui/shadcn/input";
 import {
-  WebtoonStatus,
-  WebtoonStatusEnum,
-  webtoonStatusColors,
-  webtoonStatusLabels,
-  Webtoon
-} from '@/entities/admin/model/types';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/shadcn/select";
+import {
+  fetchWebtoons,
+  updateWebtoonStatus,
+  deleteWebtoon,
+  createWebtoon,
+  updateWebtoon,
+  exportWebtoonsToExcel,
+} from '@/entities/admin/api/managementApi';
+import { ManagementPageProps } from '@/entities/admin/model/managementPage';
+import { WebtoonResponse } from '@/entities/admin/api/types';
+import { WebtoonStatus } from '@/entities/webtoon/model/webtoon';
 
-const WebtoonManagement: FC = () => {
-  const [filter, setFilter] = useState({
-    status: '',
-    search: '',
-  });
+// 웹툰 장르 정의
+export const WEBTOON_GENRE = {
+  ALL: 'ALL',
+  ROMANCE: 'ROMANCE',
+  ACTION: 'ACTION',
+  COMEDY: 'COMEDY',
+  DRAMA: 'DRAMA',
+  FANTASY: 'FANTASY'
+} as const;
 
-  // 더미 데이터 생성
-  const data: Webtoon[] = useMemo(() => {
-    const genres = ['로맨스', '액션', '판타지', '일상', '스릴러', '개그'];
-    const authors = ['김작가', '이작가', '박작가', '최작가', '정작가'];
-    const statuses = Object.values(WebtoonStatusEnum);
-    
-    return Array.from({ length: 35 }, (_, i) => ({
-      id: i + 1,
-      title: `웹툰 ${i + 1}${i % 3 === 0 ? ' [신작]' : i % 3 === 1 ? ' [인기]' : ''}`,
-      author: authors[i % authors.length],
-      description: `웹툰 ${i + 1}의 상세 설명입니다.`,
-      status: statuses[i % statuses.length],
-      genre: genres[i % genres.length],
-      views: Math.floor(Math.random() * 1000000),
-      rating: Number((Math.random() * 2 + 3).toFixed(1)), // 3.0 ~ 5.0
-      lastUpdated: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
-      createdAt: new Date(2024, 0, 1 + i),
-    }));
-  }, []);
+// 웹툰 상태 라벨
+export const webtoonStatusLabels: Record<WebtoonStatus, string> = {
+  [WebtoonStatus.ACTIVE]: '연재중',
+  [WebtoonStatus.INACTIVE]: '휴재/완결',
+  [WebtoonStatus.DELETED]: '삭제됨',
+  [WebtoonStatus.PENDING]: '승인대기',
+  [WebtoonStatus.BLOCKED]: '블라인드'
+};
 
-  // 필터링된 데이터
-  const filteredData = useMemo(() => {
-    return data.filter(webtoon => {
-      if (filter.status && webtoon.status !== filter.status) return false;
-      if (filter.search) {
-        const searchLower = filter.search.toLowerCase();
-        return webtoon.title.toLowerCase().includes(searchLower) ||
-               webtoon.author.toLowerCase().includes(searchLower);
+// 웹툰 상태 색상
+export const webtoonStatusColors: Record<WebtoonStatus, { bg: string; text: string }> = {
+  [WebtoonStatus.ACTIVE]: { bg: 'bg-green-100', text: 'text-green-800' },
+  [WebtoonStatus.INACTIVE]: { bg: 'bg-gray-100', text: 'text-gray-800' },
+  [WebtoonStatus.DELETED]: { bg: 'bg-red-100', text: 'text-red-800' },
+  [WebtoonStatus.PENDING]: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  [WebtoonStatus.BLOCKED]: { bg: 'bg-purple-100', text: 'text-purple-800' }
+};
+
+const WebtoonManagement: FC<ManagementPageProps> = ({ title = '웹툰 관리', description }) => {
+  const [webtoons, setWebtoons] = useState<WebtoonResponse[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<WebtoonStatus | null>(null);
+  const [genreFilter, setGenreFilter] = useState<string>(WEBTOON_GENRE.ALL);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const loadWebtoons = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetchWebtoons({
+        page: currentPage,
+        limit: 10,
+        search: searchQuery,
+        status: statusFilter || undefined,
+        genre: genreFilter === WEBTOON_GENRE.ALL ? undefined : genreFilter
+      });
+
+      setWebtoons(response.data);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error('웹툰 목록을 불러오는데 실패했습니다:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWebtoons();
+  }, [currentPage, searchQuery, statusFilter, genreFilter]);
+
+  const handleStatusChange = async (webtoonId: number, newStatus: WebtoonStatus) => {
+    try {
+      await updateWebtoonStatus(webtoonId, { status: newStatus });
+      loadWebtoons();
+    } catch (error) {
+      console.error('웹툰 상태 변경에 실패했습니다:', error);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const blob = await exportWebtoonsToExcel({
+        search: searchQuery,
+        status: statusFilter || undefined,
+        genre: genreFilter === WEBTOON_GENRE.ALL ? undefined : genreFilter
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `webtoons-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('엑셀 다운로드에 실패했습니다:', error);
+    }
+  };
+
+  const handleDeleteWebtoon = async (webtoonId: number) => {
+    if (window.confirm('정말로 이 웹툰을 삭제하시겠습니까?')) {
+      try {
+        await deleteWebtoon(webtoonId);
+        loadWebtoons();
+      } catch (error) {
+        console.error('웹툰 삭제에 실패했습니다:', error);
       }
-      return true;
-    });
-  }, [data, filter]);
-
-  // 통계 데이터
-  const stats = useMemo(() => {
-    const total = data.length;
-    const active = data.filter(w => w.status === 'active').length;
-    const inactive = data.filter(w => w.status === 'inactive').length;
-    const pending = data.filter(w => w.status === 'pending').length;
-    const blocked = data.filter(w => w.status === 'blocked').length;
-    const deleted = data.filter(w => w.status === 'deleted').length;
-    
-    return { total, active, inactive, pending, blocked, deleted };
-  }, [data]);
-
-  const dashboardCards = [
-    { 
-      title: '전체 웹툰', 
-      value: stats.total,
-      onClick: () => setFilter(prev => ({ ...prev, status: '' }))
-    },
-    { 
-      title: '연재중', 
-      value: stats.active,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.ACTIVE }))
-    },
-    { 
-      title: '완결/숨김', 
-      value: stats.inactive,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.INACTIVE }))
-    },
-    { 
-      title: '승인대기', 
-      value: stats.pending,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.PENDING }))
-    },
-  ];
-
-  const statusOptions = Object.values(WebtoonStatusEnum).map(status => ({
-    value: status,
-    label: webtoonStatusLabels[status],
-  }));
-
-  const columns: ColumnDef<Webtoon>[] = [
-    {
-      accessorKey: 'title',
-      header: '제목',
-    },
-    {
-      accessorKey: 'author',
-      header: '작가',
-    },
-    {
-      accessorKey: 'genre',
-      header: '장르',
-    },
-    {
-      accessorKey: 'status',
-      header: '상태',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        const { bg, text } = webtoonStatusColors[status];
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
-            {webtoonStatusLabels[status]}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: 'views',
-      header: '조회수',
-      cell: ({ row }) => row.original.views.toLocaleString(),
-    },
-    {
-      accessorKey: 'rating',
-      header: '평점',
-      cell: ({ row }) => `⭐ ${row.original.rating}`,
-    },
-    {
-      accessorKey: 'lastUpdated',
-      header: '최근 업데이트',
-      cell: ({ row }) => format(row.original.lastUpdated, 'yyyy-MM-dd'),
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
-              상세보기
-            </button>
-            {status === 'pending' && (
-              <button className="px-3 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                승인하기
-              </button>
-            )}
-            {status !== 'blocked' && status !== 'deleted' && (
-              <button className="px-3 py-1 text-sm text-white bg-red-500 rounded-md hover:bg-red-600">
-                {status === 'pending' ? '반려' : '블라인드'}
-              </button>
-            )}
-          </div>
-        );
-      },
-    },
-  ];
+    }
+  };
 
   return (
-    <ManagementLayout
-      title="웹툰 관리"
-      description="웹툰 콘텐츠를 관리하고 모니터링합니다."
-      dashboardCards={dashboardCards}
-      statusOptions={statusOptions}
-      columns={columns}
-      data={filteredData}
-      filter={filter}
-      onFilterChange={setFilter}
-      pagination={{
-        page: 1,
-        limit: 10,
-        total: filteredData.length,
-        onPageChange: (page) => console.log('페이지 변경:', page),
-      }}
-    />
+    <div className="space-y-6">
+      {/* 메인 컨텐츠 */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold">{title}</h2>
+            {description && (
+              <p className="text-sm text-gray-500 mt-1">{description}</p>
+            )}
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={handleExportExcel}>엑셀 다운로드</Button>
+            <Button>새 웹툰 등록</Button>
+          </div>
+        </div>
+
+        {/* 검색 및 필터 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="제목 또는 작가로 검색..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select 
+            value={statusFilter || "ALL"} 
+            onValueChange={(value) => setStatusFilter(value === "ALL" ? null : value as WebtoonStatus)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="상태 선택">
+                {statusFilter ? (
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${webtoonStatusColors[statusFilter].bg} ${webtoonStatusColors[statusFilter].text}`}>
+                    {webtoonStatusLabels[statusFilter]}
+                  </span>
+                ) : (
+                  "전체"
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">전체</SelectItem>
+              {Object.values(WebtoonStatus).map((status) => (
+                <SelectItem key={status} value={status}>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${webtoonStatusColors[status].bg} ${webtoonStatusColors[status].text}`}>
+                    {webtoonStatusLabels[status]}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={genreFilter} onValueChange={setGenreFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="장르 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={WEBTOON_GENRE.ALL}>전체</SelectItem>
+              <SelectItem value={WEBTOON_GENRE.ROMANCE}>로맨스</SelectItem>
+              <SelectItem value={WEBTOON_GENRE.ACTION}>액션</SelectItem>
+              <SelectItem value={WEBTOON_GENRE.COMEDY}>코미디</SelectItem>
+              <SelectItem value={WEBTOON_GENRE.DRAMA}>드라마</SelectItem>
+              <SelectItem value={WEBTOON_GENRE.FANTASY}>판타지</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 웹툰 목록 */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  제목
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  작가
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  장르
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  상태
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  작업
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center">
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : webtoons.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center">
+                    웹툰이 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                webtoons.map((webtoon) => (
+                  <tr key={webtoon.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">{webtoon.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{webtoon.titleName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{webtoon.author}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{webtoon.genre.join(', ')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Select
+                        value={webtoon.finish ? WebtoonStatus.INACTIVE : WebtoonStatus.ACTIVE}
+                        onValueChange={(value) => handleStatusChange(webtoon.id, value as WebtoonStatus)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${webtoonStatusColors[webtoon.finish ? WebtoonStatus.INACTIVE : WebtoonStatus.ACTIVE].bg} ${webtoonStatusColors[webtoon.finish ? WebtoonStatus.INACTIVE : WebtoonStatus.ACTIVE].text}`}>
+                              {webtoonStatusLabels[webtoon.finish ? WebtoonStatus.INACTIVE : WebtoonStatus.ACTIVE]}
+                            </span>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(WebtoonStatus).map((status) => (
+                            <SelectItem key={status} value={status}>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${webtoonStatusColors[status].bg} ${webtoonStatusColors[status].text}`}>
+                                {webtoonStatusLabels[status]}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <Button variant="outline" size="sm" className="mr-2">
+                        수정
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteWebtoon(webtoon.id)}
+                      >
+                        삭제
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* 페이지네이션 */}
+        <div className="mt-4 flex justify-center">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              이전
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              다음
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
