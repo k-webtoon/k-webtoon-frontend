@@ -15,9 +15,6 @@ import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
 import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
 import UserLikeWebtoon from "@/pages/user/userpage/UserLikeWebtoon.tsx";
-import UserComments from "@/pages/user/userpage/UserComments.tsx";
-import UserFollowers from "@/pages/user/userpage/UserFollowers.tsx";
-import UserFollowees from "@/pages/user/userpage/UserFollowees.tsx";
 import MyPage from "@/pages/user/MyPage";
 import WebtoonSearchResults from "@/pages/webtoon-search/WebtoonSearchResults.tsx";
 import Error from "@/pages/error/Error.tsx";
@@ -30,7 +27,6 @@ import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
 import AuthorStats from "@/pages/admin/stats/AuthorStats";
 import CommentStats from "@/pages/admin/stats/CommentStats";
-import Stats from "@/pages/admin/stats/Stats";
 import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
@@ -40,6 +36,8 @@ import IdResult from "@/pages/auth/find/IdResult.tsx";
 import FindIdSecurityQuestion from "@/pages/auth/find/FindIdSecurityQuestion";
 import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurityQuestion";
 import AdminLayout from "@/pages/admin/common/AdminLayout";
+import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
+import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -104,7 +102,8 @@ const RoutesConfig = () => (
       </Route>
 
       {/* 👨‍💼 관리자 페이지 ====================== */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminMain />} />
         
         {/* 관리 */}
@@ -138,8 +137,11 @@ const RoutesConfig = () => (
         </Route>
       </Route>
     </Route>
+    </Route>
 
     {/* 🚫 오류 */}
+    <Route path="not-admin" element={<AdminAccessDenied />} />
+    <Route path="not-user" element={<UserAccessDenied />} />
     <Route path="*" element={<Error />} />
   </Routes>
 );

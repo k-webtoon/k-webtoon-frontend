@@ -5,21 +5,24 @@ import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Label } from "@/shared/ui/shadcn/label.tsx";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/shared/ui/shadcn/alert.tsx";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 type SocialProvider = "kakao" | "google";
 
 interface LoginFormProps {
+  redirectUrl?: string;
   onSuccess?: () => void;
   className?: string;
   onSocialLogin?: (provider: SocialProvider) => Promise<void>;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
+  redirectUrl = '/',
   onSuccess,
   className = "",
   onSocialLogin,
 }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, loading, error } = useAuthStore();
@@ -37,6 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       await login(email, password);
       if (onSuccess) onSuccess();
       console.log("로그인 시도:", { userEmail: email, userPassword: password });
+      navigate(redirectUrl);
     } catch (err) {
       console.error("로그인 에러:", err);
     }

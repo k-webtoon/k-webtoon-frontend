@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import LoginForm from '@/entities/auth/ui/LoginForm';
 import { useAuthStore } from '@/entities/auth/api/store.ts';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated, initialize } = useAuthStore();
+
+    const [searchParams] = useSearchParams();
+    const redirectUrl = searchParams.get('redirect') || '/';
 
     useEffect(() => {
         initialize();
@@ -25,7 +28,7 @@ const LoginPage: React.FC = () => {
     return (
         <div className="min-h-screen bg-background pt-10">
             <div className="w-full h-full p-8 md:p-10 flex items-center justify-center">
-                <LoginForm onSuccess={handleLoginSuccess} />
+                <LoginForm  redirectUrl={redirectUrl}  onSuccess={handleLoginSuccess} />
             </div>
         </div>
     );

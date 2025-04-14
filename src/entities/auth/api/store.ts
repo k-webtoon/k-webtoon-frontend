@@ -7,6 +7,9 @@ import {
     LoginRequest,
     UserInfo
 } from "@/entities/auth/model/types.ts";
+import {useWebtoonLikeStore} from "@/entities/webtoon-like/api/store.ts";
+import {useWebtoonFavoriteStore} from "@/entities/webtoon-favorite/api/store.ts";
+import {useWebtoonWatchedStore} from "@/entities/webtoon-watched/api/store.ts";
 
 export const useAuthStore = create<AuthState>((set, get) => ({
     token: null,
@@ -32,6 +35,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                         userId: decoded.id
                     };
                     set({ token: storedToken, userInfo, isAuthenticated: true });
+
+                    // 로그인 성공 후 웹툰 좋아요,즐겨찾기,봤어요 목록 불러오기
+                    useWebtoonLikeStore.getState().getLikedWebtoons(decoded.id);
+                    useWebtoonFavoriteStore.getState().getFavoriteWebtoons(decoded.id);
+                    useWebtoonWatchedStore.getState().getWatchedWebtoons(decoded.id);
+
                 } else {
                     // 토큰이 만료된 경우
                     localStorage.removeItem('token');
@@ -70,6 +79,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 // 업데이트된 상태 확인
                 const updatedState = get();
                 console.log("로그인 후 상태:", updatedState);
+
+                // 로그인 성공 후 웹툰 좋아요,즐겨찾기,봤어요 목록 불러오기
+                useWebtoonLikeStore.getState().getLikedWebtoons(decoded.id);
+                useWebtoonFavoriteStore.getState().getFavoriteWebtoons(decoded.id);
+                useWebtoonWatchedStore.getState().getWatchedWebtoons(decoded.id);
+
             } catch (error) {
                 console.error('토큰 디코딩 오류:', error);
                 throw new Error('유효하지 않은 토큰입니다');
@@ -115,5 +130,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     logout: () => {
         localStorage.removeItem('token');
         set({token: null, userInfo: null, isAuthenticated: false, error: null});
+        // 웹툰 좋아요,즐겨찾기,봤어요 목록 초기화
+        useWebtoonLikeStore.getState().reset();
+        useWebtoonFavoriteStore.getState().reset();
+        useWebtoonWatchedStore.getState().reset();
     }
 }));

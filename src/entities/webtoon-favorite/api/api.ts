@@ -15,18 +15,18 @@ apiClient.interceptors.request.use((config) => {
     return config;
 });
 
-// 사용자의 웹툰 좋아요 목록 조회 API
-export const getUserLikedWebtoons = async (userId: number) => {
-    const url = `${BASE_URL}/${userId}/likes`;
+// 사용자의 웹툰 즐겨찾기 목록 조회 API
+export const getUserFavoriteWebtoons = async (userId?: number) => {
+    const url = `${BASE_URL}/${userId}/favorites`;
 
     const response = await axios.get(url);
     return response.data;
 };
 
-// 특정 웹툰 좋아요 API
-export const toggleWebtoonLike = async (webtoonId: number) => {
+// 특정 웹툰 즐겨찾기 API
+export const toggleWebtoonFavorite = async (webtoonId: number) => {
     const response = await apiClient.post(
-        `${BASE_URL}/${webtoonId}/like`,
+        `${BASE_URL}/${webtoonId}/favorite`,
         {}
     );
     return response.data;

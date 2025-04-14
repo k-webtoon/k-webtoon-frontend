@@ -1,15 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Slash } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
+import { useWebtoonWatchedStore } from "@/entities/webtoon-watched/api/store.ts";
+import { WebtoonWatchedRequest } from "@/entities/webtoon-watched/model/types.ts";
 
-const WatchedButton = () => {
+const WebtoonWatchedButton = ({ webtoonId }: WebtoonWatchedRequest) => {
     // 0: 중립, 1: 봤어요, 2: 보지 않을래요
     const [watchState, setWatchState] = useState(0);
-    // 툴팁 표시 상태
     const [showText, setShowText] = useState(false);
 
-    const handleClick = () => {
-        setWatchState((prevState) => (prevState + 1) % 3);
+    const toggleWatched = useWebtoonWatchedStore(state => state.toggleWatched);
+    const watchedWebtoons = useWebtoonWatchedStore(state => state.watchedWebtoons);
+
+    useEffect(() => {
+        if (webtoonId && watchedWebtoons.has(webtoonId)) {
+            const watched = watchedWebtoons.get(webtoonId);
+
+            if (watched === true) {
+                setWatchState(1);
+            } else if (watched === false) {
+                setWatchState(2);
+            } else {
+                setWatchState(0);
+            }
+
+        } else {
+            setWatchState(0); // 봤어요 정보가 없는 경우 중립 상태로 설정
+        }
+    }, [watchedWebtoons, webtoonId]);
+
+    const handleClick = async () => {
+        if (webtoonId) {
+            try {
+                // 현재 상태를 확인하고 다음 상태를 결정
+                const newState = (watchState + 1) % 3;
+                setWatchState(newState);
+
+                await toggleWatched({ webtoonId });
+
+            } catch (error) {
+                console.error('봤어요 처리 중 오류 발생:', error);
+                setWatchState(watchState);
+            }
+        } else {
+            setWatchState((prevState) => (prevState + 1) % 3);
+        }
     };
 
     const getButtonContent = () => {
@@ -20,13 +55,13 @@ const WatchedButton = () => {
                     text: "봤니?",
                     bgColor: "bg-white/20 hover:bg-white/40"
                 };
-            case 1:
+            case 1: // 봤어요
                 return {
                     icon: <Eye className="h-3 w-3 text-white" />,
                     text: "봤어요",
                     bgColor: "bg-purple-500/70 hover:bg-purple-600/70"
                 };
-            case 2:
+            case 2: // 보지 않을래요
                 return {
                     icon: <EyeOff className="h-3 w-3 text-white" />,
                     text: "보지 않을래요",
@@ -63,4 +98,4 @@ const WatchedButton = () => {
     );
 };
 
-export default WatchedButton;
+export default WebtoonWatchedButton;

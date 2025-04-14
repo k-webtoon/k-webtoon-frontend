@@ -5,7 +5,7 @@
 // 웹툰 좋아요 타입
 export interface WebtoonLike {
     webtoonId: number;
-    isLiked: boolean;
+    isLiked: boolean | null;
 }
 
 // ===============
@@ -35,9 +35,10 @@ export interface WebtoonLikeState {
     isLoading: boolean;
     error: string | null;
     likedWebtoons: Map<number, boolean>;
+    temporaryLikes: Map<number, boolean>;
 
     // 액션 메서드
-    fetchAllLikes: (userId?: number) => Promise<void>;
+    getLikedWebtoons: (userId: number) => Promise<void>;
     toggleLike: (request: WebtoonLikeRequest) => Promise<WebtoonLikeResponse | null>;
     setLikedStatus: (webtoonId: number, isLiked: boolean) => void;
     reset: () => void;
