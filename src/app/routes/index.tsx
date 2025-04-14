@@ -38,6 +38,7 @@ import FindPasswordSecurityQuestion from "@/pages/auth/find/FindPasswordSecurity
 import AdminLayout from "@/pages/admin/common/AdminLayout";
 import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
 import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
+import OAuthRedirect from "@/entities/auth/ui/OAuthRedirect";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -103,40 +104,42 @@ const RoutesConfig = () => (
       {/* 👨‍💼 관리자 페이지 ====================== */}
       <Route element={<AdminProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminMain />} />
-        
-        {/* 관리 */}
-        <Route path="management">
-          <Route path="users" element={<UserManagement />} />
-          <Route path="webtoons" element={<WebtoonManagement />} />
-          <Route path="comments" element={<CommentManagement />} />
-        </Route>
+          <Route index element={<AdminMain />} />
 
-        {/* 통계 */}
-        <Route path="stats">
-          <Route path="users" element={<UserStats />} />
-          <Route path="webtoons" element={<WebtoonStats />} />
-          <Route path="authors" element={<AuthorStats />} />
-          <Route path="comments" element={<CommentStats />} />
-        </Route>
+          {/* 관리 */}
+          <Route path="management">
+            <Route path="users" element={<UserManagement />} />
+            <Route path="webtoons" element={<WebtoonManagement />} />
+            <Route path="comments" element={<CommentManagement />} />
+          </Route>
 
-        {/* 분석/시각화 */}
-        <Route path="visualization">
-          <Route path="users" element={<UserAnalysis />} />
-        </Route>
+          {/* 통계 */}
+          <Route path="stats">
+            <Route path="users" element={<UserStats />} />
+            <Route path="webtoons" element={<WebtoonStats />} />
+            <Route path="authors" element={<AuthorStats />} />
+            <Route path="comments" element={<CommentStats />} />
+          </Route>
 
-        {/* 설정 */}
-        <Route path="settings">
-          <Route path="tags" element={<TagManagement />} />
-        </Route>
+          {/* 분석/시각화 */}
+          <Route path="visualization">
+            <Route path="users" element={<UserAnalysis />} />
+          </Route>
 
-        {/* 추천 시스템 */}
-        <Route path="recommendation">
-          <Route path="feedback" element={<FeedbackStatus />} />
+          {/* 설정 */}
+          <Route path="settings">
+            <Route path="tags" element={<TagManagement />} />
+          </Route>
+
+          {/* 추천 시스템 */}
+          <Route path="recommendation">
+            <Route path="feedback" element={<FeedbackStatus />} />
+          </Route>
         </Route>
       </Route>
     </Route>
-    </Route>
+
+    <Route path="/oauth-redirect" element={<OAuthRedirect />} />
 
     {/* 🚫 오류 */}
     <Route path="not-admin" element={<AdminAccessDenied />} />
@@ -146,4 +149,3 @@ const RoutesConfig = () => (
 );
 
 export default RoutesConfig;
-

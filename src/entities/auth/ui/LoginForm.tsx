@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import {useAuthStore} from "@/entities/auth/api/store.ts";
+import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { Input } from "@/shared/ui/shadcn/input.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { Label } from "@/shared/ui/shadcn/label.tsx";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/shared/ui/shadcn/alert.tsx";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type SocialProvider = "kakao" | "google";
 
@@ -17,7 +17,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
-  redirectUrl = '/',
+  redirectUrl = "/",
   onSuccess,
   className = "",
   onSocialLogin,
@@ -47,6 +47,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   const handleSocialLogin = async (provider: SocialProvider) => {
+    if (provider === "google") {
+      window.location.href = "http://localhost:8080/api/oauth2/login/google";
+      return;
+    }
+    // Kakao 구현해야 하는데.... 치피치피
     if (onSocialLogin) {
       await onSocialLogin(provider);
     }
@@ -104,14 +109,25 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </form>
 
       <div className="text-center">
-        <Link 
-          to="/auth/find" 
+        <Link
+          to="/auth/find"
           className="inline-flex items-center justify-center text-sm text-muted-foreground hover:text-primary transition-colors gap-1.5"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-help-circle">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-            <path d="M12 17h.01"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-help-circle"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <path d="M12 17h.01" />
           </svg>
           로그인에 도움이 필요하신가요?
         </Link>
@@ -190,7 +206,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <div className="text-center pt-4">
         <p className="text-sm text-muted-foreground">
           계정이 없으신가요?{" "}
-          <Link to="/auth/signup" className="text-sm text-primary hover:underline">
+          <Link
+            to="/auth/signup"
+            className="text-sm text-primary hover:underline"
+          >
             회원가입
           </Link>
         </p>
