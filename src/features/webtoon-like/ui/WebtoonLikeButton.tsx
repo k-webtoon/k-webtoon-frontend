@@ -15,7 +15,15 @@ const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     useEffect(() => {
         if (webtoonId && likedWebtoons.has(webtoonId)) {
             const isLiked = likedWebtoons.get(webtoonId);
-            setState(isLiked ? 1 : 2);
+
+            if (isLiked === true) {
+                setState(1);
+            } else if (isLiked === false) {
+                setState(2);
+            } else {
+                setState(0);
+            }
+
         } else {
             setState(0); // 좋아요 정보가 없는 경우 중립 상태로 설정
         }
@@ -24,19 +32,17 @@ const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     const handleClick = async () => {
         if (webtoonId) {
             try {
-                // API 호출 - API가 자동으로 좋아요 상태를 토글
+                // 현재 상태를 확인하고 다음 상태를 결정
+                const newState = (state + 1) % 3;
+                setState(newState);
+
                 await toggleLike({ webtoonId });
-                // API 호출 후 상태는 useEffect에 의해 자동으로 업데이트됨
             } catch (error) {
                 console.error('좋아요 처리 중 오류 발생:', error);
+                setState(state);
             }
         } else {
-            // webtoonId가 없는 경우 로컬 상태만 변경
-            setState((prevState) => {
-                if (prevState === 0) return 1;  // 중립 -> 좋아요
-                if (prevState === 1) return 2;  // 좋아요 -> 싫어요
-                return 1;  // 싫어요 -> 좋아요
-            });
+            setState((prevState) => (prevState + 1) % 3);
         }
     };
 

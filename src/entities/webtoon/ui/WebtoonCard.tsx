@@ -5,8 +5,8 @@ import { Star } from "lucide-react"
 import {mapGenre, WebtoonInfo} from "@/entities/webtoon/model/types.ts";
 import { cn } from "@/shared/lib/cn";
 import WebtoonLikeButton from "@/features/webtoon-like/ui/WebtoonLikeButton.tsx";
-import BookmarkButton from "@/features/bookmark/ui/BookmarkButton.tsx";
-import WatchedButton from "@/features/watched-status/ui/WatchedButton.tsx";
+import WebtoonFavoriteButton from "@/features/webtoon-favorite/ui/WebtoonFavoriteButton.tsx";
+import WebtoonWatchedButton from "@/features/webtoon-watched/ui/WebtoonWatchedButton.tsx";
 
 export interface WebtoonCardProps {
     webtoon: WebtoonInfo;
@@ -110,8 +110,8 @@ export default function WebtoonCard({
                 {showActionButtons && (
                     <CardFooter className="p-0 flex justify-end gap-2">
                         <WebtoonLikeButton webtoonId={webtoon.id}/>
-                        <BookmarkButton />
-                        <WatchedButton />
+                        <WebtoonFavoriteButton webtoonId={webtoon.id} />
+                        <WebtoonWatchedButton webtoonId={webtoon.id} />
                     </CardFooter>
                 )}
             </div>
