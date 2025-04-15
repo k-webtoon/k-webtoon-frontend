@@ -1,17 +1,24 @@
 import "./global.css";
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import RoutesConfig from "@/app/routes";
-import { useEffect } from "react";
-import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { TrackingProvider } from "@/pages/TrackingProvider";
+import { useAuthStore } from "@/entities/auth/api/store.ts";
 
 function App() {
-    const initialize = useAuthStore(state => state.initialize);
+  const { isAuthenticated, user, initialize, fetchUserInfo } = useAuthStore();
 
-    // 앱 초기화 시 사용자 정보 로드
-    useEffect(() => {
-        initialize();
-    }, []);
+  // 토큰으로 로그인 정보 초기화
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  // 인증은 됐는데 user 정보 없으면 불러오기
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+//       fetchUserInfo();
+    }
+  }, [isAuthenticated, user]);
 
   return (
     <BrowserRouter>
