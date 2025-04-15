@@ -5,10 +5,13 @@ import { getWebtoonDetail, commentApi } from "@/entities/webtoondetail/api/webto
 import { CommentRequest } from "@/entities/webtoondetail/model/types";
 import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { CommentSection } from "@/pages/webtoon/WebtoonComment.tsx";
+import { useNavigate  } from "react-router-dom";
 
 function WebtoonDetail() {
   const { id } = useParams<{ id: string }>();
   const [newComment, setNewComment] = useState("");
+  const navigate = useNavigate(); // useNavigate 사용
+
   const {
     webtoon,
     comments,
@@ -142,6 +145,17 @@ function WebtoonDetail() {
     setCurrentPage(newPage);
   };
 
+  // 태그 클릭 시 URL 변경
+  const handleTagClick = (tag: string) => {
+    //console.log("Tag detected:", tag);  // 디버깅
+    navigate(`/search?query=$${tag}`);  // 태그는 #으로 구분
+  };
+
+  // 작가 클릭 시 URL 변경
+  const handleAuthorClick = (author: string) => {
+    navigate(`/search?query=~${author}`);  // 작가는 $으로 구분
+  };
+
   // 날짜 포맷 함수
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -229,14 +243,20 @@ function WebtoonDetail() {
                 <h1 className="text-5xl font-bold tracking-tight text-gray-900">
                   {webtoon.titleName}
                 </h1>
-                <p className="text-2xl text-gray-600">{webtoon.author}</p>
+                <p 
+                    className="text-2xl text-gray-600 cursor-pointer"
+                    onClick={() => handleAuthorClick(webtoon.author)} // 클릭 시 작가 이름으로 검색
+                  >
+                    {webtoon.author}
+                  </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {webtoon.tag.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-5 py-2.5 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-full text-sm font-medium hover:from-gray-100 hover:to-gray-200 transition-all duration-300 shadow-sm"
+                    className="px-5 py-2.5 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 rounded-full text-sm font-medium hover:from-gray-100 hover:to-gray-200 transition-all duration-300 shadow-sm cursor-pointer"
+                    onClick={() => handleTagClick(tag)}
                   >
                     {tag}
                   </span>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { topWebtoons, searchWebtoons, getWebtoonById } from '@/entities/webtoon/api/api';
+import { topWebtoons, searchWebtoons, searchWebtoons_Author, searchWebtoons_Tags, getWebtoonById } from '@/entities/webtoon/api/api';
 import { WebtoonState } from '@/entities/webtoon/model/types';
 
 // Zustand 스토어 생성
@@ -42,6 +42,34 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     },
 
     // 작가로 웹툰 검색 API (리스트)
+    searchWebtoonsByAuthor: async (authorName: string, page: number = 0, size: number = 10) => {
+        set({ isLoading: true, error: null });
+        try {
+          const data = await searchWebtoons_Author(authorName, page, size);
+          set({ searchResults: data, isLoading: false });
+        } catch (error) {
+          console.error('웹툰 작가 검색 오류:', error);
+          set({
+            error: '작가로 웹툰 검색 중 오류가 발생했습니다.',
+            isLoading: false
+          });
+        }
+      },
+    
+      // 태그로 웹툰 검색
+      searchWebtoonsByTags: async (tagName: string, page: number = 0, size: number = 10) => {
+        set({ isLoading: true, error: null });
+        try {
+          const data = await searchWebtoons_Tags(tagName, page, size); // 태그로 검색하는 API 호출
+          set({ searchResults: data, isLoading: false });
+        } catch (error) {
+          console.error('태그로 웹툰 검색 오류:', error);
+          set({
+            error: '태그로 웹툰 검색 중 오류가 발생했습니다.',
+            isLoading: false
+          });
+        }
+      },
 
 
     // 조회수 높은 웹툰 조회 (리스트)

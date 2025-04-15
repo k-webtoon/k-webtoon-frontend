@@ -18,11 +18,19 @@ export const searchWebtoons = async (titleName: string): Promise<WebtoonPaginate
 };
 
 // 작가로 웹툰 검색 API (리스트)
-export const searchWebtoonsByAuthor = async (authorName: string, page: number = 0, size: number = 10): Promise<WebtoonPaginatedResponse> => {
+export const searchWebtoons_Author = async (authorName: string, page: number = 0, size: number = 10): Promise<WebtoonPaginatedResponse> => {
   const response = await axios.get(`${BASE_URL}/search/author`, {
     params: { authorName, page, size }
   });
   return response.data;
+};
+
+// 태그로 웹툰 검색 API (리스트)
+export const searchWebtoons_Tags =async (tagName: string, page: number = 0, size: number = 10): Promise<WebtoonPaginatedResponse> => {
+    const response = await axios.get(`${BASE_URL}/search/tag`, {
+        params: { tagName, page, size }
+    });
+    return response.data;
 };
 
 // 조회수 높은 웹툰 조회 API (리스트)
