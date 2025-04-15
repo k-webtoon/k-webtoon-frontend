@@ -78,30 +78,41 @@ export const MyProfile = () => {
   } | null>(null);
 
   // 컴포넌트 마운트 시 사용자 정보 로드
-  useEffect(() => {
-    // location.state에서 사용자 정보가 넘어왔는지 확인
-    const userId = locationUserInfo?.indexId;
+useEffect(() => {
+  const userId = locationUserInfo?.indexId;
 
-    if (userId) {
+  const fetchData = async () => {
+    try {
+      if (!userId) {
+        console.warn("사용자 ID가 없습니다. location 정보 확인 필요", locationUserInfo);
+        return;
+      }
+
       console.log("프로필 페이지에서 사용할 사용자 ID:", userId);
-      fetchMyInfo(userId);
-      fetchMyLikedWebtoons(userId);
-      fetchMyComments(userId);
-      fetchFollowers(userId);
-      fetchFollowees(userId);
-    } else {
-      console.error("사용자 ID를 찾을 수 없습니다:", {
-        locationUserInfo
-      });
+      await Promise.all([
+        fetchMyInfo(userId),
+        fetchMyLikedWebtoons(userId),
+        fetchMyComments(userId),
+        fetchFollowers(userId),
+        fetchFollowees(userId),
+      ]);
+    } catch (err) {
+      console.error("프로필 관련 데이터 로딩 중 에러 발생", err);
+      // TODO: 사용자에게 메시지 노출하려면 setMessage 사용 가능
+      // setMessage({ type: 'error', text: '프로필 정보를 불러오는 데 실패했습니다.' });
     }
-  }, [
-    locationUserInfo,
-    fetchMyInfo,
-    fetchMyLikedWebtoons,
-    fetchMyComments,
-    fetchFollowers,
-    fetchFollowees,
-  ]);
+  };
+
+  fetchData();
+}, [
+  locationUserInfo,
+  fetchMyInfo,
+  fetchMyLikedWebtoons,
+  fetchMyComments,
+  fetchFollowers,
+  fetchFollowees,
+]);
+
 
   const { fetchUserActivity, loading: activityLoading } =
     useUserActivityStore();

@@ -22,7 +22,7 @@ export const BioSection = ({ userId }: BioSectionProps) => {
         setError(null);
         const bioData = await getBioApi(userId);
         console.log("받은 bio 데이터: ", bioData);
-        setBio(bioData);
+      setBio(bioData.bio); // ✅ 수정된 부분
       } catch (err: any) {
         console.error("소개 조회 에러:", err);
         setError(err.message);
