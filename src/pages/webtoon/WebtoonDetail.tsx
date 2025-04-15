@@ -145,14 +145,16 @@ function WebtoonDetail() {
     setCurrentPage(newPage);
   };
 
+  // 태그 클릭 시 URL 변경
   const handleTagClick = (tag: string) => {
-    navigate(`/search?query=${tag}`);
+    //console.log("Tag detected:", tag);  // 디버깅
+    navigate(`/search?query=$${tag}`);  // 태그는 #으로 구분
   };
-  
-    // 작가 클릭 시 URL 변경
+
+  // 작가 클릭 시 URL 변경
   const handleAuthorClick = (author: string) => {
-    navigate(`/search?query=${author}`); // URL에 쿼리로 작가 이름을 전달
-   };
+    navigate(`/search?query=~${author}`);  // 작가는 $으로 구분
+  };
 
   // 날짜 포맷 함수
   const formatDate = (dateString: string) => {
