@@ -11,6 +11,7 @@ import FollowersList from "../mypage/FollowersList";
 import FolloweesList from "../mypage/FolloweesList";
 import UserBioSection from "./UserBioSection";
 import FollowButton from "./FollowButton";
+import { useAuthStore } from '@/entities/auth/api/store.ts';
 
 type TabType = "overview" | "followers" | "followees";
 
@@ -55,7 +56,7 @@ const UserProfile = () => {
   } = useUserStore();
 
   // @ts-ignore 여기 부분 로그인한 사용자 아이디 토큰 전달로 바뀜. 리팩토링할 예정
-  // const { user } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (numericUserId) {
@@ -74,7 +75,7 @@ const UserProfile = () => {
       if (numericUserId) {
         try {
           const isFollowing = await checkFollowStatusAction(
-            // user.indexId,
+            user.indexId,
             numericUserId
           );
           setIsFollowing(isFollowing);
@@ -112,6 +113,19 @@ const UserProfile = () => {
       setFollowLoading(false);
     }
   };
+
+useEffect(() => {
+  if (!user || !user.indexId) return; // null 체크
+  const checkFollowStatus = async () => {
+    try {
+      const result = await checkFollowStatusAction(user.indexId, numericUserId);
+      setIsFollowing(result);
+    } catch (e) {
+      console.error("팔로우 상태 확인 중 오류:", e);
+    }
+  };
+  checkFollowStatus();
+}, [user, numericUserId]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -163,14 +177,14 @@ const UserProfile = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {likedWebtoons.map((webtoon) => (
-                    <WebtoonCard
-                      key={webtoon.id}
-                      webtoon={convertToTopWebtoonInfo(webtoon)}
-                      size="sm"
-                      showActionButtons={false}
-                    />
-                  ))}
+              {likedWebtoons.map((webtoon) => (
+                <WebtoonCard
+                  key={`${webtoon.id}-${webtoon.title}`} // 안전한 key
+                  webtoon={convertToTopWebtoonInfo(webtoon)}
+                  size="sm"
+                  showActionButtons={false}
+                />
+              ))}
                 </div>
               )}
             </div>
