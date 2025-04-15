@@ -25,7 +25,6 @@ import UserManagement from "@/pages/admin/management/UserManagement";
 import CommentManagement from "@/pages/admin/management/CommentManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
-import AuthorStats from "@/pages/admin/stats/AuthorStats";
 import CommentStats from "@/pages/admin/stats/CommentStats";
 import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
@@ -74,6 +73,7 @@ const RoutesConfig = () => (
           path="auth/find/reset-password/result"
           element={<ResetPasswordResult />}
         />
+        <Route path="/oauth-redirect" element={<OAuthRedirect />} />
       </Route>
 
       {/* 🌐 웹툰 ====================== */}
@@ -117,7 +117,6 @@ const RoutesConfig = () => (
           <Route path="stats">
             <Route path="users" element={<UserStats />} />
             <Route path="webtoons" element={<WebtoonStats />} />
-            <Route path="authors" element={<AuthorStats />} />
             <Route path="comments" element={<CommentStats />} />
           </Route>
 
@@ -138,8 +137,6 @@ const RoutesConfig = () => (
         </Route>
       </Route>
     </Route>
-
-    <Route path="/oauth-redirect" element={<OAuthRedirect />} />
 
     {/* 🚫 오류 */}
     <Route path="not-admin" element={<AdminAccessDenied />} />
