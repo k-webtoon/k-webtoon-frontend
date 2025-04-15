@@ -11,16 +11,15 @@ import FollowersList from "../mypage/FollowersList";
 import FolloweesList from "../mypage/FolloweesList";
 import UserBioSection from "./UserBioSection";
 import FollowButton from "./FollowButton";
-import { useAuthStore } from '@/entities/auth/api/store.ts';
+import { useAuthStore } from "@/entities/auth/api/store.ts";
 
 type TabType = "overview" | "followers" | "followees";
 
-// LikedWebtoon을 TopWebtoonInfo로 변환하는 함수
 const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): WebtoonInfo => ({
   id: webtoon.id,
   titleId: webtoon.id,
   titleName: webtoon.title,
-  author: "작가명", // API에서 제공하지 않는 경우 기본값
+  author: "작가명",
   adult: false,
   age: "전체연령가",
   finish: false,
@@ -29,9 +28,11 @@ const convertToTopWebtoonInfo = (webtoon: LikedWebtoon): WebtoonInfo => ({
   rankGenreTypes: ["DRAMA"],
   starScore: 0,
 });
+
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const numericUserId = parseInt(userId || "0", 10);
+
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
@@ -55,9 +56,35 @@ const UserProfile = () => {
     checkFollowStatusAction,
   } = useUserStore();
 
-  // @ts-ignore 여기 부분 로그인한 사용자 아이디 토큰 전달로 바뀜. 리팩토링할 예정
-  const { user } = useAuthStore();
+  const { userInfo: loginUserInfo, isAuthenticated, initialize } = useAuthStore();
 
+  // 로그인 상태 및 유저 정보 초기화
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  // 로그인 정보 및 팔로우 상태 확인
+  useEffect(() => {
+    console.log("💡 [UserProfile] isAuthenticated:", isAuthenticated);
+
+    if (isAuthenticated && loginUserInfo?.userId && numericUserId) {
+      const checkFollowStatus = async () => {
+        try {
+          const isFollowing = await checkFollowStatusAction(
+            loginUserInfo.userId,
+            numericUserId
+          );
+      console.log(numericUserId);
+          setIsFollowing(isFollowing);
+        } catch (error) {
+          console.error("팔로우 상태 확인 중 오류 발생:", error);
+        }
+      };
+      checkFollowStatus();
+    }
+  }, [loginUserInfo, isAuthenticated, numericUserId]);
+
+  // 좋아요한 웹툰, 댓글, 팔로워, 팔로잉 정보 불러오기
   useEffect(() => {
     if (numericUserId) {
       fetchUserInfo(numericUserId);
@@ -68,41 +95,22 @@ const UserProfile = () => {
     }
   }, [numericUserId]);
 
-  // 팔로우 상태 확인
-useEffect(() => {
-  const checkFollowStatus = async () => {
-    if (!user || !user.indexId || !numericUserId) {
-      console.warn("[UserProfile] user 또는 indexId 없음. 팔로우 상태 확인 스킵");
+  const toggleFollow = async () => {
+    if (!loginUserInfo?.userId) {
+      console.warn("로그인 유저 정보 없음");
       return;
     }
 
-    try {
-      const isFollowing = await checkFollowStatusAction(user.indexId, numericUserId);
-      setIsFollowing(isFollowing);
-    } catch (error) {
-      console.error("팔로우 상태 확인 중 오류 발생:", error);
-    }
-  };
-
-  checkFollowStatus();
-}, [user, numericUserId]);
-
-  const toggleFollow = async () => {
-    // if (!user) return;
     setFollowLoading(true);
     setFollowError(null);
 
     try {
       if (isFollowing) {
-        // await unfollowUserAction(user.indexId, numericUserId);
-        await unfollowUserAction(numericUserId);
+        await unfollowUserAction(loginUserInfo.userId, numericUserId);
       } else {
-        // await followUserAction(user.indexId, numericUserId);
-        await followUserAction(numericUserId);
+        await followUserAction(loginUserInfo.userId, numericUserId);
       }
       setIsFollowing(!isFollowing);
-
-      // 팔로워 목록 새로고침
       await fetchFollowers(numericUserId);
     } catch (error) {
       console.error("팔로우 상태 변경 중 오류 발생:", error);
@@ -111,19 +119,6 @@ useEffect(() => {
       setFollowLoading(false);
     }
   };
-
-useEffect(() => {
-  if (!user || !user.indexId) return; // null 체크
-  const checkFollowStatus = async () => {
-    try {
-      const result = await checkFollowStatusAction(user.indexId, numericUserId);
-      setIsFollowing(result);
-    } catch (e) {
-      console.error("팔로우 상태 확인 중 오류:", e);
-    }
-  };
-  checkFollowStatus();
-}, [user, numericUserId]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -134,7 +129,6 @@ useEffect(() => {
       default:
         return (
           <>
-            {/* 좋아요한 웹툰 섹션 */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">좋아요한 웹툰</h2>
@@ -146,7 +140,7 @@ useEffect(() => {
                     <div
                       key={index}
                       className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse"
-                    ></div>
+                    />
                   ))}
                 </div>
               ) : error ? (
@@ -175,19 +169,18 @@ useEffect(() => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {likedWebtoons.map((webtoon) => (
-                <WebtoonCard
-                  key={`${webtoon.id}-${webtoon.title}`} // 안전한 key
-                  webtoon={convertToTopWebtoonInfo(webtoon)}
-                  size="sm"
-                  showActionButtons={false}
-                />
-              ))}
+                  {likedWebtoons.map((webtoon) => (
+                    <WebtoonCard
+                      key={`${webtoon.id}-${webtoon.title}`}
+                      webtoon={convertToTopWebtoonInfo(webtoon)}
+                      size="sm"
+                      showActionButtons={false}
+                    />
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* 작성한 댓글 섹션 */}
             <UserComments comments={comments} loading={loading} error={error} />
           </>
         );
@@ -197,13 +190,13 @@ useEffect(() => {
   if (loading) {
     return (
       <div className="w-full font-[Pretendard]">
-        <div className="w-full h-[360px] bg-gray-200 animate-pulse"></div>
+        <div className="w-full h-[360px] bg-gray-200 animate-pulse" />
         <div className="mt-10 space-y-6">
-          <div className="h-12 w-48 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-12 w-48 bg-gray-200 animate-pulse rounded" />
           <div className="grid grid-cols-3 gap-4">
-            <div className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse"></div>
-            <div className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse"></div>
-            <div className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse"></div>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-[280px] w-full rounded-xl bg-gray-200 animate-pulse" />
+            ))}
           </div>
         </div>
       </div>
@@ -227,19 +220,19 @@ useEffect(() => {
   return (
     <div className="container mx-auto px-4 py-8 mt-16 max-w-7xl">
       <div className="flex flex-col md:flex-row gap-8">
-        {/* 왼쪽 프로필 섹션 */}
         <div className="w-full md:w-1/4">
           <div className="sticky top-24">
             <ProfileImageDisplay userId={numericUserId} />
-
-            {/* 소개 섹션 */}
             <UserBioSection userId={numericUserId} />
-
             <div className="mb-6">
-              <FollowButton userId={numericUserId} />
+                <FollowButton
+                  userId={numericUserId}
+                  isFollowing={isFollowing}
+                  onToggle={toggleFollow}
+                  loading={followLoading}
+                />
             </div>
 
-            {/* 팔로우 통계 */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <button
                 onClick={() => setActiveTab("followers")}
@@ -261,46 +254,25 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* 탭 네비게이션 */}
             <nav className="space-y-1">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={clsx(
-                  "w-full px-4 py-2 text-left rounded-md",
-                  activeTab === "overview"
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                )}
-              >
-                프로필 개요
-              </button>
-              <button
-                onClick={() => setActiveTab("followers")}
-                className={clsx(
-                  "w-full px-4 py-2 text-left rounded-md",
-                  activeTab === "followers"
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                )}
-              >
-                팔로워
-              </button>
-              <button
-                onClick={() => setActiveTab("followees")}
-                className={clsx(
-                  "w-full px-4 py-2 text-left rounded-md",
-                  activeTab === "followees"
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                )}
-              >
-                팔로잉
-              </button>
+              {(["overview", "followers", "followees"] as TabType[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={clsx(
+                    "w-full px-4 py-2 text-left rounded-md",
+                    activeTab === tab
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-600 hover:bg-gray-50"
+                  )}
+                >
+                  {tab === "overview" ? "프로필 개요" : tab === "followers" ? "팔로워" : "팔로잉"}
+                </button>
+              ))}
             </nav>
           </div>
         </div>
 
-        {/* 오른쪽 콘텐츠 섹션 */}
         <div className="flex-1">{renderTabContent()}</div>
       </div>
     </div>

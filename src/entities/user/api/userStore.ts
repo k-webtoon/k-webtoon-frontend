@@ -160,7 +160,7 @@ export const useUserStore = create<UserState>((set) => ({
       }
 
       const response = await fetch(
-        `/api/follow/${followerId}/follow/${followeeId}`,
+        `http://localhost:8080/api/follow/${followeeId}`,
         {
           method: "POST",
           headers: {
@@ -198,7 +198,7 @@ export const useUserStore = create<UserState>((set) => ({
       }
 
       const response = await fetch(
-        `/api/follow/${followerId}/unfollow/${followeeId}`,
+        `http://localhost:8080/api/follow/${followeeId}/unfollow`,
         {
           method: "DELETE",
           headers: {
@@ -330,36 +330,41 @@ export const useUserStore = create<UserState>((set) => ({
   },
 
   // 새로운 액션
-  checkFollowStatusAction: async (
-    followerId: number,
-    followeeId: number
-  ): Promise<boolean> => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("로그인이 필요합니다.");
-      }
-
-      const response = await fetch(
-        `/api/follow/${followerId}/status/${followeeId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("팔로우 상태 확인에 실패했습니다.");
-      }
-
-      const data = await response.json();
-      return data.isFollowing;
-    } catch (error) {
-      console.error("팔로우 상태 확인 중 오류 발생:", error);
-      throw error;
+checkFollowStatusAction: async (
+  followerId: number,
+  followeeId: number
+): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem("token");
+    console.log("로그인 토큰:", token); // 토큰 확인
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
     }
-  },
+
+    console.log(`팔로우 상태 확인 요청: followerId = ${followerId}, followeeId = ${followeeId}`);
+
+    const response = await fetch(
+  `http://localhost:8080/api/follow/status/${followerId}/${followeeId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("팔로우 상태 확인에 실패했습니다.");
+    }
+
+   const data = await response.text();
+   console.log("팔로우 상태 응답 데이터:", data);
+return data === "true"; // ← 진짜 불린 값으로 바꿔줌
+  } catch (error) {
+    console.error("팔로우 상태 확인 중 오류 발생:", error);
+    throw error;
+  }
+},
+
 }));
