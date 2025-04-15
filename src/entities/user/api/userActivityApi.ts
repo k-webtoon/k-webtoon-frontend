@@ -67,28 +67,15 @@ export const getUserProfileImageApi = async (userId: number) => {
 };
 
 // 소개 조회
-export const getBioApi = async (userId: number) => {
+export const getBioApi = async (userId: number): Promise<string> => {
   try {
     const response = await axios.get(`${USER_ACTIVITY_BASE_URL}/${userId}/bio`);
-    console.log("response: ", response.data);
+    console.log("response: ", response.data); // 여기에 바로 bio가 들어있음
 
-    // null 방어 처리
-    return {
-      bio: response.data?.bio ?? "",
-      profileImageUrl: response.data?.profileImageUrl ?? "",
-    };
+    return response.data ?? "";
   } catch (error: any) {
-    // 404 또는 400이 아닌 진짜 예외만 처리
     const message = error.response?.data?.message;
-
-    // 백엔드에서 USER_ACTIVITY_NOT_FOUND 같은 메시지를 주면 기본 값으로 대체
-    if (message === "사용자 활동 정보 없음") {
-      return {
-        bio: "",
-        profileImageUrl: "",
-      };
-    }
-
+    if (message === "사용자 활동 정보 없음") return "";
     throw new Error(message || "소개 조회 실패");
   }
 };

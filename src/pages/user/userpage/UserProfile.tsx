@@ -69,25 +69,23 @@ const UserProfile = () => {
   }, [numericUserId]);
 
   // 팔로우 상태 확인
-  useEffect(() => {
-    const checkFollowStatus = async () => {
-      // if (user && numericUserId) {
-      if (numericUserId) {
-        try {
-          const isFollowing = await checkFollowStatusAction(
-            user.indexId,
-            numericUserId
-          );
-          setIsFollowing(isFollowing);
-        } catch (error) {
-          console.error("팔로우 상태 확인 중 오류 발생:", error);
-        }
-      }
-    };
+useEffect(() => {
+  const checkFollowStatus = async () => {
+    if (!user || !user.indexId || !numericUserId) {
+      console.warn("[UserProfile] user 또는 indexId 없음. 팔로우 상태 확인 스킵");
+      return;
+    }
 
-    checkFollowStatus();
-  // }, [user, numericUserId, checkFollowStatusAction]);
-  }, [numericUserId, checkFollowStatusAction]);
+    try {
+      const isFollowing = await checkFollowStatusAction(user.indexId, numericUserId);
+      setIsFollowing(isFollowing);
+    } catch (error) {
+      console.error("팔로우 상태 확인 중 오류 발생:", error);
+    }
+  };
+
+  checkFollowStatus();
+}, [user, numericUserId]);
 
   const toggleFollow = async () => {
     // if (!user) return;
