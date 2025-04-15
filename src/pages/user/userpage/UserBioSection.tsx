@@ -33,11 +33,8 @@ useEffect(() => {
 }, [userId]);
 
   if (loading) {
-    console.log("[BIO] 로딩 중...");
     return <p className="text-gray-500">소개를 불러오는 중...</p>;
   }
-
-  console.log("[BIO 렌더링 전]", bio);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
