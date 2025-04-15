@@ -1,13 +1,24 @@
 import { create } from 'zustand';
-import { topWebtoons, searchWebtoons, searchWebtoons_Author, searchWebtoons_Tags, getWebtoonById } from '@/entities/webtoon/api/api';
+import { 
+    topWebtoons, 
+    searchWebtoons, 
+    searchWebtoons_Author, 
+    searchWebtoons_Tags, 
+    getWebtoonById,
+    getPopularByFavorites,
+    getPopularByLikes,
+    getPopularByWatched
+} from '@/entities/webtoon/api/api';
 import { WebtoonState } from '@/entities/webtoon/model/types';
 
-// Zustand 스토어 생성
 export const useWebtoonStore = create<WebtoonState>((set) => ({
     // 초기 상태
     currentWebtoon: null,
     searchResults: null,
     topWebtoonList: null,
+    popularByFavorites: null,
+    popularByLikes: null,
+    popularByWatched: null,
     isLoading: false,
     error: null,
 
@@ -95,5 +106,50 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     // 검색 결과 초기화
     resetSearchResults: () => {
         set({ searchResults: null });
+    },
+    
+    // 즐겨찾기 기준 인기 웹툰 조회
+    fetchPopularByFavorites: async (page = 0, size = 10) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await getPopularByFavorites(page, size);
+            set({ popularByFavorites: data, isLoading: false });
+        } catch (error) {
+            console.error('인기 웹툰(즐겨찾기) 로딩 오류:', error);
+            set({
+                error: '인기 웹툰(즐겨찾기)을 불러오는 중 오류가 발생했습니다.',
+                isLoading: false
+            });
+        }
+    },
+    
+    // 좋아요 기준 인기 웹툰 조회
+    fetchPopularByLikes: async (page = 0, size = 10) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await getPopularByLikes(page, size);
+            set({ popularByLikes: data, isLoading: false });
+        } catch (error) {
+            console.error('인기 웹툰(좋아요) 로딩 오류:', error);
+            set({
+                error: '인기 웹툰(좋아요)을 불러오는 중 오류가 발생했습니다.',
+                isLoading: false
+            });
+        }
+    },
+    
+    // 봤어요 기준 인기 웹툰 조회
+    fetchPopularByWatched: async (page = 0, size = 10) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await getPopularByWatched(page, size);
+            set({ popularByWatched: data, isLoading: false });
+        } catch (error) {
+            console.error('인기 웹툰(봤어요) 로딩 오류:', error);
+            set({
+                error: '인기 웹툰(봤어요)을 불러오는 중 오류가 발생했습니다.',
+                isLoading: false
+            });
+        }
     },
 }));

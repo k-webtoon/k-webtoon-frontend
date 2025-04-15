@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import {WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
+import {PopularWebtoonResponse, WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard.tsx";
 import {Button} from "@/shared/ui/shadcn/button.tsx";
 
 interface WebtoonSliderProps {
     title: string;
     coment?: string;
-    webtoons: () => Promise<WebtoonPaginatedResponse>;
+    webtoons: () => Promise<WebtoonPaginatedResponse | PopularWebtoonResponse>;
     cardSize?: 'sm' | 'md' | 'lg';
     showBadges?: boolean;
     showActionButtons?: boolean;
@@ -28,7 +28,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
     const sliderRef = useRef<HTMLDivElement>(null);
 
     // 로컬 상태 관리
-    const [webtoonData, setWebtoonData] = useState<WebtoonPaginatedResponse | null>(null);
+    const [webtoonData, setWebtoonData] = useState<WebtoonPaginatedResponse | PopularWebtoonResponse | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(initialLoad);
     const [error, setError] = useState<string | null>(null);
 
@@ -45,16 +45,17 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
 
         try {
             const data = await webtoons();
-            console.log("슬라이더에서 로드된 데이터:", data);
-
+            
             if (!data) {
-                throw new Error('데이터가 없습니다.');
+                console.warn(`데이터가 비어있습니다 (${title})`);
+                throw new Error(`데이터가 없습니다 (${title})`);
             }
 
             setWebtoonData(data);
-        } catch (err) {
-            console.error('웹툰 데이터 로드 오류:', err);
-            setError('웹툰 데이터를 불러오는 중 오류가 발생했습니다.');
+        } catch (error: unknown) {
+            const err = error as Error;
+            console.error(`웹툰 데이터 로드 오류 (${title}):`, err);
+            setError(`웹툰 데이터를 불러오는 중 오류가 발생했습니다: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -62,10 +63,25 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
 
     // 초기 로드 또는 webtoons 변경 시 데이터 로드
     useEffect(() => {
-        if (initialLoad || !webtoonData) {
-            loadData();
-        }
-    }, [initialLoad, webtoons]);
+        const loadInitialData = async () => {
+            if (initialLoad) {
+                // 초기 로드 설정인 경우 API 호출
+                await loadData();
+            } else if (webtoons && !webtoonData) {
+                // initialLoad가 false지만 외부에서 데이터를 받는 경우
+                try {
+                    const data = await webtoons();
+                    if (data) {
+                        setWebtoonData(data);
+                    }
+                } catch (err) {
+                    console.error(`외부 데이터 로드 오류 (${title}):`, err);
+                }
+            }
+        };
+        
+        loadInitialData();
+    }, [initialLoad, webtoons, title, webtoonData]);
 
     // 슬라이더 스크롤 함수
     const scroll = (direction: 'left' | 'right') => {
@@ -99,8 +115,28 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
         );
     }
 
-    if (!webtoonData || !webtoonData.content || webtoonData.content.length === 0) {
+    if (!webtoonData) {
         return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
+    }
+    
+    // 데이터 타입에 따른 웹툰 목록 추출
+    let webtoonsToDisplay: any[] = [];
+    
+    // 배열인 경우 (PopularWebtoonResponse)
+    if (Array.isArray(webtoonData)) {
+        webtoonsToDisplay = webtoonData;
+        if (webtoonsToDisplay.length === 0) {
+            return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
+        }
+    } 
+    // 페이지네이션 응답인 경우 (WebtoonPaginatedResponse)
+    else if ('content' in webtoonData && Array.isArray(webtoonData.content)) {
+        webtoonsToDisplay = webtoonData.content;
+        if (webtoonsToDisplay.length === 0) {
+            return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
+        }
+    } else {
+        return <div className="p-6 text-center">웹툰 데이터 형식이 올바르지 않습니다.</div>;
     }
 
     return (
@@ -123,12 +159,18 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                     className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                    {webtoonData.content.map((webtoon, index) => (
-                        <div key={webtoon.id} className="relative group flex-shrink-0">
+                    {webtoonsToDisplay.map((webtoon, index) => (
+                        <div key={'webtoonId' in webtoon ? webtoon.webtoonId : webtoon.id} className="relative group flex-shrink-0">
                             <div className="absolute top-0 left-0 z-20 p-2 text-white text-5xl font-bold">
                                 {index + 1}
                             </div>
-                            <WebtoonCard webtoon={webtoon} size={cardSize} showAI={showAI} showBadges={showBadges} showActionButtons={showActionButtons} />
+                            <WebtoonCard 
+                                webtoon={webtoon} 
+                                size={cardSize} 
+                                showAI={showAI} 
+                                showBadges={showBadges} 
+                                showActionButtons={showActionButtons} 
+                            />
                         </div>
                     ))}
                 </div>
@@ -145,4 +187,9 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
     );
 };
 
-export default WebtoonSlider;
+// 불필요한 리렌더링 방지를 위한 메모이제이션
+export default React.memo(WebtoonSlider, (prevProps, nextProps) => {
+    // title이 같고 webtoons 함수가 같으면 리렌더링하지 않음
+    return prevProps.title === nextProps.title && 
+           prevProps.webtoons === nextProps.webtoons;
+});

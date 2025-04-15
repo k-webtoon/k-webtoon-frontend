@@ -1,5 +1,9 @@
 import axios from "axios";
-import {WebtoonResponse, WebtoonPaginatedResponse} from "@/entities/webtoon/model/types.ts";
+import {
+    WebtoonResponse, 
+    WebtoonPaginatedResponse,
+    PopularWebtoonResponse
+} from "@/entities/webtoon/model/types.ts";
 
 const BASE_URL = 'http://localhost:8080/api/webtoons';
 
@@ -41,6 +45,42 @@ export const topWebtoons = async (page: number = 0, size: number = 10): Promise<
     return response.data;
 };
 
+// 즐겨찾기가 많은 웹툰 조회 API
+export const getPopularByFavorites = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+    try {
+        const response = await axios.get(`${BASE_URL}/popular/favorites`, {
+            params: { page, size }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('인기 웹툰(즐겨찾기) 조회 실패:', error);
+        throw error;
+    }
+};
 
+// 좋아요가 많은 웹툰 조회 API
+export const getPopularByLikes = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+    try {
+        const response = await axios.get(`${BASE_URL}/popular/likes`, {
+            params: { page, size }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('인기 웹툰(좋아요) 조회 실패:', error);
+        throw error;
+    }
+};
 
+// 봤어요가 많은 웹툰 조회 API
+export const getPopularByWatched = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+    try {
+        const response = await axios.get(`${BASE_URL}/popular/watched`, {
+            params: { page, size }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('인기 웹툰(봤어요) 조회 실패:', error);
+        throw error;
+    }
+};
 
