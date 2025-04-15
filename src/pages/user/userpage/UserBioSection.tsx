@@ -15,7 +15,7 @@ const UserBioSection: React.FC<BioSectionProps> = ({ userId }) => {
       try {
         setLoading(true);
         const bioData = await getBioApi(userId);
-        setBio(bioData || null);
+        setBio(bioData.bio || null); // bio 값만 뽑아서 세팅
       } catch (err: any) {
         console.error("소개 조회 에러:", err);
         setBio(null); // 에러 발생 시 null로 설정
