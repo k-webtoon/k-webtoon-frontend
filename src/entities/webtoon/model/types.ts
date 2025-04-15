@@ -9,10 +9,12 @@ export type GenreType =
     | 'ACTION'
     | 'ROMANCE'
     | 'COMEDY'
+    | 'COMIC'
     | 'THRILLER'
     | 'SPORTS'
     | 'DAILY'
-    | 'HUMOR';
+    | 'HUMOR'
+    | 'PURE';
 
 // 한글 장르 타입
 export type KoreanGenreType =
@@ -24,7 +26,8 @@ export type KoreanGenreType =
     | '스릴러'
     | '스포츠'
     | '일상'
-    | '개그';
+    | '개그'
+    | '순정';
 
 // 연령 제한 타입
 export type AgeRating = '전체연령가' | '12세 이용가' | '15세 이용가' | '성인';
@@ -55,10 +58,12 @@ export const GENRE_MAPPING: Record<GenreType, KoreanGenreType> = {
     'ACTION': '액션',
     'ROMANCE': '로맨스',
     'COMEDY': '코미디',
+    'COMIC': '코미디',
     'THRILLER': '스릴러',
     'SPORTS': '스포츠',
     'DAILY': '일상',
-    'HUMOR': '개그'
+    'HUMOR': '개그',
+    'PURE': '순정'
 };
 
 // 장르 한글 매핑 함수
@@ -79,6 +84,21 @@ export interface PaginatedResponse<T> {
 }
 export type WebtoonPaginatedResponse = PaginatedResponse<WebtoonInfo>;
 
+// 인기 웹툰 응답 타입
+export interface PopularWebtoon {
+    webtoonId: number;
+    titleName: string;
+    author: string;
+    thumbnailUrl: string;
+    genre: string[];
+    adult: boolean;
+    finish: boolean;
+    starScore: string;
+    totalCount: number;
+}
+
+export type PopularWebtoonResponse = PopularWebtoon[];
+
 // ===============
 // 상태 관리 타입
 // ===============
@@ -89,6 +109,9 @@ export interface WebtoonState {
     currentWebtoon: WebtoonInfo | null;
     searchResults: WebtoonPaginatedResponse | null;
     topWebtoonList: WebtoonPaginatedResponse | null;
+    popularByFavorites: PopularWebtoon[] | null;
+    popularByLikes: PopularWebtoon[] | null;
+    popularByWatched: PopularWebtoon[] | null;
     isLoading: boolean;
     error: string | null;
 
@@ -96,6 +119,9 @@ export interface WebtoonState {
     fetchWebtoonById: (id: number) => Promise<void>;
     searchWebtoonsByName: (titleName: string) => Promise<void>;
     fetchTopWebtoons: (page?: number, size?: number) => Promise<void>;
+    fetchPopularByFavorites: (page?: number, size?: number) => Promise<void>;
+    fetchPopularByLikes: (page?: number, size?: number) => Promise<void>;
+    fetchPopularByWatched: (page?: number, size?: number) => Promise<void>;
     resetCurrentWebtoon: () => void;
     resetSearchResults: () => void;
 }

@@ -44,18 +44,17 @@ const Header: React.FC = () => {
     ], []);
 
     const webtoonSubTabItems: SubTabItem[] = useMemo(() => [
-        { title: "오늘의 추천 웹툰", href: "/1" },
-        { title: "인기 웹툰", href: "/2" },
-        { title: "최신 웹툰", href: "/3" },
-        { title: "큐레이툰 에디터 추천", href: "/4" }
+        { title: "맞춤 추천 웹툰", href: "/1" },
+        { title: "이건 진짜 인기 있음", href: "/2" }, // 인기순
+        { title: "이건 봐야 해", href: "/3" },         // 조회수
+        { title: "심장을 저격한 작품들", href: "/4" }, // 좋아요
+        { title: "찜 안 하면 섭섭해", href: "/5" }     // 즐겨찾기
     ], []);
 
-    // 현재 활성 탭에 따른 서브탭 아이템 선택 - useMemo로 최적화
     const currentSubTabItems = useMemo(() =>
             activeTab === "home" ? homeSubTabItems : webtoonSubTabItems,
         [activeTab, homeSubTabItems, webtoonSubTabItems]);
 
-    // URL 경로에 따라 activeTab 업데이트
     useEffect(() => {
         const currentPath = location.pathname;
 
