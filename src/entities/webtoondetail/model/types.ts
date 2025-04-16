@@ -19,13 +19,23 @@ export interface WebtoonDetail {
   artistId: string;
 }
 
-export interface Comment {
+export interface WebtoonComment {
   id: number;
   content: string;
-  userNickname: string;
+  nickname: string;
   createdDate: string;
   likeCount: number;
   isLiked: boolean;
+}
+
+export interface CommentWithAnalysis {
+  comment: WebtoonComment;
+  feelTop3: string[] | null;
+  message1: string | null;
+  message2: string | null;
+  message3: string | null;
+  randomMessageIndex: number | null; // 랜덤 메시지 고정
+  isAnalyzing: boolean; // 분석 중 상태
 }
 
 export interface CommentRequest {
@@ -46,7 +56,7 @@ export interface PageInfo {
 }
 
 export interface CommentPageResponse {
-  content: Comment[];
+  content: CommentWithAnalysis[];
   pageable: PageInfo;
   totalPages: number;
   totalElements: number;
