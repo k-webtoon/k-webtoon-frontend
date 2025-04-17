@@ -38,6 +38,7 @@ import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
 import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
 import OAuthRedirect from "@/entities/auth/ui/OAuthRedirect";
 import LogStats from "@/pages/admin/stats/LogStats";
+import PermissionManagement from "@/pages/admin/settings/PermissionManagement";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -127,12 +128,7 @@ const RoutesConfig = () => (
 
           {/* 설정 */}
           <Route path="settings">
-            <Route path="tags" element={<TagManagement />} />
-          </Route>
-
-          {/* 추천 시스템 */}
-          <Route path="recommendation">
-            <Route path="feedback" element={<FeedbackStatus />} />
+            <Route path="permissions" element={<PermissionManagement />} />
           </Route>
         </Route>
       </Route>

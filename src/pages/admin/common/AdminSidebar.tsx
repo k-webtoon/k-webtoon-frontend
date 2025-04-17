@@ -41,12 +41,8 @@ const menuGroups: MenuGroup[] = [
   },
   {
     title: "설정",
-    items: [{ title: "태그 관리", path: "/admin/settings/tags" }],
-  },
-  {
-    title: "추천 시스템",
-    items: [{ title: "피드백 현황", path: "/admin/recommendation/feedback" }],
-  },
+    items: [{ title: "권한 관리", path: "/admin/settings/permissions" }],
+  }
 ];
 
 export const AdminSidebar: FC<AdminSidebarProps> = memo(
