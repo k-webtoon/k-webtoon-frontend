@@ -2,8 +2,8 @@ import axios from "axios";
 import {
     WebtoonResponse, 
     WebtoonPaginatedResponse,
-    PopularWebtoonResponse
-} from "@/entities/webtoon/model/types.ts";
+    WebtoonInfo
+} from "@/entities/webtoon/model/types";
 
 const BASE_URL = 'http://localhost:8080/api/webtoons';
 
@@ -15,9 +15,9 @@ export const getWebtoonById = async (id: number): Promise<WebtoonResponse> => {
 
 // 단어로 웹툰 검색 API (리스트)
 export const searchWebtoons = async (titleName: string): Promise<WebtoonPaginatedResponse> => {
-    const response = await axios.get(
-        `${BASE_URL}/search/name?titleName=${titleName}`
-    );
+    const response = await axios.get(`${BASE_URL}/search/name`, {
+        params: { titleName }
+    });
     return response.data;
 };
 
@@ -46,10 +46,11 @@ export const topWebtoons = async (page: number = 0, size: number = 10): Promise<
 };
 
 // 즐겨찾기가 많은 웹툰 조회 API
-export const getPopularByFavorites = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+export const getPopularByFavorites = async (size: number = 10): Promise<WebtoonInfo[]> => {
     try {
+        const safeSize = size <= 0 ? 10 : size;
         const response = await axios.get(`${BASE_URL}/popular/favorites`, {
-            params: { page, size }
+            params: { size: safeSize }
         });
         return response.data;
     } catch (error) {
@@ -59,10 +60,11 @@ export const getPopularByFavorites = async (page: number = 0, size: number = 10)
 };
 
 // 좋아요가 많은 웹툰 조회 API
-export const getPopularByLikes = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+export const getPopularByLikes = async (size: number = 10): Promise<WebtoonInfo[]> => {
     try {
+        const safeSize = size <= 0 ? 10 : size;
         const response = await axios.get(`${BASE_URL}/popular/likes`, {
-            params: { page, size }
+            params: { size: safeSize }
         });
         return response.data;
     } catch (error) {
@@ -72,10 +74,11 @@ export const getPopularByLikes = async (page: number = 0, size: number = 10): Pr
 };
 
 // 봤어요가 많은 웹툰 조회 API
-export const getPopularByWatched = async (page: number = 0, size: number = 10): Promise<PopularWebtoonResponse> => {
+export const getPopularByWatched = async (size: number = 10): Promise<WebtoonInfo[]> => {
     try {
+        const safeSize = size <= 0 ? 10 : size;
         const response = await axios.get(`${BASE_URL}/popular/watched`, {
-            params: { page, size }
+            params: { size: safeSize }
         });
         return response.data;
     } catch (error) {
