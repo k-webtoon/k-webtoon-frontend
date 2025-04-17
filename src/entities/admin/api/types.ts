@@ -7,6 +7,7 @@ export interface AgeDistributionDto {
 export interface GenderRatioDto {
   gender: string;
   ratio: number;
+  count: number;
 }
 
 export interface GenderAgeActivityDto {
@@ -18,6 +19,7 @@ export interface GenderAgeActivityDto {
 export interface UserStatusRatioDto {
   status: string;
   ratio: number;
+  count: number;
 }
 
 export interface DailySignupDto {
