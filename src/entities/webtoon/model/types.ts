@@ -8,13 +8,8 @@ export type GenreType =
     | 'FANTASY'
     | 'ACTION'
     | 'ROMANCE'
-    | 'COMEDY'
-    | 'COMIC'
     | 'THRILLER'
-    | 'SPORTS'
-    | 'DAILY'
-    | 'HUMOR'
-    | 'PURE';
+    | 'HUMOR';
 
 // 한글 장르 타입
 export type KoreanGenreType =
@@ -22,12 +17,8 @@ export type KoreanGenreType =
     | '판타지'
     | '액션'
     | '로맨스'
-    | '코미디'
     | '스릴러'
-    | '스포츠'
-    | '일상'
-    | '개그'
-    | '순정';
+    | '개그';
 
 // 연령 제한 타입
 export type AgeRating = '전체연령가' | '12세 이용가' | '15세 이용가' | '성인';
@@ -45,6 +36,7 @@ export interface WebtoonInfo {
     synopsis: string;
     rankGenreTypes: GenreType[];
     starScore: number;
+    totalCount?: number;
 }
 
 // ===============
@@ -57,13 +49,8 @@ export const GENRE_MAPPING: Record<GenreType, KoreanGenreType> = {
     'FANTASY': '판타지',
     'ACTION': '액션',
     'ROMANCE': '로맨스',
-    'COMEDY': '코미디',
-    'COMIC': '코미디',
     'THRILLER': '스릴러',
-    'SPORTS': '스포츠',
-    'DAILY': '일상',
     'HUMOR': '개그',
-    'PURE': '순정'
 };
 
 // 장르 한글 매핑 함수
@@ -81,23 +68,12 @@ export type WebtoonResponse = WebtoonInfo;
 // 단어로 웹툰 검색 API,  작가로 웹툰 검색 API, 조회수 높은 웹툰 조회 API 응답 타입 (페이지네이션)
 export interface PaginatedResponse<T> {
     content: T[];
+    pageSize?: number;
+    totalPages?: number;
+    totalElements?: number;
+    currentPage?: number;
 }
 export type WebtoonPaginatedResponse = PaginatedResponse<WebtoonInfo>;
-
-// 인기 웹툰 응답 타입
-export interface PopularWebtoon {
-    webtoonId: number;
-    titleName: string;
-    author: string;
-    thumbnailUrl: string;
-    genre: string[];
-    adult: boolean;
-    finish: boolean;
-    starScore: string;
-    totalCount: number;
-}
-
-export type PopularWebtoonResponse = PopularWebtoon[];
 
 // ===============
 // 상태 관리 타입
@@ -109,9 +85,9 @@ export interface WebtoonState {
     currentWebtoon: WebtoonInfo | null;
     searchResults: WebtoonPaginatedResponse | null;
     topWebtoonList: WebtoonPaginatedResponse | null;
-    popularByFavorites: PopularWebtoon[] | null;
-    popularByLikes: PopularWebtoon[] | null;
-    popularByWatched: PopularWebtoon[] | null;
+    popularByFavorites: WebtoonInfo[] | null;
+    popularByLikes: WebtoonInfo[] | null;
+    popularByWatched: WebtoonInfo[] | null;
     isLoading: boolean;
     error: string | null;
 

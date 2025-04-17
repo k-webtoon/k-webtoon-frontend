@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import ScrollToTop from "@/shared/ui/ScrollToTop";
 import ProtectedRoute from "@/app/routes/ProtectedRoute.tsx";
 import UnprotectedRoute from "@/app/routes/UnprotectedRoute.tsx";
 import AdminProtectedRoute from "@/app/routes/AdminProtectedRoute.tsx";
@@ -13,6 +14,7 @@ import ResetPassword from "@/pages/auth/find/ResetPassword.tsx";
 import ResetPasswordResult from "@/pages/auth/find/ResetPasswordResult.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
+import WebtoonListPage from "@/pages/webtoon/WebtoonListPage.tsx";
 import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
 import UserLikeWebtoon from "@/pages/user/userpage/UserLikeWebtoon.tsx";
 import MyPage from "@/pages/user/MyPage";
@@ -48,7 +50,9 @@ const PlaceholderComponent = ({ title }: { title: string }) => (
 );
 
 const RoutesConfig = () => (
-  <Routes>
+  <>
+    <ScrollToTop />
+    <Routes>
     <Route path="/" element={<Layout />}>
       <Route index element={<Main />} />
 
@@ -78,12 +82,10 @@ const RoutesConfig = () => (
 
       {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
+      <Route path="/webtoon/list/:category" element={<WebtoonListPage />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
       <Route path="/search" element={<WebtoonSearchResults />} />
-      <Route
-        path="/text-based-recommendations"
-        element={<TextBasedRecommendations />}
-      />
+      <Route path="/text-based-recommendations" element={<TextBasedRecommendations />}/>
 
       {/* 🔐 회원만 접근 가능 ====================== */}
       <Route element={<ProtectedRoute />}>
@@ -143,6 +145,7 @@ const RoutesConfig = () => (
     <Route path="not-user" element={<UserAccessDenied />} />
     <Route path="*" element={<Error />} />
   </Routes>
+  </>
 );
 
 export default RoutesConfig;
