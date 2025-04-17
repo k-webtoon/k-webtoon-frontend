@@ -25,7 +25,6 @@ import UserManagement from "@/pages/admin/management/UserManagement";
 import CommentManagement from "@/pages/admin/management/CommentManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
-import CommentStats from "@/pages/admin/stats/CommentStats";
 import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
@@ -38,6 +37,7 @@ import AdminLayout from "@/pages/admin/common/AdminLayout";
 import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
 import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
 import OAuthRedirect from "@/entities/auth/ui/OAuthRedirect";
+import LogStats from "@/pages/admin/stats/LogStats";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -117,7 +117,7 @@ const RoutesConfig = () => (
           <Route path="stats">
             <Route path="users" element={<UserStats />} />
             <Route path="webtoons" element={<WebtoonStats />} />
-            <Route path="comments" element={<CommentStats />} />
+            <Route path="logs" element={<LogStats />} />
           </Route>
 
           {/* 분석/시각화 */}
