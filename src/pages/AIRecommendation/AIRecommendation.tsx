@@ -82,8 +82,8 @@ export default function AIRecommendation() {
 
   const next = async () => {
     if (
-      (step === 3 && !selGenres.length) ||
-      (step === 4 && !selGenres.every((g) => (selTags[g]?.length || 0) >= 5)) ||
+      (step === 3 && !selGenres.length ) ||
+      (step === 4 && !selGenres.every((g) => (selTags[g]?.length || 0) >= 3)) ||
       (step === 5 && selWebtoons.length < 5)
     ) return;
 
@@ -339,10 +339,14 @@ export default function AIRecommendation() {
                   <Button
                     onClick={next}
                     disabled={
-                      !selGenres.every((g) => (selTags[g]?.length || 0) >= 5)
+                      step === 3
+                        ? selGenres.length === 0
+                        : !selGenres.every((g) => (selTags[g]?.length || 0) >= 1)
                     }
                     className={`bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-4 px-8 rounded-xl ${
-                      selGenres.every((g) => (selTags[g]?.length || 0) >= 5)
+                      (step === 3
+                        ? selGenres.length > 0
+                        : selGenres.every((g) => (selTags[g]?.length || 0) >= 1))
                         ? "hover:from-purple-600 hover:to-indigo-600 transform hover:scale-105"
                         : "opacity-50 cursor-not-allowed"
                     }`}
@@ -365,14 +369,14 @@ export default function AIRecommendation() {
                   </h2>
                 </div>
                 <p className="text-center text-gray-500">
-                  각 장르별로 최소 5개 이상의 태그를 선택해주세요
+                  각 장르별로 최소 3개 이상의 태그를 선택해주세요
                 </p>
                 {selGenres.map((g) => (
                   <div key={g} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">{g}</h3>
                       <span className="text-sm text-purple-600">
-                        {selTags[g]?.length || 0}/5+
+                        {selTags[g]?.length || 0}/3+
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -404,10 +408,10 @@ export default function AIRecommendation() {
                   <Button
                     onClick={next}
                     disabled={
-                      !selGenres.every((g) => (selTags[g]?.length || 0) >= 5)
+                      !selGenres.every((g) => (selTags[g]?.length || 0) >= 3)
                     }
                     className={`bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-4 px-8 rounded-xl ${
-                      selGenres.every((g) => (selTags[g]?.length || 0) >= 5)
+                      selGenres.every((g) => (selTags[g]?.length || 0) >= 3)
                         ? "hover:from-purple-600 hover:to-indigo-600 transform hover:scale-105"
                         : "opacity-50 cursor-not-allowed"
                     }`}
