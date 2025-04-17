@@ -23,6 +23,8 @@ interface StatusOption {
   label: string;
 }
 
+type DashboardLayout = "default" | "full";
+
 interface ManagementLayoutProps {
   title: string;
   description?: string;
@@ -41,6 +43,7 @@ interface ManagementLayoutProps {
     total: number;
     onPageChange: (page: number) => void;
   };
+  dashboardLayout?: DashboardLayout;
 }
 
 export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
@@ -53,7 +56,17 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
   filter,
   onFilterChange,
   pagination,
+  dashboardLayout = "default",
 }) => {
+  const getDashboardGridClass = () => {
+    switch (dashboardLayout) {
+      case "full":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+      default:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-4";
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-2">{title}</h1>
@@ -62,7 +75,7 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
       )}
 
       {dashboardCards && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className={`grid ${getDashboardGridClass()} gap-4 mb-6`}>
           {dashboardCards.map((card, index) => (
             <Card
               key={index}

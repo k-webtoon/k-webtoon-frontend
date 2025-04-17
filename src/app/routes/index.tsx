@@ -20,12 +20,9 @@ import WebtoonSearchResults from "@/pages/webtoon-search/WebtoonSearchResults.ts
 import Error from "@/pages/error/Error.tsx";
 import MyProfile from "@/pages/user/mypage/MyProfile";
 import AdminMain from "@/pages/admin/AdminMain";
-import WebtoonManagement from "@/pages/admin/management/WebtoonManagement";
 import UserManagement from "@/pages/admin/management/UserManagement";
-import CommentManagement from "@/pages/admin/management/CommentManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
-import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/webtoon-search-ai/TextBasedRecommendations.tsx";
@@ -38,7 +35,7 @@ import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
 import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
 import OAuthRedirect from "@/entities/auth/ui/OAuthRedirect";
 import LogStats from "@/pages/admin/stats/LogStats";
-import PermissionManagement from "@/pages/admin/settings/PermissionManagement";
+import WebtoonManagement from "@/pages/admin/management/WebtoonManagement";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -111,7 +108,6 @@ const RoutesConfig = () => (
           <Route path="management">
             <Route path="users" element={<UserManagement />} />
             <Route path="webtoons" element={<WebtoonManagement />} />
-            <Route path="comments" element={<CommentManagement />} />
           </Route>
 
           {/* 통계 */}
@@ -128,7 +124,7 @@ const RoutesConfig = () => (
 
           {/* 설정 */}
           <Route path="settings">
-            <Route path="permissions" element={<PermissionManagement />} />
+            <Route path="permissions" element={<PlaceholderComponent title="권한 관리" />} />
           </Route>
         </Route>
       </Route>
