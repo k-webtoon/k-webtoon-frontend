@@ -40,14 +40,16 @@ const SubNavigationFilter: React.FC<SubNavigationFilterProps> = memo(({
   const [activeGenre, setActiveGenre] = useState<string | null>(initialGenre);
 
   useEffect(() => {
-    setFilter(initialFilter || defaultFilter);
-    setActiveGenre(initialFilter?.genre?.length ? initialFilter.genre[0] as string : null);
+    if (initialFilter) {
+      setFilter(initialFilter);
+      setActiveGenre(initialFilter.genre?.length ? initialFilter.genre[0] as string : null);
+    }
   }, [initialFilter]);
 
   useEffect(() => {
     if (!didInitRef.current) {
-      didInitRef.current = true;
       onFilterChange(filter);
+      didInitRef.current = true;
     }
   }, [filter, onFilterChange]);
 
@@ -90,12 +92,12 @@ const SubNavigationFilter: React.FC<SubNavigationFilterProps> = memo(({
       [key]: checked
     };
     setFilter(newFilter);
-    onFilterChange(newFilter);
+    onFilterChange({...newFilter});
   }, [filter, onFilterChange]);
 
   const resetFilters = useCallback(() => {
     setActiveGenre(null);
-    const resetFilter = {
+    const resetFilter: FilterOptions = {
       sortBy: 'popularity',
       genre: [],
       onlyCompleted: false,

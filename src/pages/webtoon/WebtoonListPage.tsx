@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {WebtoonInfo, GENRE_MAPPING, GenreType, KoreanGenreType} from '@/entities/webtoon/model/types';
 import WebtoonCard from '@/entities/webtoon/ui/WebtoonCard';
@@ -22,6 +22,7 @@ const WebtoonListPage: React.FC = () => {
   const { state } = location;
   const title = state?.title || "웹툰 목록";
   const { isAuthenticated } = useAuthStore();
+  const forceUpdateKey = useRef(0);
 
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [itemsPerPage] = useState<number>(20);
@@ -34,41 +35,21 @@ const WebtoonListPage: React.FC = () => {
     excludeAdult: true,
   });
   
-  const [allWebtoonData, setAllWebtoonData] = useState<(WebtoonInfo)[]>([]);
-  const [filteredWebtoons, setFilteredWebtoons] = useState<(WebtoonInfo)[]>([]);
+  const [allWebtoonData, setAllWebtoonData] = useState<WebtoonInfo[]>([]);
+  const [filteredWebtoons, setFilteredWebtoons] = useState<WebtoonInfo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
   const [subNavPortalTarget, setSubNavPortalTarget] = useState<HTMLElement | null>(null);
-  
-  useEffect(() => {
-    if (location.pathname === '/webtoon/list') {
-      navigate('/webtoon/list/top', { replace: true });
-    }
-  }, [location.pathname, navigate]);
 
-  // 장르 리스트 추출
-  const allGenres = Object.values(GENRE_MAPPING)
-    .filter((value, index, self) => 
-      self.indexOf(value) === index
-    );
-
-  useEffect(() => {
-    const subNavPlaceholder = document.getElementById('sub-nav-placeholder');
-    if (subNavPlaceholder) {
-      setSubNavPortalTarget(subNavPlaceholder);
-    }
-  }, []);
-  
-  // 필터링 함수
-  const applyFilters = useCallback((data: (WebtoonInfo)[], options: FilterOptions) => {
-    if (!data.length) return;
+  const applyFilters = useCallback((data: WebtoonInfo[], options: FilterOptions) => {
+    if (!data || data.length === 0) return [];
     
     let filtered = [...data];
     
+    // 장르 필터링
     if (options.genre.length > 0) {
       filtered = filtered.filter(webtoon => {
         const koreanGenres = webtoon.rankGenreTypes?.map(g => GENRE_MAPPING[g as GenreType]) || [];
-        
         return options.genre.some(genre => koreanGenres.includes(genre as KoreanGenreType));
       });
     }
@@ -103,27 +84,51 @@ const WebtoonListPage: React.FC = () => {
       return 0;
     });
     
-    setFilteredWebtoons(filtered);
-    
-    setCurrentPage(0);
+    return filtered;
   }, []);
   
-  // 필터 적용 콜백
+  // 필터 옵션 변경 처리
   const handleFilterChange = useCallback((options: FilterOptions) => {
-    if (allWebtoonData.length === 0) return;
-    
     setActiveFilterOptions(options);
     
-    applyFilters(allWebtoonData, options);
+    // 필터링 및 상태 업데이트
+    if (allWebtoonData.length > 0) {
+      const newFiltered = applyFilters(allWebtoonData, options);
+      setFilteredWebtoons(newFiltered);
+      setCurrentPage(0);
+      
+      // 강제 리렌더링
+      forceUpdateKey.current++;
+    }
   }, [allWebtoonData, applyFilters]);
+
+  useEffect(() => {
+    if (location.pathname === '/webtoon/list') {
+      navigate('/webtoon/list/top', { replace: true });
+    }
+  }, [location.pathname, navigate]);
+
+  const allGenres = Object.values(GENRE_MAPPING)
+    .filter((value, index, self) => 
+      self.indexOf(value) === index
+    );
+
+  useEffect(() => {
+    const subNavPlaceholder = document.getElementById('sub-nav-placeholder');
+    if (subNavPlaceholder) {
+      setSubNavPortalTarget(subNavPlaceholder);
+    }
+  }, []);
 
   // 카테고리에 따라 모든 웹툰 데이터 로드
   useEffect(() => {
+    const currentExcludeAdult = activeFilterOptions.excludeAdult;
+    
     setActiveFilterOptions({
       sortBy: 'popularity',
       genre: [],
       onlyCompleted: false,
-      excludeAdult: true,
+      excludeAdult: currentExcludeAdult,
     });
     
     setCurrentPage(0);
@@ -132,7 +137,7 @@ const WebtoonListPage: React.FC = () => {
       setLoading(true);
       
       try {
-        let data: (WebtoonInfo)[] = [];
+        let data: WebtoonInfo[] = [];
         let totalItemsCount = 0;
         
         switch(category) {
@@ -171,8 +176,14 @@ const WebtoonListPage: React.FC = () => {
         setAllWebtoonData(data);
         setTotalItems(totalItemsCount);
         
-        // 초기화된 필터 적용
-        setFilteredWebtoons(data);
+        // 필터 적용
+        const filtered = applyFilters(data, {
+          sortBy: 'popularity',
+          genre: [],
+          onlyCompleted: false,
+          excludeAdult: currentExcludeAdult
+        });
+        setFilteredWebtoons(filtered);
       } catch (error) {
         console.error('데이터 로드 중 오류:', error);
       } finally {
@@ -181,10 +192,10 @@ const WebtoonListPage: React.FC = () => {
     };
     
     loadAllData();
-  }, [category, itemsPerPage, navigate]);
+  }, [category, navigate, applyFilters]);
 
+  // 페이지 변경 핸들러
   const handlePageChange = (newPage: number) => {
-    console.log(`페이지 변경: ${currentPage} -> ${newPage}`);
     setCurrentPage(newPage);
 
     window.scrollTo({
@@ -256,11 +267,13 @@ const WebtoonListPage: React.FC = () => {
     return <div className="container pt-45 py-8 text-center">데이터를 불러오는 중입니다...</div>;
   }
   
+  // 현재 페이지에 표시할 웹툰 계산
   const startIndex = currentPage * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPageWebtoons = filteredWebtoons.slice(startIndex, endIndex);
   
-  console.log(`현재 페이지: ${currentPage}, 표시할 웹툰: ${startIndex} ~ ${endIndex-1}, 총 ${filteredWebtoons.length}개 중`);
+  const adultCount = allWebtoonData.filter(w => w.adult).length;
+  const filteredAdultCount = filteredWebtoons.filter(w => w.adult).length;
   
   return (
     <div className="container pt-45 py-8" id={sectionId}>
@@ -271,24 +284,35 @@ const WebtoonListPage: React.FC = () => {
           onFilterChange={handleFilterChange}
           genres={allGenres as string[]}
           initialFilter={activeFilterOptions}
-          key={category}
+          key={`filter-${category}`}
         />,
         subNavPortalTarget
       )}
       
       <div className="text-sm text-gray-600 mb-4">
-        전체 {totalItems}개 중 {filteredWebtoons.length}개의 웹툰 ({currentPage + 1} / {Math.max(1, Math.ceil(filteredWebtoons.length / itemsPerPage))} 페이지)
+        <div>
+          전체 {totalItems}개 중 {filteredWebtoons.length}개의 웹툰 ({currentPage + 1} / {Math.max(1, Math.ceil(filteredWebtoons.length / itemsPerPage))} 페이지)
+        </div>
+        {!activeFilterOptions.excludeAdult && adultCount > 0 &&
+          <div className="text-red-500 ml-2">(성인물 {filteredAdultCount}개 포함)</div>
+        }
       </div>
       
-      {currentPageWebtoons.length === 0 ? (
+      {filteredWebtoons.length === 0 ? (
         <div className="text-center py-8">
           조건에 맞는 웹툰이 없습니다.
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8 mt-8">
+          <div 
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8 mt-8" 
+            key={`grid-${activeFilterOptions.excludeAdult ? 'exclude' : 'include'}-${forceUpdateKey.current}`}
+          >
             {currentPageWebtoons.map((webtoon) => (
-              <div key={String('webtoonId' in webtoon ? webtoon.webtoonId : webtoon.id)} className="flex flex-col h-full">
+              <div 
+                key={`webtoon-${webtoon.id}`} 
+                className="flex flex-col h-full"
+              >
                 <WebtoonCard 
                   webtoon={webtoon}
                   size={'sm'}
