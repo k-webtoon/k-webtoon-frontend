@@ -1,9 +1,13 @@
 import { Link } from "react-router-dom"
-import { Badge } from "@/shared/ui/shadcn/badge.tsx"
-import { WebtoonInfo, mapGenre } from "@/entities/webtoon/model/types.ts"
+import { Badge } from "@/shared/ui/shadcn/badge"
+import { WebtoonInfo, mapGenre } from "@/entities/webtoon/model/types"
+import React from "react";
 
 interface HorizontalWebtoonCardProps {
-    webtoon: WebtoonInfo;
+    webtoon: WebtoonInfo & {
+        titleNameWithHighlight?: React.ReactNode;
+        authorWithHighlight?: React.ReactNode;
+    };
     similarity?: number;
 }
 
@@ -35,7 +39,9 @@ export const HorizontalWebtoonCard = ({ webtoon, similarity }: HorizontalWebtoon
         starScore = 0,
         rankGenreTypes = [],
         finish = false,
-        age = '전체이용가'
+        age = '전체이용가',
+        titleNameWithHighlight,
+        authorWithHighlight
     } = webtoon;
 
     return (
@@ -48,7 +54,7 @@ export const HorizontalWebtoonCard = ({ webtoon, similarity }: HorizontalWebtoon
                             alt={titleName}
                             width="150"
                             height="150"
-                            className="rounded-md cursor-pointer hover:brightness-90 transition-all duration-200"
+                            className="w-[150px] h-[190px] object-cover rounded-md cursor-pointer hover:brightness-90 transition-all duration-200"
                         />
                     ) : (
                         <div className="w-[150px] h-[150px] bg-gray-200 rounded-md flex items-center justify-center">
@@ -60,15 +66,19 @@ export const HorizontalWebtoonCard = ({ webtoon, similarity }: HorizontalWebtoon
             <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                     <Link to={`/webtoon/${id}`} className="hover:underline">
-                        <h3 className="text-xl font-bold text-green-500">{titleName}</h3>
+                        <h3 className="text-xl font-bold">
+                            {titleNameWithHighlight || titleName}
+                        </h3>
                     </Link>
                     <div className="flex items-center gap-2">
-                        {typeof starScore === 'number' && (
-                            <div className="flex items-center">
-                                <span className="text-yellow-500">★</span>
-                                <span className="text-sm ml-1">{starScore.toFixed(1)}</span>
-                            </div>
-                        )}
+                        <div className="flex items-center">
+                            <span className="text-yellow-500">★</span>
+                            <span className="text-sm ml-1">
+                                {typeof starScore === 'number' 
+                                    ? starScore.toFixed(1) 
+                                    : (String(starScore || '0.0'))}
+                            </span>
+                        </div>
 
                         {similarity !== undefined && (
                             <span className="text-blue-600 ml-2 px-2 py-1 bg-blue-100 rounded-full text-xs font-medium">
@@ -82,7 +92,7 @@ export const HorizontalWebtoonCard = ({ webtoon, similarity }: HorizontalWebtoon
                         <span className="inline-block w-5 h-5 bg-green-100 text-green-600 rounded-full text-xs flex items-center justify-center">
                             ✓
                         </span>
-                        <span>{author}</span>
+                        <span>{authorWithHighlight || author}</span>
                     </span>
                     {rankGenreTypes.length > 0 && (
                         <span>· {rankGenreTypes.map(genre => mapGenre(genre)).join(', ')}</span>

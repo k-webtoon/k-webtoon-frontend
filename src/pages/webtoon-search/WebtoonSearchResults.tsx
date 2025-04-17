@@ -1,11 +1,11 @@
-import { WebtoonInfo, WebtoonPaginatedResponse } from "@/entities/webtoon/model/types.ts"
-import { useSearchStore } from "@/entities/webtoon-search/api/store.ts"
+import { WebtoonInfo } from "@/entities/webtoon/model/types"
+import { useSearchStore } from "@/entities/webtoon-search/api/store"
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
-import { searchWebtoons, searchWebtoons_Tags, searchWebtoons_Author, topWebtoons, getWebtoonById } from "@/entities/webtoon/api/api.ts"
-import { HorizontalWebtoonCard } from "@/entities/webtoon/ui/HorizontalWebtoonCard.tsx"
+import { searchWebtoons, searchWebtoons_Tags, searchWebtoons_Author, topWebtoons, getWebtoonById } from "@/entities/webtoon/api/api"
+import { HorizontalWebtoonCard } from "@/entities/webtoon/ui/HorizontalWebtoonCard"
 
-const searchTypeHandlers = {
+const searchTypeHandlers: Record<string, any> = {
   "$": searchWebtoons_Tags,  // 태그 검색
   "~": searchWebtoons_Author,  // 작가 검색
   "+": topWebtoons, // 조회수 높은거 검색
@@ -19,31 +19,81 @@ export default function WebtoonSearchResults() {
     
     const { results, setResults } = useSearchStore()
     const [ex_searchQuery, setEx_searchQuery] = useState("")
+    const [prefix, setPrefix] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
+    // URL이 변경될 때만 검색 실행
     useEffect(() => {
         if (!searchQuery) return
 
-        const prefix = searchQuery[0]
-        const queryHandler = searchTypeHandlers[prefix] || searchTypeHandlers.default
+        console.log("검색 페이지 검색 쿼리:", searchQuery);
 
-        setEx_searchQuery(searchQuery.slice(1))  // 특수문자 제거한 쿼리 저장
+        const firstChar = searchQuery[0];
+        let actualQuery = searchQuery;
+        let queryHandler: any = searchTypeHandlers.default;
+
+        if (firstChar === '$' || firstChar === '~' || firstChar === '+' || firstChar === '-') {
+            setPrefix(firstChar);
+            actualQuery = searchQuery.slice(1);
+            queryHandler = firstChar in searchTypeHandlers 
+                ? searchTypeHandlers[firstChar] 
+                : searchTypeHandlers.default;
+        } else {
+            setPrefix("");
+        }
+
+        console.log("실제 검색 쿼리:", actualQuery);
+        setEx_searchQuery(actualQuery);  // 표시용 쿼리 저장
 
         const fetchSearchResults = async () => {
             try {
-                const data = await queryHandler(searchQuery.slice(1))
-                setResults(data)
+                setIsLoading(true);
+                let data;
+                
+                // ID 검색인 경우
+                if (prefix === '-') {
+                    const id = parseInt(actualQuery);
+                    if (!isNaN(id)) {
+                        data = await queryHandler(id);
+                    } else {
+                        throw new Error('ID 검색은 숫자만 가능합니다.');
+                    }
+                } else {
+                    data = await queryHandler(actualQuery);
+                }
+                
+                // 단일 객체인 경우 (getWebtoonById)
+                if (!data.content && data.id) {
+                    setResults({ content: [data] });
+                } else {
+                    setResults(data);
+                }
             } catch (error) {
-                console.error("웹툰 검색 중 오류 발생:", error)
-                setResults({ content: [] })  // 빈 결과 설정
+                console.error("웹툰 검색 중 오류 발생:", error);
+                setResults({ content: [] });  // 빈 결과 설정
             } finally {
-                setIsLoading(false)
+                setIsLoading(false);
             }
-        }
+        };
 
-        setIsLoading(true)
-        fetchSearchResults()
-    }, [searchQuery, setResults])
+        fetchSearchResults();
+    }, [searchQuery, setResults]);
+
+    // 검색어 강조 표시
+    const highlightMatch = (text: string, searchTerm: string) => {
+        if (!searchTerm.trim() || !text) return text;
+        
+        const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+        return (
+          <>
+            {parts.map((part, i) => 
+              part.toLowerCase() === searchTerm.toLowerCase() ? 
+                <span key={i} className="bg-green-200 text-green-800">{part}</span> : 
+                part
+            )}
+          </>
+        );
+    };
 
     return (
         <div className="min-h-screen pt-20 pb-10">
@@ -51,9 +101,12 @@ export default function WebtoonSearchResults() {
             <div className="flex flex-col items-start mb-6">
                 <h1 className="text-xl font-bold">
                     <span className="text-green-500">'{ex_searchQuery}'</span> 에 대한 검색결과 입니다.
+                    {prefix === '$' && <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">태그 검색</span>}
+                    {prefix === '~' && <span className="ml-2 text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full">작가 검색</span>}
+                    {prefix !== '$' && prefix !== '~' && <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">제목 검색</span>}
                 </h1>
                 <h2 className="text-lg font-medium mt-2">
-                    웹툰 <span className="text-sm text-gray-500">총 {results.content.length}</span>
+                    웹툰 <span className="text-sm text-gray-500">총 {results.content?.length || 0}개</span>
                 </h2>
             </div>
 
@@ -62,10 +115,17 @@ export default function WebtoonSearchResults() {
                     <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
                     </div>
-                ) : results.content.length > 0 ? (
+                ) : results.content && results.content.length > 0 ? (
                     <div className="space-y-6">
                         {results.content.map((webtoon: WebtoonInfo) => (
-                            <HorizontalWebtoonCard key={webtoon.id} webtoon={webtoon} />
+                            <div key={webtoon.id} className="hover:bg-gray-50 rounded-lg p-2">
+                                <HorizontalWebtoonCard webtoon={{
+                                    ...webtoon,
+                                    // 원본 웹툰 데이터는 유지하되, 표시용으로만 하이라이트된 텍스트 전달
+                                    titleNameWithHighlight: highlightMatch(webtoon.titleName, ex_searchQuery),
+                                    authorWithHighlight: highlightMatch(webtoon.author, ex_searchQuery)
+                                }} />
+                            </div>
                         ))}
                     </div>
                 ) : (

@@ -1,18 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import {PopularWebtoonResponse, WebtoonPaginatedResponse} from '@/entities/webtoon/model/types.ts';
+import {WebtoonPaginatedResponse, WebtoonInfo} from '@/entities/webtoon/model/types.ts';
 import WebtoonCard from "@/entities/webtoon/ui/WebtoonCard.tsx";
 import {Button} from "@/shared/ui/shadcn/button.tsx";
 
 interface WebtoonSliderProps {
     title: string;
     coment?: string;
-    webtoons: () => Promise<WebtoonPaginatedResponse | PopularWebtoonResponse>;
+    webtoons: () => Promise<WebtoonPaginatedResponse | WebtoonInfo[]>;
     cardSize?: 'sm' | 'md' | 'lg';
     showBadges?: boolean;
     showActionButtons?: boolean;
     showAI?: boolean;
     initialLoad?: boolean;
+    countType?: 'likes' | 'favorites' | 'watched' | null;
 }
 
 const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
@@ -23,12 +24,13 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                                                          showBadges = false,
                                                          showActionButtons,
                                                          showAI,
-                                                         initialLoad = true
+                                                         initialLoad = true,
+                                                         countType = null
                                                      }) => {
     const sliderRef = useRef<HTMLDivElement>(null);
 
     // 로컬 상태 관리
-    const [webtoonData, setWebtoonData] = useState<WebtoonPaginatedResponse | PopularWebtoonResponse | null>(null);
+    const [webtoonData, setWebtoonData] = useState<WebtoonPaginatedResponse | WebtoonInfo[] | any[]| null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(initialLoad);
     const [error, setError] = useState<string | null>(null);
 
@@ -122,21 +124,16 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
     // 데이터 타입에 따른 웹툰 목록 추출
     let webtoonsToDisplay: any[] = [];
     
-    // 배열인 경우 (PopularWebtoonResponse)
-    if (Array.isArray(webtoonData)) {
-        webtoonsToDisplay = webtoonData;
-        if (webtoonsToDisplay.length === 0) {
-            return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
-        }
-    } 
     // 페이지네이션 응답인 경우 (WebtoonPaginatedResponse)
-    else if ('content' in webtoonData && Array.isArray(webtoonData.content)) {
+    if (webtoonData && 'content' in webtoonData && Array.isArray(webtoonData.content)) {
         webtoonsToDisplay = webtoonData.content;
-        if (webtoonsToDisplay.length === 0) {
-            return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
-        }
-    } else {
-        return <div className="p-6 text-center">웹툰 데이터 형식이 올바르지 않습니다.</div>;
+    } 
+    else if (Array.isArray(webtoonData)) {
+        webtoonsToDisplay = webtoonData;
+    }
+    
+    if (webtoonsToDisplay.length === 0) {
+        return <div className="p-6 text-center">웹툰 데이터가 없습니다.</div>;
     }
 
     return (
@@ -160,7 +157,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {webtoonsToDisplay.map((webtoon, index) => (
-                        <div key={'webtoonId' in webtoon ? webtoon.webtoonId : webtoon.id} className="relative group flex-shrink-0">
+                        <div key={'id' in webtoon ? webtoon.id : ('webtoonId' in webtoon ? webtoon.webtoonId : index)} className="relative group flex-shrink-0">
                             <div className="absolute top-0 left-0 z-20 p-2 text-white text-5xl font-bold">
                                 {index + 1}
                             </div>
@@ -169,7 +166,8 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                                 size={cardSize} 
                                 showAI={showAI} 
                                 showBadges={showBadges} 
-                                showActionButtons={showActionButtons} 
+                                showActionButtons={showActionButtons}
+                                countType={countType}
                             />
                         </div>
                     ))}
@@ -187,9 +185,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
     );
 };
 
-// 불필요한 리렌더링 방지를 위한 메모이제이션
 export default React.memo(WebtoonSlider, (prevProps, nextProps) => {
-    // title이 같고 webtoons 함수가 같으면 리렌더링하지 않음
-    return prevProps.title === nextProps.title && 
+    return prevProps.title === nextProps.title &&
            prevProps.webtoons === nextProps.webtoons;
 });
