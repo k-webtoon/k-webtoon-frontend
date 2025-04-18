@@ -1,177 +1,234 @@
-import { FC, useState, useMemo } from 'react';
-import { ManagementLayout } from '@/components/admin/ManagementLayout';
-import { ColumnDef } from '@tanstack/react-table';
-import { format } from 'date-fns';
+import { FC, useEffect, useState } from 'react';
+import { Button } from '@/shared/ui/shadcn/button';
+import { Card, CardContent } from "@/shared/ui/shadcn/card";
+import { Search, Eye, EyeOff } from 'lucide-react';
+import { Input } from "@/shared/ui/shadcn/input";
 import {
-  WebtoonStatus,
-  WebtoonStatusEnum,
-  webtoonStatusColors,
-  webtoonStatusLabels,
-  Webtoon
-} from '@/entities/admin/model/types';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/shadcn/select";
+import { WebtoonDetailModal } from './WebtoonDetailModal';
+import { ManagementLayout } from "@/components/admin/ManagementLayout";
+import { ColumnDef } from "@tanstack/react-table";
+import { useWebtoonStore } from '@/entities/admin/store/webtoonStore';
+import { WebtoonDTO } from '@/entities/admin/model/webtoon';
+
+type StatusFilterType = 'all' | 'public' | 'private';
 
 const WebtoonManagement: FC = () => {
-  const [filter, setFilter] = useState({
-    status: '',
-    search: '',
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilterType>('all');
 
-  // 더미 데이터 생성
-  const data: Webtoon[] = useMemo(() => {
-    const genres = ['로맨스', '액션', '판타지', '일상', '스릴러', '개그'];
-    const authors = ['김작가', '이작가', '박작가', '최작가', '정작가'];
-    const statuses = Object.values(WebtoonStatusEnum);
-    
-    return Array.from({ length: 35 }, (_, i) => ({
-      id: i + 1,
-      title: `웹툰 ${i + 1}${i % 3 === 0 ? ' [신작]' : i % 3 === 1 ? ' [인기]' : ''}`,
-      author: authors[i % authors.length],
-      description: `웹툰 ${i + 1}의 상세 설명입니다.`,
-      status: statuses[i % statuses.length],
-      genre: genres[i % genres.length],
-      views: Math.floor(Math.random() * 1000000),
-      rating: Number((Math.random() * 2 + 3).toFixed(1)), // 3.0 ~ 5.0
-      lastUpdated: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
-      createdAt: new Date(2024, 0, 1 + i),
-    }));
+  const {
+    webtoons,
+    currentPage,
+    pageSize,
+    totalWebtoons,
+    loading,
+    stats,
+    fetchWebtoons,
+    fetchWebtoonStats,
+    updateWebtoonStatus,
+    openWebtoonModal,
+  } = useWebtoonStore();
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchWebtoonStats();
+    fetchWebtoons(0, pageSize, 'all', '');
   }, []);
 
-  // 필터링된 데이터
-  const filteredData = useMemo(() => {
-    return data.filter(webtoon => {
-      if (filter.status && webtoon.status !== filter.status) return false;
-      if (filter.search) {
-        const searchLower = filter.search.toLowerCase();
-        return webtoon.title.toLowerCase().includes(searchLower) ||
-               webtoon.author.toLowerCase().includes(searchLower);
-      }
-      return true;
+  const handleStatusFilterChange = async (newStatus: StatusFilterType) => {
+    console.log('Dashboard card clicked:', { 
+      currentStatus: statusFilter, 
+      newStatus,
+      currentSearch: searchQuery 
     });
-  }, [data, filter]);
-
-  // 통계 데이터
-  const stats = useMemo(() => {
-    const total = data.length;
-    const active = data.filter(w => w.status === 'active').length;
-    const inactive = data.filter(w => w.status === 'inactive').length;
-    const pending = data.filter(w => w.status === 'pending').length;
-    const blocked = data.filter(w => w.status === 'blocked').length;
-    const deleted = data.filter(w => w.status === 'deleted').length;
     
-    return { total, active, inactive, pending, blocked, deleted };
-  }, [data]);
+    setStatusFilter(newStatus);
+    setSearchQuery(''); // 검색어 초기화
+    
+    try {
+      // 상태에 따라 다른 API를 호출
+      await fetchWebtoons(0, pageSize, newStatus, '');
+      
+      console.log('Data fetched after status change:', {
+        status: newStatus,
+        webtoonsCount: webtoons.length
+      });
+    } catch (error) {
+      console.error('Error fetching webtoons:', error);
+    }
+  };
+
+  const handleSearchChange = (newSearch: string) => {
+    setSearchQuery(newSearch);
+    // 현재 상태에 따라 검색
+    fetchWebtoons(0, pageSize, statusFilter, newSearch);
+  };
+
+  const handleFilterChange = (newFilter: { status: string; search: string }) => {
+    if (newFilter.status !== statusFilter) {
+      handleStatusFilterChange(newFilter.status as StatusFilterType);
+    }
+    if (newFilter.search !== searchQuery) {
+      handleSearchChange(newFilter.search);
+    }
+  };
+
+  // 페이지네이션 처리
+  const handlePageChange = (page: number) => {
+    fetchWebtoons(page - 1, pageSize, statusFilter, searchQuery);
+  };
 
   const dashboardCards = [
-    { 
-      title: '전체 웹툰', 
-      value: stats.total,
-      onClick: () => setFilter(prev => ({ ...prev, status: '' }))
+    {
+      title: "총 웹툰",
+      value: stats.totalWebtoons,
+      onClick: () => handleStatusFilterChange('all'),
+      isActive: statusFilter === 'all',
+      className: `cursor-pointer transition-colors ${statusFilter === 'all'
+          ? 'bg-blue-50 border-blue-200'
+          : 'hover:bg-gray-50'
+        }`,
     },
-    { 
-      title: '연재중', 
-      value: stats.active,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.ACTIVE }))
+    {
+      title: "공개 웹툰",
+      value: stats.publicWebtoons,
+      onClick: () => handleStatusFilterChange('public'),
+      isActive: statusFilter === 'public',
+      className: `cursor-pointer transition-colors ${statusFilter === 'public'
+          ? 'bg-blue-50 border-blue-200'
+          : 'hover:bg-gray-50'
+        }`,
     },
-    { 
-      title: '완결/숨김', 
-      value: stats.inactive,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.INACTIVE }))
-    },
-    { 
-      title: '승인대기', 
-      value: stats.pending,
-      onClick: () => setFilter(prev => ({ ...prev, status: WebtoonStatusEnum.PENDING }))
+    {
+      title: "비공개 웹툰",
+      value: stats.privateWebtoons,
+      onClick: () => handleStatusFilterChange('private'),
+      isActive: statusFilter === 'private',
+      className: `cursor-pointer transition-colors ${statusFilter === 'private'
+          ? 'bg-blue-50 border-blue-200'
+          : 'hover:bg-gray-50'
+        }`,
     },
   ];
 
-  const statusOptions = Object.values(WebtoonStatusEnum).map(status => ({
-    value: status,
-    label: webtoonStatusLabels[status],
-  }));
+  const statusOptions = [
+    { value: 'all', label: "전체" },
+    { value: 'public', label: "공개" },
+    { value: 'private', label: "비공개" },
+  ];
 
-  const columns: ColumnDef<Webtoon>[] = [
+  const handlePublicToggle = async (webtoonId: number) => {
+    try {
+      await updateWebtoonStatus(webtoonId);
+      // 상태 변경 후 현재 필터에 맞는 데이터 다시 로드
+      await fetchWebtoons(0, pageSize, statusFilter, searchQuery);
+      // 통계 업데이트
+      await fetchWebtoonStats();
+    } catch (error) {
+      console.error('웹툰 상태 변경 실패:', error);
+      alert('웹툰 상태 변경에 실패했습니다.');
+    }
+  };
+
+  const handleDetailClick = (webtoon: WebtoonDTO) => {
+    openWebtoonModal(webtoon.id);
+  };
+
+  const columns: ColumnDef<WebtoonDTO>[] = [
     {
-      accessorKey: 'title',
-      header: '제목',
+      accessorKey: "titleName",
+      header: "제목",
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {row.original.titleName}
+        </div>
+      )
     },
     {
-      accessorKey: 'author',
-      header: '작가',
+      accessorKey: "author",
+      header: "작가",
+      cell: ({ row }) => (
+        <div>
+          {row.original.author}
+        </div>
+      )
     },
     {
-      accessorKey: 'genre',
-      header: '장르',
+      accessorKey: "genre",
+      header: "장르",
+      cell: ({ row }) => (
+        <div>
+          {row.original.genre}
+        </div>
+      )
     },
     {
-      accessorKey: 'status',
-      header: '상태',
+      accessorKey: "isPublic",
+      header: "상태",
       cell: ({ row }) => {
-        const status = row.original.status;
-        const { bg, text } = webtoonStatusColors[status];
+        const isPublic = row.original.isPublic;
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
-            {webtoonStatusLabels[status]}
+          <span className={`px-2 py-1 rounded-full text-xs ${isPublic ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-700'
+            }`}>
+            {isPublic ? '공개' : '비공개'}
           </span>
         );
       },
     },
     {
-      accessorKey: 'views',
-      header: '조회수',
-      cell: ({ row }) => row.original.views.toLocaleString(),
-    },
-    {
-      accessorKey: 'rating',
-      header: '평점',
-      cell: ({ row }) => `⭐ ${row.original.rating}`,
-    },
-    {
-      accessorKey: 'lastUpdated',
-      header: '최근 업데이트',
-      cell: ({ row }) => format(row.original.lastUpdated, 'yyyy-MM-dd'),
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
-              상세보기
-            </button>
-            {status === 'pending' && (
-              <button className="px-3 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                승인하기
-              </button>
-            )}
-            {status !== 'blocked' && status !== 'deleted' && (
-              <button className="px-3 py-1 text-sm text-white bg-red-500 rounded-md hover:bg-red-600">
-                {status === 'pending' ? '반려' : '블라인드'}
-              </button>
-            )}
-          </div>
-        );
-      },
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <button
+            className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
+            onClick={() => handleDetailClick(row.original)}
+          >
+            상세보기
+          </button>
+          <button
+            className={`px-3 py-1 text-sm rounded-md ${row.original.isPublic
+                ? 'text-white bg-red-500 hover:bg-red-600'
+                : 'text-white bg-blue-500 hover:bg-blue-600'
+              }`}
+            onClick={() => handlePublicToggle(row.original.id)}
+          >
+            {row.original.isPublic ? '비공개로 전환' : '공개로 전환'}
+          </button>
+        </div>
+      ),
     },
   ];
 
   return (
-    <ManagementLayout
-      title="웹툰 관리"
-      description="웹툰 콘텐츠를 관리하고 모니터링합니다."
-      dashboardCards={dashboardCards}
-      statusOptions={statusOptions}
-      columns={columns}
-      data={filteredData}
-      filter={filter}
-      onFilterChange={setFilter}
-      pagination={{
-        page: 1,
-        limit: 10,
-        total: filteredData.length,
-        onPageChange: (page) => console.log('페이지 변경:', page),
-      }}
-    />
+    <>
+      <ManagementLayout
+        title="웹툰 관리"
+        description="웹툰을 관리하고 모니터링합니다."
+        dashboardCards={dashboardCards}
+        statusOptions={statusOptions}
+        columns={columns}
+        data={webtoons}
+        filter={{
+          status: statusFilter,
+          search: searchQuery,
+        }}
+        onFilterChange={handleFilterChange}
+        pagination={{
+          page: currentPage + 1,
+          limit: pageSize,
+          total: totalWebtoons,
+          onPageChange: handlePageChange,
+        }}
+        dashboardLayout="full"
+      />
+      <WebtoonDetailModal />
+    </>
   );
 };
 

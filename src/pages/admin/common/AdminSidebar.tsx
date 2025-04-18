@@ -23,8 +23,7 @@ const menuGroups: MenuGroup[] = [
     title: "관리",
     items: [
       { title: "사용자 관리", path: "/admin/management/users" },
-      { title: "웹툰 관리", path: "/admin/management/webtoons" },
-      { title: "댓글 관리", path: "/admin/management/comments" },
+      { title: "웹툰 관리", path: "/admin/management/webtoons" }
     ],
   },
   {
