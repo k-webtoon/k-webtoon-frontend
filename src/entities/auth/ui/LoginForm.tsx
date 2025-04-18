@@ -52,8 +52,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
       return;
     }
     // Kakao 구현해야 하는데.... 치피치피
-    if (onSocialLogin) {
-      await onSocialLogin(provider);
+    if (provider === "kakao") {
+      window.location.href = "http://localhost:8080/api/oauth2/login/kakao";
+      return;
     }
   };
 
