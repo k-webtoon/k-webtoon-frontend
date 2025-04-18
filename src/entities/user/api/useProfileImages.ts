@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getUserProfileImageApi } from "@/entities/user/api/userActivityApi.ts";
 
-const cachedProfileImages: Record<number, string | null> = {}; // 캐시 저장소
+const cachedProfileImages: Record<number, string | null> = {};
 
 export const useProfileImages = (userIds: number[]) => {
   const [profileImages, setProfileImages] = useState<
@@ -10,7 +10,7 @@ export const useProfileImages = (userIds: number[]) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchedIdsRef = useRef<Set<number>>(new Set()); // 이미 호출된 ID 추적
+  const memoizedUserIds = useMemo(() => userIds, [userIds]);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -18,45 +18,50 @@ export const useProfileImages = (userIds: number[]) => {
         setLoading(true);
         setError(null);
 
-        // 새로 요청해야 할 ID만 필터링
-        const idsToFetch = userIds.filter(
-          (id) => !fetchedIdsRef.current.has(id)
+        // 캐시된 데이터와 요청 필요한 ID 분리
+        const newIds = memoizedUserIds.filter(
+          (id) => !(id in cachedProfileImages)
         );
-
-        if (idsToFetch.length > 0) {
-          const results = await Promise.all(
-            idsToFetch.map((id) =>
-              getUserProfileImageApi(id)
-                .then((url) => url || null)
-                .catch(() => null)
-            )
-          );
-
-          // 새로 가져온 데이터를 캐시에 저장
-          idsToFetch.forEach((id, index) => {
-            cachedProfileImages[id] = results[index];
-            fetchedIdsRef.current.add(id); // 호출된 ID 기록
-          });
-        }
-
-        // 현재 userIds에 해당하는 이미지를 반환
-        const imageMap = userIds.reduce((acc, id) => {
-          acc[id] = cachedProfileImages[id] || null;
+        const existingData = memoizedUserIds.reduce((acc, id) => {
+          if (id in cachedProfileImages) acc[id] = cachedProfileImages[id];
           return acc;
         }, {} as Record<number, string | null>);
 
-        setProfileImages(imageMap);
+        // 기존 데이터 먼저 반영
+        if (Object.keys(existingData).length > 0) {
+          setProfileImages(existingData);
+        }
+
+        // 새로운 데이터 요청
+        if (newIds.length > 0) {
+          const newImages = await Promise.all(
+            newIds.map((id) =>
+              getUserProfileImageApi(id)
+                .then((url) => {
+                  cachedProfileImages[id] = url || null;
+                  return { id, url };
+                })
+                .catch(() => ({ id, url: null }))
+            )
+          );
+
+          setProfileImages((prev) => ({
+            ...prev,
+            ...newImages.reduce((acc, { id, url }) => {
+              acc[id] = url;
+              return acc;
+            }, {} as Record<number, string | null>),
+          }));
+        }
       } catch (err) {
-        console.error("프로필 이미지 로드 실패:", err);
-        setError("프로필 이미지를 불러오는 중 오류가 발생했습니다.");
+        setError("이미지 로드 실패");
       } finally {
         setLoading(false);
       }
     };
 
-    if (userIds.length > 0) fetchImages();
-    else setLoading(false);
-  }, [userIds]);
+    fetchImages();
+  }, [memoizedUserIds]);
 
   return { profileImages, loading, error };
 };

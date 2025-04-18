@@ -1,4 +1,3 @@
-// profileStore.ts
 import { create } from "zustand";
 import { updateProfileImageApi } from "@/entities/user/api/userActivityApi.ts";
 import { getUserActivityInfoApi } from "@/entities/user/api/userActivityApi.ts";
@@ -20,6 +19,17 @@ interface UserActivityState {
   fetchUserActivity: (userId: number) => Promise<void>;
 }
 
+// 상태 갱신 로직 분리
+const updateUserStoreProfile = (fileName: string) => {
+  const userStore = useUserStore.getState();
+  if (userStore.userInfo) {
+    userStore.setUserInfo({
+      ...userStore.userInfo,
+      profileImageUrl: fileName,
+    });
+  }
+};
+
 export const useProfileStore = create<ProfileState>((set) => ({
   loading: false,
   error: null,
@@ -28,22 +38,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
     set({ loading: true, error: null });
     try {
       const fileName = await updateProfileImageApi(file);
-
-      // 모든 관련 스토어 동기화
-      const userStore = useUserStore.getState();
-      if (userStore.userInfo) {
-        userStore.setUserInfo({
-          ...userStore.userInfo,
-          profileImageUrl: fileName,
-        });
-      }
-
-      // 사용자 활동 스토어 강제 갱신
-      const activityStore = useUserActivityStore.getState();
-      if (userStore.userInfo?.indexId) {
-        await activityStore.fetchUserActivity(userStore.userInfo.indexId);
-      }
-
+      updateUserStoreProfile(fileName); // 동기적 업데이트
       set({ loading: false });
     } catch (error: any) {
       set({ loading: false, error: error.message });
@@ -61,7 +56,6 @@ export const useUserActivityStore = create<UserActivityState>((set) => ({
     set({ loading: true, error: null });
     try {
       const data = await getUserActivityInfoApi(userId);
-
       set({
         profileData: {
           profileImageUrl: data.profileImageUrl,

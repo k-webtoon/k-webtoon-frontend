@@ -1,36 +1,42 @@
 // Webtoon Types
-export type WebtoonStatus =
-  | "active"
-  | "inactive"
-  | "deleted"
-  | "pending"
-  | "blocked";
+export enum WebtoonStatusEnum {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  BLINDED = 'BLINDED'
+}
 
-export const WebtoonStatusEnum = {
-  ACTIVE: "active" as const, // 연재 중 (정상 노출)
-  INACTIVE: "inactive" as const, // 완결 / 작가가 숨김 처리
-  DELETED: "deleted" as const, // 삭제 (소프트 삭제)
-  PENDING: "pending" as const, // 작가가 등록 후 승인 대기
-  BLOCKED: "blocked" as const, // 운영자 블라인드 처리
-};
+export type WebtoonStatus = keyof typeof WebtoonStatusEnum;
+
+export interface Webtoon {
+  id: number;
+  title: string;
+  author: string;
+  description: string;
+  status: WebtoonStatus;
+  genre: string;
+  views: number;
+  rating: number;
+  lastUpdated: Date;
+  createdAt: Date;
+  thumbnailUrl?: string;
+  isAdult?: boolean;
+  isOriginal?: boolean;
+  tags?: string[];
+}
 
 export const webtoonStatusLabels: Record<WebtoonStatus, string> = {
-  active: "연재중",
-  inactive: "완결/숨김",
-  deleted: "삭제됨",
-  pending: "승인대기",
-  blocked: "블라인드",
+  PENDING: '대기중',
+  APPROVED: '승인됨',
+  REJECTED: '거절됨',
+  BLINDED: '블라인드'
 };
 
-export const webtoonStatusColors: Record<
-  WebtoonStatus,
-  { bg: string; text: string }
-> = {
-  active: { bg: "bg-blue-100", text: "text-blue-800" },
-  inactive: { bg: "bg-gray-100", text: "text-gray-800" },
-  deleted: { bg: "bg-red-100", text: "text-red-800" },
-  pending: { bg: "bg-yellow-100", text: "text-yellow-800" },
-  blocked: { bg: "bg-purple-100", text: "text-purple-800" },
+export const webtoonStatusColors: Record<WebtoonStatus, { bg: string; text: string }> = {
+  PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  APPROVED: { bg: 'bg-green-100', text: 'text-green-800' },
+  REJECTED: { bg: 'bg-red-100', text: 'text-red-800' },
+  BLINDED: { bg: 'bg-gray-100', text: 'text-gray-800' }
 };
 
 // Comment Types
@@ -188,4 +194,29 @@ export interface ModalUserDetailDTO {
   nickname?: string;
   phoneNumber?: string;
   securityQuestion?: string;
+}
+
+export interface WebtoonViewCountResponse {
+  id: number;
+  title: string;
+  author: string;
+  thumbnailUrl: string;
+  views: number;
+  likes: number;
+  favorites: number;
+  watched: number;
+  rating: number;
+  status: WebtoonStatus;
+}
+
+export interface WebtoonDetailResponse extends WebtoonViewCountResponse {
+  description: string;
+  genre: string[];
+  tags: string[];
+  isAdult: boolean;
+  isOriginal: boolean;
+  createdAt: string;
+  lastUpdated: string;
+  characters: string[];
+  synopsis: string;
 }

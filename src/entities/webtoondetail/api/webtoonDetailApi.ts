@@ -1,9 +1,9 @@
 import axios from "axios";
 import {
   WebtoonDetail,
-  Comment,
   CommentRequest,
   CommentPageResponse,
+  WebtoonComment,
 } from "@/entities/webtoondetail/model/types.ts";
 
 const BASE_URL = "http://localhost:8080";
@@ -42,7 +42,7 @@ export const commentApi = {
     return response.data;
   },
 
-  getBestComments: async (webtoonId: number): Promise<Comment[]> => {
+  getBestComments: async (webtoonId: number): Promise<WebtoonComment[]> => {
     const response = await apiClient.get(`/api/comments/best/${webtoonId}`);
     return response.data;
   },
@@ -51,7 +51,7 @@ export const commentApi = {
   addComment: async (
     webtoonId: number,
     requestDto: CommentRequest
-  ): Promise<Comment> => {
+  ): Promise<WebtoonComment> => {
     const response = await apiClient.post(
       `/api/comments/${webtoonId}`,
       requestDto
