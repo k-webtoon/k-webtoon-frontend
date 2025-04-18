@@ -16,6 +16,8 @@ interface DashboardCard {
   title: string;
   value: string | number;
   onClick?: () => void;
+  isActive?: boolean;
+  className?: string;
 }
 
 interface StatusOption {
@@ -81,7 +83,7 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
               key={index}
               className={`p-6 ${
                 card.onClick ? "cursor-pointer hover:bg-gray-50" : ""
-              }`}
+              } ${card.className || ""} ${card.isActive ? "bg-blue-50 border-blue-200" : ""}`}
               onClick={card.onClick}
             >
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
@@ -92,6 +94,34 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
           ))}
         </div>
       )}
+
+      {/* 필터 UI 추가 */}
+      <div className="flex gap-4 mb-6">
+        {statusOptions && (
+          <Select
+            value={filter.status}
+            onValueChange={(value) => onFilterChange({ ...filter, status: value })}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="상태 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <Input
+          placeholder="검색..."
+          value={filter.search}
+          onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
+          className="w-[300px]"
+        />
+      </div>
+
       <Card className="p-6">
         <DataTable columns={columns} data={data} pagination={pagination} />
       </Card>
