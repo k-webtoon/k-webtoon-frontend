@@ -3,6 +3,7 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { useWebtoonLikeStore } from "@/entities/webtoon-like/api/store.ts";
 import { WebtoonLikeRequest } from "@/entities/webtoon-like/model/types.ts";
+import { useWebtoonCountsStore } from "@/entities/webtoon/api/WebtoonCountsStore.ts";
 
 const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     // 0: 중립 상태, 1: 좋아요, 2: 싫어요
@@ -11,6 +12,9 @@ const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
 
     const toggleLike = useWebtoonLikeStore(state => state.toggleLike);
     const likedWebtoons = useWebtoonLikeStore(state => state.likedWebtoons);
+    
+    const increaseLikeCount = useWebtoonCountsStore(state => state.increaseLikeCount);
+    const decreaseLikeCount = useWebtoonCountsStore(state => state.decreaseLikeCount);
 
     useEffect(() => {
         if (webtoonId && likedWebtoons.has(webtoonId)) {
@@ -32,11 +36,22 @@ const WebtoonLikeButton = ({ webtoonId }:WebtoonLikeRequest) => {
     const handleClick = async () => {
         if (webtoonId) {
             try {
-                // 현재 상태를 확인하고 다음 상태를 결정
+                const prevState = state;
+                
                 const newState = (state + 1) % 3;
+                
+                // 카운트 업데이트
+                if (prevState === 0 && newState === 1) {
+                    increaseLikeCount(webtoonId);
+                } 
+                else if (prevState === 1 && newState === 2) {
+                    decreaseLikeCount(webtoonId);
+                }
+                
                 setState(newState);
-
+                
                 await toggleLike({ webtoonId });
+                
             } catch (error) {
                 console.error('좋아요 처리 중 오류 발생:', error);
                 setState(state);

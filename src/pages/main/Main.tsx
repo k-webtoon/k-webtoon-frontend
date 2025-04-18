@@ -51,7 +51,7 @@ const Main: React.FC = () => {
 
     return (
         <div className="container">
-            <div className="pt-5">
+            <div className="pt-10">
                 {!isAuthenticated ?
                     <>
                         <section id="section1" className="pt-10">

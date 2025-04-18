@@ -1,16 +1,12 @@
-import {useAuthStore} from '@/entities/auth/api/store.ts';
+import {useAuthStore} from '@/entities/auth/api/store';
 import {useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CustomDropdown  from "@/shared/ui/custom/CustomDropdown.tsx";
-import {User} from "@/entities/user/model/types.ts";
-import SearchBar from "@/features/webtoon-search/ui/SearchBar.tsx";
-import {Button} from "@/shared/ui/shadcn/button.tsx";
+import CustomDropdown  from "@/shared/ui/custom/CustomDropdown";
+import {User} from "@/entities/user/model/types";
+import SearchBar from "@/features/webtoon-search/ui/SearchBar";
+import {Button} from "@/shared/ui/shadcn/button";
 import {Search} from "lucide-react";
 
-interface Notification {
-    id: number
-    label: string
-}
 interface HeaderActionsProps {
     isSearchOpen: boolean;
     setIsSearchOpen: (isOpen: boolean) => void;
@@ -27,12 +23,6 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
     // 알림 데이터
     const publicNotifications: Notification[] = [
         { id: 1, label: "로그인 후 회원님을 위한 맞춤 추천 웹툰을 확인하세요." }
-    ]
-
-    const notifications: Notification[] = [
-        { id: 1, label: "사론님이 팔로우했습니다." },
-        { id: 2, label: "대균님이 팔로우했습니다." },
-        { id: 3, label: "소원님이 팔로우했습니다." }
     ]
 
     const users: User[] = [
@@ -64,17 +54,8 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
 
                 <div className="hidden md:flex items-center transition-opacity duration-300">
                     <ul className="flex items-center">
-                        <li className="mr-2">
+                        <li className="mr-4">
                             <SearchBar />
-                        </li>
-                        <li className="mr-2">
-                            <CustomDropdown
-                                label="알림"
-                                items={publicNotifications.map((notification) => ({
-                                    label: notification.label,
-                                    onClick: () => console.log("알림 클릭됨", notification.id),
-                                }))}
-                            />
                         </li>
                         <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
                             <Link to="/login">로그인</Link>
@@ -126,15 +107,6 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                         </li>
                         <li>
                             <CustomDropdown
-                                label="알림"
-                                items={notifications.map((notification) => ({
-                                    label: notification.label,
-                                    onClick: () => console.log("알림 클릭됨", notification.id),
-                                }))}
-                            />
-                        </li>
-                        <li>
-                            <CustomDropdown
                                 label="유저"
                                 items={users.map((item) => ({
                                     label: item.label,
@@ -157,15 +129,6 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                             >
                                 <Search />
                             </Button>
-                        </li>
-                        <li>
-                            <CustomDropdown
-                                label="알림"
-                                items={notifications.map((notification) => ({
-                                    label: notification.label,
-                                    onClick: () => console.log("알림 클릭됨", notification.id),
-                                }))}
-                            />
                         </li>
                         <li>
                             <CustomDropdown

@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom";
 import { Card, CardFooter, CardTitle } from "@/shared/ui/shadcn/card.tsx"
 import { Badge } from "@/shared/ui/shadcn/badge.tsx"
-import { Star } from "lucide-react"
-import { mapGenre, WebtoonInfo, PopularWebtoon, GENRE_MAPPING, GenreType } from "@/entities/webtoon/model/types.ts";
+import { Star, ThumbsUp, Bookmark, Eye } from "lucide-react"
+import { mapGenre, WebtoonInfo, GENRE_MAPPING, GenreType } from "@/entities/webtoon/model/types.ts";
 import { cn } from "@/shared/lib/cn";
 import WebtoonLikeButton from "@/features/webtoon-like/ui/WebtoonLikeButton.tsx";
 import WebtoonFavoriteButton from "@/features/webtoon-favorite/ui/WebtoonFavoriteButton.tsx";
 import WebtoonWatchedButton from "@/features/webtoon-watched/ui/WebtoonWatchedButton.tsx";
+import { useWebtoonLikeStore } from "@/entities/webtoon-like/api/store.ts";
+import { useWebtoonFavoriteStore } from "@/entities/webtoon-favorite/api/store.ts";
+import { useWebtoonWatchedStore } from "@/entities/webtoon-watched/api/store.ts";
 
 export interface WebtoonCardProps {
-    webtoon: WebtoonInfo | PopularWebtoon | any;
+    webtoon: WebtoonInfo | any;
     // 카드 사이즈
     size?: 'sm' | 'md' | 'lg';
     // 뱃지 표시 여부 (완결, 성인)
@@ -23,6 +26,8 @@ export interface WebtoonCardProps {
     // AI 추천
     showAI?: boolean;
     aiPercent?: number;
+    // 카운트 표시 전용 (좋아요, 즐겨찾기, 봤어요 중 하나만 표시)
+    countType?: 'likes' | 'favorites' | 'watched' | null;
 }
 
 export default function WebtoonCard({
@@ -33,7 +38,8 @@ export default function WebtoonCard({
                                         showGenre = true,
                                         showActionButtons = true,
                                         showAI = false,
-                                        aiPercent = 96
+                                        aiPercent = 96,
+                                        countType = null
                                     }: WebtoonCardProps) {
 
     const sizeStyles = {
@@ -55,6 +61,26 @@ export default function WebtoonCard({
     const genres: (string | GenreType)[] = 'rankGenreTypes' in webtoon 
         ? webtoon.rankGenreTypes 
         : ('genre' in webtoon ? webtoon.genre : []);
+        
+    // 좋아요, 즐겨찾기, 봤어요 버튼 상태 감시
+    const likedWebtoons = useWebtoonLikeStore(state => state.likedWebtoons); 
+    const favoriteWebtoons = useWebtoonFavoriteStore(state => state.favoriteWebtoons);
+    const watchedWebtoons = useWebtoonWatchedStore(state => state.watchedWebtoons);
+    
+    // 각 타입에 대한 기준 카운트 계산
+    const baseLikeCount = webtoon.totalCount ? Number(webtoon.totalCount) : 0;
+    const baseFavoriteCount = webtoon.totalCount ? Number(webtoon.totalCount) : 0;
+    const baseWatchedCount = webtoon.totalCount ? Number(webtoon.totalCount) : 0;
+    
+    // 현재 로그인한 유저의 액션 상태 확인
+    const isLikedByUser = webtoonId && likedWebtoons.has(webtoonId) && likedWebtoons.get(webtoonId) === true;
+    const isFavoritedByUser = webtoonId && favoriteWebtoons.has(webtoonId) && favoriteWebtoons.get(webtoonId) === true;
+    const isWatchedByUser = webtoonId && watchedWebtoons.has(webtoonId) && watchedWebtoons.get(webtoonId) === true;
+    
+    // 카운트 계산 (API 카운트 + 사용자의 액션)
+    const displayLikeCount = baseLikeCount + (isLikedByUser ? 1 : 0);
+    const displayFavoriteCount = baseFavoriteCount + (isFavoritedByUser ? 1 : 0);
+    const displayWatchedCount = baseWatchedCount + (isWatchedByUser ? 1 : 0);
 
     return (
         <Card className={cn(
@@ -87,6 +113,32 @@ export default function WebtoonCard({
                     )}
                 </div>
             )}
+            
+            {/* 페이지별 카운트 표시 배지 */}
+            {countType && (
+                <div className="absolute top-2 right-2 z-10">
+                    {countType === 'likes' && (
+                        <Badge variant="secondary" className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 px-2 py-1">
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                            <span className="font-semibold">{displayLikeCount}</span>
+                        </Badge>
+                    )}
+                    {countType === 'favorites' && (
+                        <Badge variant="secondary" className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 px-2 py-1">
+                            <Bookmark className="h-3.5 w-3.5" />
+                            <span className="font-semibold">{displayFavoriteCount}</span>
+                        </Badge>
+                    )}
+                    {countType === 'watched' && (
+                        <Badge variant="secondary" className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 px-2 py-1">
+                            <Eye className="h-3.5 w-3.5" />
+                            <span className="font-semibold">{displayWatchedCount}</span>
+                        </Badge>
+                    )}
+                </div>
+            )}
+            
+            {/* 카운트 표시 코드 삭제 */}
 
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent pt-16 pb-4 px-4">
                 {/* 제목, 별점 */}

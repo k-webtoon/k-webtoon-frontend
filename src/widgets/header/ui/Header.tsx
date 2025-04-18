@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { useLocation, Link } from "react-router-dom"
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs.tsx"
-import SearchBar from "@/features/webtoon-search/ui/SearchBar.tsx"
+import { useLocation, Link, useNavigate } from "react-router-dom"
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs"
+import SearchBar from "@/features/webtoon-search/ui/SearchBar"
 import logo from "@/shared/assets/curatoon.png"
-import HeaderActions from "@/widgets/header/ui/HeaderActions.tsx";
+import HeaderActions from "@/widgets/header/ui/HeaderActions";
+import { homeSubNavItems, webtoonSubNavItems, findActiveSubNavItemByPath, SubNavItem, getSectionId } from "@/shared/config/navigation";
 
 interface NavItem {
     title: string
@@ -11,18 +12,15 @@ interface NavItem {
     value: string
 }
 
-interface SubTabItem {
-    title: string
-    href: string
-}
-
 const HEADER_HEIGHT = 120; // 헤더와 서브네비게이션 높이
 const OBSERVER_THRESHOLD = 0.5; // 섹션의 50% 이상이 보일 때 활성화
 
 const Header: React.FC = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("home");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [activeSubNav, setActiveSubNav] = useState<SubNavItem | undefined>(undefined);
     const [activeSubTab, setActiveSubTab] = useState("section1");
 
     // Observer 참조 저장용 (정리 단계에서 사용)
@@ -35,26 +33,11 @@ const Header: React.FC = () => {
         { title: "코멘트", href: "/coment", value: "coment" },
     ], []);
 
-    // 서브 네비게이션 아이템 - useMemo로 최적화
-    const homeSubTabItems: SubTabItem[] = useMemo(() => [
-        { title: "AI기반 맞춤", href: "/1" },
-        { title: "오늘의 추천 웹툰", href: "/2" },
-        { title: "웹툰 캐릭터와 대화", href: "/3" },
-        { title: "인기 리뷰", href: "/4" }
-    ], []);
+    const currentSubNavItems = useMemo(() => 
+        activeTab === "home" ? homeSubNavItems : webtoonSubNavItems,
+    [activeTab]);
 
-    const webtoonSubTabItems: SubTabItem[] = useMemo(() => [
-        { title: "맞춤 추천 웹툰", href: "/1" },
-        { title: "이건 진짜 인기 있음", href: "/2" }, // 인기순
-        { title: "이건 봐야 해", href: "/3" },         // 조회수
-        { title: "심장을 저격한 작품들", href: "/4" }, // 좋아요
-        { title: "찜 안 하면 섭섭해", href: "/5" }     // 즐겨찾기
-    ], []);
-
-    const currentSubTabItems = useMemo(() =>
-            activeTab === "home" ? homeSubTabItems : webtoonSubTabItems,
-        [activeTab, homeSubTabItems, webtoonSubTabItems]);
-
+    // 현재 경로에 따라 활성 탭 설정
     useEffect(() => {
         const currentPath = location.pathname;
 
@@ -66,14 +49,30 @@ const Header: React.FC = () => {
         if (matchingItem) {
             setActiveTab(matchingItem.value);
         } else if (currentPath === '/') {
-            setActiveTab('webtoon');
+            setActiveTab('home');
         }
     }, [location.pathname, navItems]);
 
+    // 현재 경로에 따라 활성 서브네비게이션 아이템 설정
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const items = activeTab === "home" ? homeSubNavItems : webtoonSubNavItems;
+        const activeItem = findActiveSubNavItemByPath(items, currentPath);
+        
+        if (activeItem) {
+            setActiveSubNav(activeItem);
+            setActiveSubTab(getSectionId(activeItem.href));
+        } else if (items.length > 0) {
+            setActiveSubNav(items[0]);
+            setActiveSubTab(getSectionId(items[0].href));
+        }
+    }, [location.pathname, activeTab]);
+
     // 스크롤 이동 함수 - useCallback으로 최적화
-    const scrollToSection = useCallback((e: React.MouseEvent, sectionId: string) => {
+    const scrollToSection = useCallback((e: React.MouseEvent, sectionId: string, item: SubNavItem) => {
         e.preventDefault();
         setActiveSubTab(sectionId);
+        setActiveSubNav(item);
 
         const section = document.getElementById(sectionId);
         if (section) {
@@ -110,6 +109,13 @@ const Header: React.FC = () => {
             if (intersectingEntries.length > 0) {
                 const newActiveTab = intersectingEntries[0].target.id;
                 setActiveSubTab(newActiveTab);
+                
+                // 해당 ID에 맞는 서브네비게이션 아이템 찾기
+                const items = activeTab === "home" ? homeSubNavItems : webtoonSubNavItems;
+                const matchingItem = items.find(item => getSectionId(item.href) === newActiveTab);
+                if (matchingItem) {
+                    setActiveSubNav(matchingItem);
+                }
             }
         };
 
@@ -120,8 +126,8 @@ const Header: React.FC = () => {
         setTimeout(() => {
             if (!observerRef.current) return;
 
-            currentSubTabItems.forEach(item => {
-                const sectionId = `section${item.href.split('/').pop()}`;
+            currentSubNavItems.forEach(item => {
+                const sectionId = getSectionId(item.href);
                 const sectionElement = document.getElementById(sectionId);
                 if (sectionElement) {
                     observerRef.current?.observe(sectionElement);
@@ -134,8 +140,8 @@ const Header: React.FC = () => {
                 let closestSection = null;
                 let closestDistance = Infinity;
 
-                currentSubTabItems.forEach(item => {
-                    const sectionId = `section${item.href.split('/').pop()}`;
+                currentSubNavItems.forEach(item => {
+                    const sectionId = getSectionId(item.href);
                     const section = document.getElementById(sectionId);
 
                     if (section) {
@@ -152,12 +158,19 @@ const Header: React.FC = () => {
 
                 if (closestSection) {
                     setActiveSubTab(closestSection);
+                    // 해당 ID에 맞는 서브네비게이션 아이템 찾기
+                    const matchingItem = currentSubNavItems.find(
+                        item => getSectionId(item.href) === closestSection
+                    );
+                    if (matchingItem) {
+                        setActiveSubNav(matchingItem);
+                    }
                 }
             };
 
             checkInitialVisibility();
         }, 100);
-    }, [activeTab, currentSubTabItems]);
+    }, [activeTab, currentSubNavItems]);
 
     // Observer 설정 및 정리
     useEffect(() => {
@@ -171,49 +184,20 @@ const Header: React.FC = () => {
         };
     }, [setupIntersectionObserver]);
 
-    // 탭 변경 시 추가적인 처리
-    useEffect(() => {
-        // 탭이 변경될 때 현재 스크롤 위치에 맞는 서브탭 초기화
-        if (activeTab === "home" || activeTab === "webtoon") {
-            // 약간의 지연을 두어 DOM이 업데이트될 시간을 확보
-            const timer = setTimeout(() => {
-                // 현재 화면에 보이는 섹션 중 가장 상단에 있는 섹션 찾기
-                let bestVisibleSection = null;
-                let bestVisibleRatio = 0;
-
-                currentSubTabItems.forEach(item => {
-                    const sectionId = `section${item.href.split('/').pop()}`;
-                    const section = document.getElementById(sectionId);
-
-                    if (section) {
-                        const rect = section.getBoundingClientRect();
-                        const windowHeight = window.innerHeight;
-
-                        // 화면에 얼마나 보이는지 계산 (비율)
-                        const visibleTop = Math.max(0, rect.top);
-                        const visibleBottom = Math.min(windowHeight, rect.bottom);
-                        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-                        const visibleRatio = visibleHeight / rect.height;
-
-                        if (visibleRatio > bestVisibleRatio) {
-                            bestVisibleRatio = visibleRatio;
-                            bestVisibleSection = sectionId;
-                        }
-                    }
-                });
-
-                if (bestVisibleSection) {
-                    setActiveSubTab(bestVisibleSection);
-                } else if (currentSubTabItems.length > 0) {
-                    // 보이는 섹션이 없으면 첫 번째 섹션으로 설정
-                    const firstSectionId = `section${currentSubTabItems[0].href.split('/').pop()}`;
-                    setActiveSubTab(firstSectionId);
-                }
-            }, 200);
-
-            return () => clearTimeout(timer);
+    // 서브 네비게이션 클릭 핸들러
+    const handleSubNavClick = (e: React.MouseEvent, item: SubNavItem) => {
+        const sectionId = getSectionId(item.href);
+        
+        // 스크롤이 필요한 경우 스크롤 처리
+        if (document.getElementById(sectionId)) {
+            scrollToSection(e, sectionId, item);
+        } else {
+            // 스크롤 대상이 없으면 페이지 이동
+            e.preventDefault();
+            setActiveSubNav(item);
+            navigate(item.path);
         }
-    }, [activeTab, currentSubTabItems]);
+    };
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white transition-all duration-300">
@@ -276,23 +260,23 @@ const Header: React.FC = () => {
 
             {/* 서브 네비게이션 (홈 또는 웹툰 탭에서만 표시) */}
             {(activeTab === "home" || activeTab === "webtoon") && (
-                <div className="max-w-screen-xl mx-auto border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+                <div className="max-w-screen-xl mx-auto border-b transition-all duration-300">
                     <ul className="flex overflow-x-auto py-3 px-4 whitespace-nowrap transition-all duration-300">
-                        {currentSubTabItems.map((item, index) => {
+                        {currentSubNavItems.map((item, index) => {
                             // href에서 섹션 ID 추출
-                            const sectionId = `section${item.href.split('/').pop()}`;
+                            const sectionId = getSectionId(item.href);
 
                             // 활성화 여부에 따른 클래스 결정
-                            const isActive = activeSubTab === sectionId;
+                            const isActive = activeSubNav?.title === item.title;
                             const linkClass = isActive
-                                ? "text-sm font-bold text-gray-900 transition-colors duration-300"
-                                : "text-sm text-gray-600 hover:text-gray-900 transition-colors duration-300";
+                                ? "text-sm font-bold text-yellow-500 transition-colors duration-300"
+                                : "text-sm text-gray-700 hover:text-gray-900 transition-colors duration-300";
 
                             return (
                                 <li key={index} className="mr-6 transition-transform duration-300">
                                     <a
                                         href={`#${sectionId}`}
-                                        onClick={(e) => scrollToSection(e, sectionId)}
+                                        onClick={(e) => handleSubNavClick(e, item)}
                                         className={linkClass}
                                     >
                                         {item.title}

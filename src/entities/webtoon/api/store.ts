@@ -109,11 +109,11 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     },
     
     // 즐겨찾기 기준 인기 웹툰 조회
-    fetchPopularByFavorites: async (page = 0, size = 10) => {
+    fetchPopularByFavorites: async (size = 10) => {
         set({ isLoading: true, error: null });
         try {
-            const data = await getPopularByFavorites(page, size);
-            set({ popularByFavorites: data, isLoading: false });
+            const data = await getPopularByFavorites(size);
+            set({ popularByFavorites: data, isLoading: false }); // 바로 배열 데이터 저장
         } catch (error) {
             console.error('인기 웹툰(즐겨찾기) 로딩 오류:', error);
             set({
@@ -124,11 +124,11 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     },
     
     // 좋아요 기준 인기 웹툰 조회
-    fetchPopularByLikes: async (page = 0, size = 10) => {
+    fetchPopularByLikes: async (size = 10) => {
         set({ isLoading: true, error: null });
         try {
-            const data = await getPopularByLikes(page, size);
-            set({ popularByLikes: data, isLoading: false });
+            const data = await getPopularByLikes(size);
+            set({ popularByLikes: data, isLoading: false }); // 바로 배열 데이터 저장
         } catch (error) {
             console.error('인기 웹툰(좋아요) 로딩 오류:', error);
             set({
@@ -139,10 +139,10 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     },
     
     // 봤어요 기준 인기 웹툰 조회
-    fetchPopularByWatched: async (page = 0, size = 10) => {
+    fetchPopularByWatched: async (size = 10) => {
         set({ isLoading: true, error: null });
         try {
-            const data = await getPopularByWatched(page, size);
+            const data = await getPopularByWatched(size);
             set({ popularByWatched: data, isLoading: false });
         } catch (error) {
             console.error('인기 웹툰(봤어요) 로딩 오류:', error);
