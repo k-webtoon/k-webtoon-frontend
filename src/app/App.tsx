@@ -6,19 +6,19 @@ import { TrackingProvider } from "@/pages/TrackingProvider";
 import { useAuthStore } from "@/entities/auth/api/store.ts";
 
 function App() {
-  const { isAuthenticated, user, initialize, fetchUserInfo } = useAuthStore();
+  const { isAuthenticated, userInfo, initialize, getUserInfo } = useAuthStore();
 
   // 토큰으로 로그인 정보 초기화
   useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
-  // 인증은 됐는데 user 정보 없으면 불러오기
+  // 인증은 됐는데 userInfo 정보 없으면 불러오기
   useEffect(() => {
-    if (isAuthenticated && !user) {
-//       fetchUserInfo();
+    if (isAuthenticated && !userInfo) {
+      getUserInfo();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, userInfo, getUserInfo]);
 
   return (
     <BrowserRouter>

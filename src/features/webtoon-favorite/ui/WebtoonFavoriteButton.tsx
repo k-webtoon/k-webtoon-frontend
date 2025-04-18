@@ -3,21 +3,34 @@ import { Bookmark } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { useWebtoonFavoriteStore } from "@/entities/webtoon-favorite/api/store.ts";
 import { WebtoonFavoriteRequest } from "@/entities/webtoon-favorite/model/types.ts";
+import { useWebtoonCountsStore } from "@/entities/webtoon/api/WebtoonCountsStore.ts";
 
 const WebtoonFavoriteButton = ({ webtoonId }: WebtoonFavoriteRequest) => {
     // 즐겨찾기 상태 (true: 즐겨찾기됨, false: 즐겨찾기 안됨)
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [prevBookmarked, setPrevBookmarked] = useState<boolean>(false);
     // 툴팁 표시 상태
     const [showText, setShowText] = useState(false);
 
     const toggleFavorite = useWebtoonFavoriteStore(state => state.toggleFavorite);
     const favoriteWebtoons = useWebtoonFavoriteStore(state => state.favoriteWebtoons);
+    
+    const increaseFavoriteCount = useWebtoonCountsStore(state => state.increaseFavoriteCount);
+    const decreaseFavoriteCount = useWebtoonCountsStore(state => state.decreaseFavoriteCount);
 
     useEffect(() => {
         if (webtoonId && favoriteWebtoons.has(webtoonId)) {
             const isFavorite = favoriteWebtoons.get(webtoonId);
+            if (isFavorite && !isBookmarked) {
+                increaseFavoriteCount(webtoonId);
+            } else if (!isFavorite && isBookmarked) {
+                decreaseFavoriteCount(webtoonId);
+            }
+            
+            setPrevBookmarked(isBookmarked);
             setIsBookmarked(isFavorite || false);
         } else {
+            setPrevBookmarked(isBookmarked);
             setIsBookmarked(false); // 즐겨찾기 정보가 없는 경우 기본값으로 설정
         }
     }, [favoriteWebtoons, webtoonId]);
@@ -25,14 +38,36 @@ const WebtoonFavoriteButton = ({ webtoonId }: WebtoonFavoriteRequest) => {
     const handleClick = async () => {
         if (webtoonId) {
             try {
-                // API 호출 - API가 자동으로 즐겨찾기 상태를 토글
+                // 현재 상태의 반대값으로 새로운 상태 설정
+                const newBookmarkedState = !isBookmarked;
+                
+                // 이전 상태 저장
+                setPrevBookmarked(isBookmarked);
+                
+                // 새로운 상태로 업데이트
+                setIsBookmarked(newBookmarkedState);
+                
+                // 카운트 업데이트
+                if (newBookmarkedState) {
+                    increaseFavoriteCount(webtoonId);
+                } else {
+                    decreaseFavoriteCount(webtoonId);
+                }
+                
                 await toggleFavorite({ webtoonId });
-                // API 호출 후 상태는 useEffect에 의해 자동으로 업데이트됨
             } catch (error) {
                 console.error('즐겨찾기 처리 중 오류 발생:', error);
+                // 에러 발생 시 상태 롤백
+                setIsBookmarked(prevBookmarked);
+                
+                // 카운트 롤백
+                if (prevBookmarked) {
+                    increaseFavoriteCount(webtoonId);
+                } else {
+                    decreaseFavoriteCount(webtoonId);
+                }
             }
         } else {
-            // webtoonId가 없는 경우 로컬 상태만 변경
             setIsBookmarked(prevState => !prevState);
         }
     };

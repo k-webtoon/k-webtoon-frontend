@@ -3,6 +3,7 @@ import { Eye, EyeOff, Slash } from 'lucide-react';
 import { Button } from "@/shared/ui/shadcn/button.tsx";
 import { useWebtoonWatchedStore } from "@/entities/webtoon-watched/api/store.ts";
 import { WebtoonWatchedRequest } from "@/entities/webtoon-watched/model/types.ts";
+import { useWebtoonCountsStore } from "@/entities/webtoon/api/WebtoonCountsStore.ts";
 
 const WebtoonWatchedButton = ({ webtoonId }: WebtoonWatchedRequest) => {
     // 0: 중립, 1: 봤어요, 2: 보지 않을래요
@@ -11,6 +12,9 @@ const WebtoonWatchedButton = ({ webtoonId }: WebtoonWatchedRequest) => {
 
     const toggleWatched = useWebtoonWatchedStore(state => state.toggleWatched);
     const watchedWebtoons = useWebtoonWatchedStore(state => state.watchedWebtoons);
+    
+    const increaseWatchedCount = useWebtoonCountsStore(state => state.increaseWatchedCount);
+    const decreaseWatchedCount = useWebtoonCountsStore(state => state.decreaseWatchedCount);
 
     useEffect(() => {
         if (webtoonId && watchedWebtoons.has(webtoonId)) {
@@ -32,9 +36,20 @@ const WebtoonWatchedButton = ({ webtoonId }: WebtoonWatchedRequest) => {
     const handleClick = async () => {
         if (webtoonId) {
             try {
-                // 현재 상태를 확인하고 다음 상태를 결정
+                // 현재 상태 저장
+                const prevState = watchState;
+                
+                // 다음 상태 계산
                 const newState = (watchState + 1) % 3;
                 setWatchState(newState);
+                
+                // 카운트 업데이트
+                if (prevState === 0 && newState === 1) {
+                    increaseWatchedCount(webtoonId);
+                } 
+                else if (prevState === 1 && newState === 2) {
+                    decreaseWatchedCount(webtoonId);
+                }
 
                 await toggleWatched({ webtoonId });
 
