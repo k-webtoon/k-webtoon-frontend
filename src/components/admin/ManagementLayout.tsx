@@ -16,12 +16,16 @@ interface DashboardCard {
   title: string;
   value: string | number;
   onClick?: () => void;
+  isActive?: boolean;
+  className?: string;
 }
 
 interface StatusOption {
   value: string;
   label: string;
 }
+
+type DashboardLayout = "default" | "full";
 
 interface ManagementLayoutProps {
   title: string;
@@ -41,6 +45,7 @@ interface ManagementLayoutProps {
     total: number;
     onPageChange: (page: number) => void;
   };
+  dashboardLayout?: DashboardLayout;
 }
 
 export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
@@ -53,7 +58,17 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
   filter,
   onFilterChange,
   pagination,
+  dashboardLayout = "default",
 }) => {
+  const getDashboardGridClass = () => {
+    switch (dashboardLayout) {
+      case "full":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+      default:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-4";
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-2">{title}</h1>
@@ -62,13 +77,13 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
       )}
 
       {dashboardCards && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className={`grid ${getDashboardGridClass()} gap-4 mb-6`}>
           {dashboardCards.map((card, index) => (
             <Card
               key={index}
               className={`p-6 ${
                 card.onClick ? "cursor-pointer hover:bg-gray-50" : ""
-              }`}
+              } ${card.className || ""} ${card.isActive ? "bg-blue-50 border-blue-200" : ""}`}
               onClick={card.onClick}
             >
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
@@ -79,6 +94,34 @@ export const ManagementLayout: React.FC<ManagementLayoutProps> = ({
           ))}
         </div>
       )}
+
+      {/* 필터 UI 추가 */}
+      <div className="flex gap-4 mb-6">
+        {statusOptions && (
+          <Select
+            value={filter.status}
+            onValueChange={(value) => onFilterChange({ ...filter, status: value })}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="상태 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <Input
+          placeholder="검색..."
+          value={filter.search}
+          onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
+          className="w-[300px]"
+        />
+      </div>
+
       <Card className="p-6">
         <DataTable columns={columns} data={data} pagination={pagination} />
       </Card>

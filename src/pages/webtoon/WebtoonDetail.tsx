@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useWebtoonDetailStore } from "@/entities/webtoondetail/model/store";
-import { getWebtoonDetail, commentApi } from "@/entities/webtoondetail/api/webtoonDetailApi.ts";
+import {
+  getWebtoonDetail,
+  commentApi,
+} from "@/entities/webtoondetail/api/webtoonDetailApi.ts";
 import { CommentRequest } from "@/entities/webtoondetail/model/types";
 import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { CommentSection } from "@/pages/webtoon/WebtoonComment.tsx";
-import { useNavigate  } from "react-router-dom";
 
 function WebtoonDetail() {
   const { id } = useParams<{ id: string }>();
   const [newComment, setNewComment] = useState("");
-  const navigate = useNavigate(); // useNavigate 사용
+  const navigate = useNavigate();
 
   const {
     webtoon,
@@ -29,9 +31,8 @@ function WebtoonDetail() {
     updateCommentLike,
   } = useWebtoonDetailStore();
 
-  const { isAuthenticated } = useAuthStore(); // 로그인 사용자 정보와 인증 상태
+  const { isAuthenticated } = useAuthStore();
 
-  // 웹툰 상세 정보 조회
   useEffect(() => {
     const fetchData = async () => {
       if (id) {
@@ -46,7 +47,6 @@ function WebtoonDetail() {
     fetchData();
   }, [id, setWebtoon]);
 
-  // 댓글 목록 조회
   useEffect(() => {
     const fetchComments = async () => {
       if (id) {
@@ -65,7 +65,6 @@ function WebtoonDetail() {
     fetchComments();
   }, [id, currentPage, setComments, setTotalPages]);
 
-  // 베스트 댓글 조회
   useEffect(() => {
     const fetchBestComments = async () => {
       if (id) {
@@ -80,7 +79,6 @@ function WebtoonDetail() {
     fetchBestComments();
   }, [id, setBestComments]);
 
-  // 댓글 작성 처리
   const handleAddComment = async () => {
     if (!isAuthenticated) {
       alert("로그인이 필요합니다.");
@@ -100,7 +98,7 @@ function WebtoonDetail() {
   const handleDeleteComment = async (commentId: number) => {
     try {
       await commentApi.deleteComment(commentId);
-      removeComment(commentId); // Zustand 스토어에서 댓글 제거
+      removeComment(commentId);
       alert("댓글이 삭제되었습니다.");
     } catch (error) {
       console.error("댓글 삭제 실패:", error);
@@ -114,49 +112,37 @@ function WebtoonDetail() {
         alert("로그인이 필요합니다.");
         return;
       }
-
-      // 즉시 UI 업데이트
       updateCommentLike(commentId, isLiked);
 
-      // 서버 동기화
       if (isLiked) {
         await commentApi.unlikeComment(commentId);
       } else {
         await commentApi.likeComment(commentId);
       }
 
-      // 데이터 전체 리프레시
       const [commentsRes, bestRes] = await Promise.all([
         commentApi.getComments(Number(id), currentPage),
         commentApi.getBestComments(Number(id)),
       ]);
-
       setComments(commentsRes.content);
       setBestComments(bestRes);
     } catch (error) {
-      // 실패 시 롤백
       updateCommentLike(commentId, !isLiked);
       console.error("좋아요 처리 실패:", error);
     }
   };
 
-  // 페이지 변경 처리
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  // 태그 클릭 시 URL 변경
   const handleTagClick = (tag: string) => {
-    //console.log("Tag detected:", tag);  // 디버깅
-    navigate(`/search?query=$${tag}`);  // 태그는 #으로 구분
+    navigate(`/search?query=$${tag}`);
   };
-
-  // 작가 클릭 시 URL 변경
   const handleAuthorClick = (author: string) => {
-    navigate(`/search?query=~${author}`);  // 작가는 $으로 구분
+    navigate(`/search?query=~${author}`);
   };
 
-  // 날짜 포맷 함수
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("ko-KR", {
@@ -168,6 +154,12 @@ function WebtoonDetail() {
     }).format(date);
   };
 
+  const handleGoToWebtoonPage = () => {
+    if (webtoon?.webtoonPageUrl) {
+      window.open(webtoon.webtoonPageUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
   if (!webtoon)
     return (
       <div className="flex justify-center items-center min-h-screen bg-white">
@@ -175,7 +167,6 @@ function WebtoonDetail() {
       </div>
     );
 
-  // 미디어믹스 태그 생성 및 색상 매핑
   const mediaMixTags = [];
   if (webtoon.osmuAnime)
     mediaMixTags.push({
@@ -243,14 +234,13 @@ function WebtoonDetail() {
                 <h1 className="text-5xl font-bold tracking-tight text-gray-900">
                   {webtoon.titleName}
                 </h1>
-                <p 
-                    className="text-2xl text-gray-600 cursor-pointer"
-                    onClick={() => handleAuthorClick(webtoon.author)} // 클릭 시 작가 이름으로 검색
-                  >
-                    {webtoon.author}
-                  </p>
+                <p
+                  className="text-2xl text-gray-600 cursor-pointer"
+                  onClick={() => handleAuthorClick(webtoon.author)}
+                >
+                  {webtoon.author}
+                </p>
               </div>
-
               <div className="flex flex-wrap gap-2">
                 {webtoon.tag.map((tag, index) => (
                   <span
@@ -272,7 +262,8 @@ function WebtoonDetail() {
                 </p>
               </div>
 
-              <div className="flex gap-8">
+              {/* 연령/완결/공식페이지 버튼 flex row */}
+              <div className="flex gap-8 items-center">
                 <div className="flex items-center gap-4">
                   <span className="font-semibold text-lg text-gray-700">
                     연령
@@ -294,6 +285,27 @@ function WebtoonDetail() {
                   >
                     {webtoon.finish ? "O" : "X"}
                   </span>
+                  {/* 공식 페이지 바로가기 버튼: 완결 옆에만 위치 */}
+                  <button
+                    type="button"
+                    onClick={handleGoToWebtoonPage}
+                    className="ml-4 flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow text-base font-semibold flex-shrink-0"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14 3h7v7m0 0L10 21l-7-7 11-11z"
+                      />
+                    </svg>
+                    공식 페이지
+                  </button>
                 </div>
               </div>
             </div>

@@ -22,13 +22,9 @@ import WebtoonSearchResults from "@/pages/webtoon-search/WebtoonSearchResults.ts
 import Error from "@/pages/error/Error.tsx";
 import MyProfile from "@/pages/user/mypage/MyProfile";
 import AdminMain from "@/pages/admin/AdminMain";
-import WebtoonManagement from "@/pages/admin/management/WebtoonManagement";
 import UserManagement from "@/pages/admin/management/UserManagement";
-import CommentManagement from "@/pages/admin/management/CommentManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
-import CommentStats from "@/pages/admin/stats/CommentStats";
-import FeedbackStatus from "@/pages/admin/recommendation/FeedbackStatus";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
 import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/webtoon-search-ai/TextBasedRecommendations.tsx";
@@ -40,6 +36,8 @@ import AdminLayout from "@/pages/admin/common/AdminLayout";
 import AdminAccessDenied from "@/pages/error/AdminAccessDenied.tsx";
 import UserAccessDenied from "@/pages/error/UserAccessDenied.tsx";
 import OAuthRedirect from "@/entities/auth/ui/OAuthRedirect";
+import LogStats from "@/pages/admin/stats/LogStats";
+import WebtoonManagement from "@/pages/admin/management/WebtoonManagement";
 
 // 임시 컴포넌트 (아직 구현되지 않은 페이지용)
 const PlaceholderComponent = ({ title }: { title: string }) => (
@@ -112,14 +110,13 @@ const RoutesConfig = () => (
           <Route path="management">
             <Route path="users" element={<UserManagement />} />
             <Route path="webtoons" element={<WebtoonManagement />} />
-            <Route path="comments" element={<CommentManagement />} />
           </Route>
 
           {/* 통계 */}
           <Route path="stats">
             <Route path="users" element={<UserStats />} />
             <Route path="webtoons" element={<WebtoonStats />} />
-            <Route path="comments" element={<CommentStats />} />
+            <Route path="logs" element={<LogStats />} />
           </Route>
 
           {/* 분석/시각화 */}
@@ -129,12 +126,7 @@ const RoutesConfig = () => (
 
           {/* 설정 */}
           <Route path="settings">
-            <Route path="tags" element={<TagManagement />} />
-          </Route>
-
-          {/* 추천 시스템 */}
-          <Route path="recommendation">
-            <Route path="feedback" element={<FeedbackStatus />} />
+            <Route path="permissions" element={<PlaceholderComponent title="권한 관리" />} />
           </Route>
         </Route>
       </Route>
