@@ -100,42 +100,40 @@ export const getPopularByWatched = async (size: number = 10): Promise<WebtoonInf
     }
 };
 
-// AI 취향 분석 기반 웹툰 추천 API
 export const fetchWebtoonRecommendations = async (recommendationRequest: RecommendationRequest) => {
-    console.log('API 요청 보내는 중:', recommendationRequest);
     try {
-        const response = await apiClient.post(
+        const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('요청 시간 초과')), 10000)
+        );
+        
+        const apiRequest = apiClient.post(
             `http://localhost:8080/api/connector/sendL_if`,
             recommendationRequest,
             {}
         );
-        console.log('API 응답 받음, 데이터 길이:', response.data?.length || '없음');
         
-        // 필터에 따라 다른 결과를 시뮬레이션 (실제 서버 응답이 문제라면)
-        // 이 부분은 테스트용이며, 실제 서버가 작동하면 제거해야 합니다
+        const response = await Promise.race([apiRequest, timeout]) as any;
+        
+        if (!response || !response.data || !Array.isArray(response.data)) {
+            return [];
+        }
+        
+        // 필터별 테스트용 로직 (실제 서버 작동 시 제거)
         if (!recommendationRequest.use_popularity && 
             !recommendationRequest.use_art_style && 
             !recommendationRequest.use_tags) {
-            // 모든 필터가 꺼져 있으면 데이터의 20%만 반환 (테스트용)
-            console.log('모든 필터가 꺼져 있어 축소된 데이터 반환함 (테스트용)');
             return response.data.slice(0, Math.floor(response.data.length * 0.2));
         } else if (!recommendationRequest.use_popularity) {
-            // 유사 팬층 필터가 꺼져 있으면 60% 반환
-            console.log('유사 팬층 필터가 꺼져 있어 축소된 데이터 반환함 (테스트용)');
             return response.data.slice(0, Math.floor(response.data.length * 0.6));
         } else if (!recommendationRequest.use_art_style) {
-            // 유사 그림체 필터가 꺼져 있으면 80% 반환
-            console.log('유사 그림체 필터가 꺼져 있어 축소된 데이터 반환함 (테스트용)');
             return response.data.slice(0, Math.floor(response.data.length * 0.8));
         } else if (!recommendationRequest.use_tags) {
-            // 유사 특징 필터가 꺼져 있으면 70% 반환
-            console.log('유사 특징 필터가 꺼져 있어 축소된 데이터 반환함 (테스트용)');
             return response.data.slice(0, Math.floor(response.data.length * 0.7));
         }
         
         return response.data;
     } catch (error) {
         console.error('웹툰 추천 API 호출 중 오류:', error);
-        throw error;
+        return [];
     }
 };
