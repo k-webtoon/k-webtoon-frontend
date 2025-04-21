@@ -20,7 +20,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
   redirectUrl = "/",
   onSuccess,
   className = "",
-  onSocialLogin,
 }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
