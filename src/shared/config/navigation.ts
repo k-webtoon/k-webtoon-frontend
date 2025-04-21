@@ -8,13 +8,19 @@ export interface SubNavItem {
 // 홈 페이지 - 비로그인
 export const homeSubNavItems: SubNavItem[] = [
   { title: "AI 취향 분석", href: "/1", path: "/user-based-recommendations" },
-  { title: "AI 텍스트 맞춤", href: "/2", path: "/text-based-recommendations" },
+  { title: "AI 맞춤 텍스트 검색", href: "/2", path: "/text-based-recommendations" },
   { title: "인기웹툰", href: "/3", path: "/webtoon/list/top" },
   { title: "웹툰 캐릭터와 대화", href: "/4", path: "/character-chat" },
   { title: "인기 리뷰", href: "/5", path: "/reviews" }
 ];
 
 // 홈 페이지 - 로그인
+export const homeLoggedInSubNavItems: SubNavItem[] = [
+  { title: "AI 맞춤 텍스트 검색", href: "/1", path: "/ai-recommendation" },
+  { title: "AI 취향 분석", href: "/2", path: "/text-based-recommendations" },
+  { title: "웹툰 캐릭터와 대화", href: "/3", path: "/character-chat" },
+  { title: "인기 리뷰", href: "/4", path: "/reviews" }
+];
 
 // 웹툰 페이지
 export const webtoonSubNavItems: SubNavItem[] = [

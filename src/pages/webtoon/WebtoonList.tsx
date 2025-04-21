@@ -275,7 +275,7 @@ const WebtoonList: React.FC = () => {
       )}
       
       {loading ? (
-        <div className="flex flex-col items-center justify-center h-64 mt-4">
+        <div className="flex flex-col items-center justify-center h-64 mt-20 mb-20">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
           <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>

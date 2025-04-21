@@ -6,11 +6,9 @@ import Footer from "../../footer/ui/Footer";
 const Layout: FC = () => {
   const location = useLocation();
   const isWebtoonListPage = location.pathname.includes('/webtoon/list');
-  const isWebtoonSimilarPage = location.pathname.includes('/webtoon/similar');
-  const isWebtoonRecommendationsPage = location.pathname === '/webtoon/recommendations';
   const isUserBasedRecommendationsPage = location.pathname === '/user-based-recommendations';
   
-  const showSubNav = isWebtoonListPage || isWebtoonSimilarPage || isWebtoonRecommendationsPage || isUserBasedRecommendationsPage;
+  const showSubNav = isWebtoonListPage || isUserBasedRecommendationsPage;
 
   return (
     <>

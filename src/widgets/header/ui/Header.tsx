@@ -4,7 +4,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/shadcn/tabs"
 import SearchBar from "@/features/webtoon-search/ui/SearchBar"
 import logo from "@/shared/assets/curatoon.png"
 import HeaderActions from "@/widgets/header/ui/HeaderActions";
-import { homeSubNavItems, webtoonSubNavItems, findActiveSubNavItemByPath, SubNavItem, getSectionId } from "@/shared/config/navigation";
+import { useAuthStore } from "@/entities/auth/api/store.ts";
+import { homeSubNavItems, homeLoggedInSubNavItems, webtoonSubNavItems, findActiveSubNavItemByPath, SubNavItem, getSectionId } from "@/shared/config/navigation";
 
 interface NavItem {
     title: string
@@ -18,6 +19,7 @@ const OBSERVER_THRESHOLD = 0.5;
 const Header: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuthStore();
     const [activeTab, setActiveTab] = useState("home");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [activeSubNav, setActiveSubNav] = useState<SubNavItem | undefined>(undefined);
@@ -29,9 +31,12 @@ const Header: React.FC = () => {
         { title: "웹툰", href: "/webtoon", value: "webtoon" },
     ], []);
 
-    const currentSubNavItems = useMemo(() => 
-        activeTab === "home" ? homeSubNavItems : webtoonSubNavItems,
-    [activeTab]);
+    const currentSubNavItems = useMemo(() => {
+        if (activeTab === "home") {
+            return isAuthenticated ? homeLoggedInSubNavItems : homeSubNavItems;
+        }
+        return webtoonSubNavItems;
+    }, [activeTab, isAuthenticated]);
 
     useEffect(() => {
         const currentPath = location.pathname;
@@ -60,7 +65,9 @@ const Header: React.FC = () => {
 
     useEffect(() => {
         const currentPath = location.pathname;
-        const items = activeTab === "home" ? homeSubNavItems : webtoonSubNavItems;
+        const items = activeTab === "home" 
+            ? (isAuthenticated ? homeLoggedInSubNavItems : homeSubNavItems) 
+            : webtoonSubNavItems;
         
         if (currentPath === '/user-based-recommendations') {
             const aiRecommendationItem = webtoonSubNavItems.find(item => item.path === '/user-based-recommendations');
@@ -77,7 +84,7 @@ const Header: React.FC = () => {
         } else if (items.length > 0) {
             setActiveSubNav(items[0]);
         }
-    }, [location.pathname, activeTab]);
+    }, [location.pathname, activeTab, isAuthenticated]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -121,7 +128,10 @@ const Header: React.FC = () => {
             if (intersectingEntries.length > 0) {
                 const newActiveTab = intersectingEntries[0].target.id;
                 
-                const items = activeTab === "home" ? homeSubNavItems : webtoonSubNavItems;
+                const items = activeTab === "home"
+                    ? (isAuthenticated ? homeLoggedInSubNavItems : homeSubNavItems) 
+                    : webtoonSubNavItems;
+                
                 const matchingItem = items.find(item => getSectionId(item.href) === newActiveTab);
                 if (matchingItem) {
                     setActiveSubNav(matchingItem);
@@ -175,7 +185,7 @@ const Header: React.FC = () => {
 
             checkInitialVisibility();
         }, 100);
-    }, [activeTab, currentSubNavItems]);
+    }, [activeTab, currentSubNavItems, isAuthenticated]);
 
     useEffect(() => {
         setupIntersectionObserver();
