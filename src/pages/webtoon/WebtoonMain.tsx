@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider";
-import { useWebtoonStore } from '@/entities/webtoon/api/store';
+import WebtoonGridHorizontal from "@/features/webtoon-list/ui/WebtoonGridHorizontal";
+import {useWebtoonStore} from '@/entities/webtoon/api/store';
 import {useAuthStore} from "@/entities/auth/api/store";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner";
-import { WebtoonPaginatedResponse } from '@/entities/webtoon/model/types';
+import {useUserStore} from "@/entities/user/api/userStore.ts";
 
 function WebtoonMain() {
     const { isAuthenticated } = useAuthStore();
-    const { 
+    const { userInfo, fetchCurrentUserInfo } = useUserStore();
+    const {
+        recommendations,
         topWebtoonList, 
         popularByLikes, 
         popularByFavorites, 
-        popularByWatched, 
+        popularByWatched,
+        fetchRecommendWebtoons,
         fetchTopWebtoons, 
         fetchPopularByLikes, 
         fetchPopularByFavorites, 
@@ -21,8 +25,9 @@ function WebtoonMain() {
         isLoading,
         error
     } = useWebtoonStore();
-    
+
     const [localLoading, setLocalLoading] = useState(true);
+    const [sortedRecommendations, setSortedRecommendations] = useState<any[]>([]);
 
     const CategoryLink = ({ to, title }: { to: string; title: string }) => (
         <Link 
@@ -36,13 +41,33 @@ function WebtoonMain() {
     );
 
     useEffect(() => {
+        if (recommendations && recommendations.length > 0) {
+            const sorted = [...recommendations].sort((a, b) => {
+                const simA = a.sim !== undefined ? a.sim : 0;
+                const simB = b.sim !== undefined ? b.sim : 0;
+                return simB - simA; // 내림차순 정렬 (유사도 높은 것이 먼저)
+            });
+            setSortedRecommendations(sorted);
+        } else {
+            setSortedRecommendations([]);
+        }
+    }, [recommendations]);
+
+    // 사용자 정보 가져오기
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchCurrentUserInfo();
+        }
+    }, [isAuthenticated, fetchCurrentUserInfo]);
+
+    useEffect(() => {
         const loadData = async () => {
             setLocalLoading(true);
             try {
                 const promises = [];
                 
                 if (!topWebtoonList || !topWebtoonList.content || topWebtoonList.content.length === 0) {
-                    promises.push(fetchTopWebtoons(0, 10));
+                    promises.push(fetchTopWebtoons(0, 12));
                 }
                 
                 if (!popularByLikes || popularByLikes.length === 0) {
@@ -57,6 +82,15 @@ function WebtoonMain() {
                     promises.push(fetchPopularByWatched(0, 10));
                 }
                 
+                // 추천 웹툰 데이터 로드
+                if (!recommendations || recommendations.length === 0) {
+                    promises.push(fetchRecommendWebtoons({
+                        use_popularity: true,
+                        use_art_style: true,
+                        use_tags: true
+                    }));
+                }
+                
                 await Promise.allSettled(promises);
                 
             } catch (err) {
@@ -67,7 +101,7 @@ function WebtoonMain() {
         };
         
         loadData();
-    }, []);
+    }, [fetchTopWebtoons, fetchPopularByLikes, fetchPopularByFavorites, fetchPopularByWatched, fetchRecommendWebtoons]);
 
     if (localLoading || isLoading) {
         return (
@@ -113,27 +147,26 @@ function WebtoonMain() {
     return (
         <div className="container">
             <div className="pt-10">
+
                 <section id="section1" className="pt-10">
                     {!isAuthenticated ?
                         <AIAnalysisBanner /> :
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <CategoryLink to="/webtoon/list/top" title="👑 맞춤 추천 웹툰" />
-                            </div>
-                            <WebtoonSlider
-                                title=""
-                                coment="회원님의 취향 데이터를 기반으로 추천했어요!"
-                                webtoons={() => Promise.resolve(topWebtoonList || { content: [] } as WebtoonPaginatedResponse)}
-                                cardSize={'sm'}
-                                initialLoad={false}
-                                showActionButtons={isAuthenticated}
-                            />
-                        </div>
+                        <WebtoonGridHorizontal
+                            title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`}
+                            comment={`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}
+                            webtoons={() => Promise.resolve(sortedRecommendations || [])}
+                            cardSize="md"
+                            showActionButtons={true}
+                            showAI={true}
+                            initialLoad={false}
+                            rows={2}
+                            countType={null}
+                        />
                     }
                 </section>
 
                 {topWebtoonList && topWebtoonList.content && topWebtoonList.content.length > 0 && (
-                    <section id="section2" className="pt-10">
+                    <section id="section2" className="pt-5">
                         <div>
                             <div className="flex justify-between items-center mb-4">
                                 <CategoryLink to="/webtoon/list/top" title="🔥 전체" />

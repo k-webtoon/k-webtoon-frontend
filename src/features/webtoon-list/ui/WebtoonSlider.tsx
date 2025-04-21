@@ -251,7 +251,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                     >
                         {webtoonsToDisplay.map((webtoon, index) => (
                             <div
-                                key={'id' in webtoon ? webtoon.id : index}
+                                key={`webtoon-${webtoon.id}-${index}`}
                                 className="relative group flex-shrink-0 mx-2"
                             >
                                 <div className="absolute top-0 left-0 z-20 p-2 text-white text-5xl font-bold">
@@ -264,6 +264,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                                     showBadges={showBadges}
                                     showActionButtons={showActionButtons}
                                     countType={countType}
+                                    aiPercent={webtoon.sim !== undefined ? Math.round(webtoon.sim) : undefined}
                                 />
                             </div>
                         ))}

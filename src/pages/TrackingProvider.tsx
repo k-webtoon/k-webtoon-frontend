@@ -58,9 +58,10 @@ useEffect(() => {
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
     const target = e.target as HTMLInputElement;
-    const keyword = target.value.trim();
-
+    
     if (!target || target.tagName.toLowerCase() !== "input") return;
+    
+    const keyword = target.value ? target.value.trim() : "";
     const source = target.getAttribute("data-source");
 
     if (e.key === "Enter" && keyword && source) {

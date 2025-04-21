@@ -6,6 +6,8 @@ import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
 import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
 import {useAuthStore} from "@/entities/auth/api/store.ts";
+import {Link} from "react-router-dom";
+import {ChevronRight} from "lucide-react";
 
 const Main: React.FC = () => {
     const { isAuthenticated, initialize } = useAuthStore();
@@ -61,14 +63,25 @@ const Main: React.FC = () => {
                             <WebtoonTextSearchForm />
                         </section>
                         <section id="section3" className="pt-5">
-                            <WebtoonSlider
-                                title="인기 웹툰"
-                                webtoons={() => Promise.resolve(topWebtoonList!)}
-                                cardSize={'sm'}
-                                showActionButtons={false}
-                                showAI={false}
-                                initialLoad={true}
-                            />
+                            <div>
+                                <div className="flex  justify-between items-center mb-4">
+                                    <Link
+                                        to="/webtoon/list/top"
+                                        state="인기 웹툰"
+                                        className="flex items-center text-xl font-bold hover:text-blue-500 transition-colors"
+                                    >
+                                        인기 웹툰
+                                        <ChevronRight className="ml-1 h-5 w-5" />
+                                    </Link>
+                                </div>
+                                <WebtoonSlider
+                                    title=""
+                                    webtoons={() => Promise.resolve(topWebtoonList!)}
+                                    cardSize={'sm'}
+                                    initialLoad={false}
+                                    showActionButtons={isAuthenticated}
+                                />
+                            </div>
                         </section>
                         <section id="section4" className="pt-5">
                             <CharacterChat />
