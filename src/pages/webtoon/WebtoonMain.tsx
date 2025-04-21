@@ -132,21 +132,10 @@ function WebtoonMain() {
 
     if (localLoading || isLoading) {
         return (
-            <div className="container pt-20 flex flex-col items-center justify-center min-h-[50vh]">
-                <div className="animate-pulse flex space-x-4">
-                    <div className="flex-1 space-y-6 py-1">
-                        <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-4 gap-4">
-                                {[...Array(4)].map((_, i) => (
-                                    <div key={i} className="h-52 bg-gray-200 rounded"></div>
-                                ))}
-                            </div>
-                            <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
-                        </div>
-                    </div>
-                </div>
-                <p className="mt-6 text-gray-500">웹툰 데이터를 불러오는 중입니다...</p>
+            <div className="bg-white rounded-lg p-8 text-center my-8 mt-50 mb-50">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
+                <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
             </div>
         );
     }

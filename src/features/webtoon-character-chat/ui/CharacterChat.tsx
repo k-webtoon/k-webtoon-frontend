@@ -92,7 +92,7 @@ const CharacterChat: React.FC = () => {
     };
 
     return (
-        <Card className="w-full border border-gray-200 my-8">
+        <Card className="w-full border border-gray-200 my-8 pt-8 pb-8">
             <CardHeader className="border-b border-gray-100">
                 <CardTitle className="text-xl font-bold text-gray-800">웹툰 캐릭터와 대화하기</CardTitle>
                 {error && (

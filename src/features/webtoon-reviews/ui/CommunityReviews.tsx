@@ -75,7 +75,7 @@ const CommunityReviews: React.FC<CommunityReviewsProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {reviews.map((review) => (
-                    <Card key={review.id} className="h-full border border-gray-200 hover:shadow-md transition-shadow">
+                    <Card key={review.id} className="h-full border border-gray-200 hover:shadow-md transition-shadow pt-5 pb-5">
                         <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
                                 <div>
