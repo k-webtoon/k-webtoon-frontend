@@ -7,9 +7,10 @@ import {
     getWebtoonById,
     getPopularByFavorites,
     getPopularByLikes,
-    getPopularByWatched
+    getPopularByWatched,
+    fetchWebtoonRecommendations
 } from '@/entities/webtoon/api/api';
-import { WebtoonState } from '@/entities/webtoon/model/types';
+import {WebtoonState, RecommendationRequest} from '@/entities/webtoon/model/types';
 
 export const useWebtoonStore = create<WebtoonState>((set) => ({
     // 초기 상태
@@ -19,6 +20,7 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
     popularByFavorites: null,
     popularByLikes: null,
     popularByWatched: null,
+    recommendations: [],
     isLoading: false,
     error: null,
 
@@ -152,4 +154,35 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
             });
         }
     },
+    
+    // 웹툰 추천 조회
+    fetchRecommendWebtoons: async (requestData: RecommendationRequest) => {
+        try {
+            console.log('[Store] 추천 웹툰 요청 시작:', requestData);
+            set({ isLoading: true, error: null });
+            
+            const data = await fetchWebtoonRecommendations(requestData);
+            console.log(`[Store] 추천 웹툰 응답 받음: ${data?.length || 0}개 항목`);
+            
+            // 응답이 배열이 아니거나 비어있으면 처리
+            if (!Array.isArray(data) || data.length === 0) {
+                console.warn('[Store] 서버에서 빈 배열 또는 잘못된 형식 반환됨');
+                set({ recommendations: [], isLoading: false });
+                return;
+            }
+            
+            // 새 데이터로 상태 업데이트
+            set((state) => {
+                console.log(`[Store] 상태 업데이트: ${state.recommendations.length}개 → ${data.length}개`);
+                return { recommendations: data, isLoading: false };
+            });
+        } catch (error) {
+            console.error('[Store] 추천 웹툰 요청 오류:', error);
+            set({ 
+                error: error instanceof Error ? error.message : '추천 웹툰을 가져오는 중 오류가 발생했습니다', 
+                isLoading: false 
+            });
+        }
+    },
 }));
+

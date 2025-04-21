@@ -37,6 +37,7 @@ export interface WebtoonInfo {
     rankGenreTypes: GenreType[];
     starScore: number;
     totalCount?: number;
+    sim?: number;
 }
 
 // ===============
@@ -75,6 +76,14 @@ export interface PaginatedResponse<T> {
 }
 export type WebtoonPaginatedResponse = PaginatedResponse<WebtoonInfo>;
 
+
+// 웹툰 추천 API 요청 타입
+export interface RecommendationRequest {
+    use_popularity: boolean;
+    use_art_style: boolean;
+    use_tags: boolean;
+}
+
 // ===============
 // 상태 관리 타입
 // ===============
@@ -88,6 +97,7 @@ export interface WebtoonState {
     popularByFavorites: WebtoonInfo[] | null;
     popularByLikes: WebtoonInfo[] | null;
     popularByWatched: WebtoonInfo[] | null;
+    recommendations: WebtoonInfo[];
     isLoading: boolean;
     error: string | null;
 
@@ -98,6 +108,7 @@ export interface WebtoonState {
     fetchPopularByFavorites: (page?: number, size?: number) => Promise<void>;
     fetchPopularByLikes: (page?: number, size?: number) => Promise<void>;
     fetchPopularByWatched: (page?: number, size?: number) => Promise<void>;
+    fetchRecommendWebtoons: (requestData: RecommendationRequest) => Promise<void>;
     resetCurrentWebtoon: () => void;
     resetSearchResults: () => void;
 }

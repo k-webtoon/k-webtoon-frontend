@@ -5,17 +5,20 @@ export interface SubNavItem {
   path: string;
 }
 
-// 홈 페이지
+// 홈 페이지 - 비로그인
 export const homeSubNavItems: SubNavItem[] = [
-  { title: "AI기반 맞춤", href: "/1", path: "/" },
-  { title: "너를 위한 픽", href: "/2", path: "/webtoon/recommendations" },
-  { title: "웹툰 캐릭터와 대화", href: "/3", path: "/character-chat" },
-  { title: "인기 리뷰", href: "/4", path: "/reviews" }
+  { title: "AI 취향 분석", href: "/1", path: "/user-based-recommendations" },
+  { title: "AI 텍스트 맞춤", href: "/2", path: "/text-based-recommendations" },
+  { title: "인기웹툰", href: "/3", path: "/webtoon/list/top" },
+  { title: "웹툰 캐릭터와 대화", href: "/4", path: "/character-chat" },
+  { title: "인기 리뷰", href: "/5", path: "/reviews" }
 ];
+
+// 홈 페이지 - 로그인
 
 // 웹툰 페이지
 export const webtoonSubNavItems: SubNavItem[] = [
-  { title: "너를 위한 픽", href: "/1", path: "/webtoon/recommendations" },
+  { title: "AI 취향 분석", href: "/1", path: "/user-based-recommendations" },
   { title: "전체", href: "/2", path: "/webtoon/list/top" },      // 인기순 (top)
   { title: "심장을 저격한 작품들", href: "/3", path: "/webtoon/list/likes" },   // 좋아요 (likes)
   { title: "이건 봐야 해", href: "/4", path: "/webtoon/list/watched" },         // 조회수 (watched)

@@ -14,7 +14,8 @@ import ResetPassword from "@/pages/auth/find/ResetPassword.tsx";
 import ResetPasswordResult from "@/pages/auth/find/ResetPasswordResult.tsx";
 import WebtoonMain from "@/pages/webtoon/WebtoonMain.tsx";
 import WebtoonDetail from "@/pages/webtoon/WebtoonDetail.tsx";
-import WebtoonListPage from "@/pages/webtoon/WebtoonListPage.tsx";
+import WebtoonList from "@/pages/webtoon/WebtoonList.tsx";
+import WebtoonRecommendations from "@/pages/webtoon/WebtoonRecommendations.tsx";
 import UserProfile from "@/pages/user/userpage/UserProfile.tsx";
 import UserLikeWebtoon from "@/pages/user/userpage/UserLikeWebtoon.tsx";
 import MyPage from "@/pages/user/MyPage";
@@ -26,7 +27,6 @@ import UserManagement from "@/pages/admin/management/UserManagement";
 import UserStats from "@/pages/admin/stats/UserStats";
 import WebtoonStats from "@/pages/admin/stats/WebtoonStats";
 import UserAnalysis from "@/pages/admin/visualization/UserAnalysis";
-import TagManagement from "@/pages/admin/settings/TagManagement";
 import TextBasedRecommendations from "@/pages/webtoon-search-ai/TextBasedRecommendations.tsx";
 import AIRecommendation from "@/pages/AIRecommendation/AIRecommendation";
 import IdResult from "@/pages/auth/find/IdResult.tsx";
@@ -80,9 +80,10 @@ const RoutesConfig = () => (
 
       {/* 🌐 웹툰 ====================== */}
       <Route path="/webtoon" element={<WebtoonMain />} />
-      <Route path="/webtoon/list/:category" element={<WebtoonListPage />} />
+      <Route path="/webtoon/list/:category" element={<WebtoonList />} />
       <Route path="/webtoon/:id" element={<WebtoonDetail />} />
       <Route path="/search" element={<WebtoonSearchResults />} />
+      <Route path="/user-based-recommendations" element={<WebtoonRecommendations />} />
       <Route path="/text-based-recommendations" element={<TextBasedRecommendations />}/>
 
       {/* 🔐 회원만 접근 가능 ====================== */}
