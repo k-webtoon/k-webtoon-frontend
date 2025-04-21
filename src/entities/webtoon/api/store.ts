@@ -115,7 +115,7 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const data = await getPopularByFavorites(size);
-            set({ popularByFavorites: data, isLoading: false }); // 바로 배열 데이터 저장
+            set({ popularByFavorites: data, isLoading: false });
         } catch (error) {
             console.error('인기 웹툰(즐겨찾기) 로딩 오류:', error);
             set({
@@ -161,16 +161,39 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
             set({ isLoading: true, error: null });
             
             const data = await fetchWebtoonRecommendations(requestData);
-            const safeData = Array.isArray(data) ? data : [];
             
+            // API에서 에러 객체를 반환한 경우
+            if (data && typeof data === 'object' && 'error' in data) {
+                console.warn(`[Store] 추천 API 오류: ${data.error}`, data);
+                
+                if (data.error === 'SERVER_ERROR' && data.status === 500) {
+                    set({ 
+                        recommendations: [],
+                        error: 'SERVER_ERROR',
+                        isLoading: false 
+                    });
+                    return { error: 'SERVER_ERROR', status: 500 };
+                }
+                
+                set({ 
+                    recommendations: [],
+                    error: data.error,
+                    isLoading: false 
+                });
+                return data;
+            }
+            
+            const safeData = Array.isArray(data) ? data : [];
             set({ recommendations: safeData, isLoading: false });
+            return safeData;
         } catch (error) {
             console.error('[Store] 추천 웹툰 요청 오류:', error);
             set({ 
                 recommendations: [],
-                error: null,
+                error: 'UNEXPECTED_ERROR',
                 isLoading: false 
             });
+            return { error: 'UNEXPECTED_ERROR', message: String(error) };
         }
     },
 }));

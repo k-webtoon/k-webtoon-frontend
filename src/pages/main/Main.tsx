@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import WebtoonGridHorizontal from "@/features/webtoon-list/ui/WebtoonGridHorizontal.tsx";
 import { Button } from "@/shared/ui/shadcn/button.tsx";
+import {Card, CardContent} from "@/shared/ui/shadcn/card.tsx";
 
 interface Review {
     id: string;
@@ -76,24 +77,71 @@ const Main: React.FC = () => {
         }
     }, [recommendations]);
 
-    // 로그인한 경우 추천 데이터 로드
+    // 추천 데이터 로드 로직
+    const [apiErrorStatus, setApiErrorStatus] = useState<{ status: number | null, retryCount: number }>({
+        status: null,
+        retryCount: 0
+    });
+    
+    const [requestSent, setRequestSent] = useState(false);
+    
+    interface ErrorResponse {
+        error: string;
+        status?: number;
+        message?: string;
+    }
+    
+    // 타입 가드 함수: API 응답이 에러인지 확인
+    function isErrorResponse(result: unknown): result is ErrorResponse {
+        return Boolean(
+            result && 
+            typeof result === 'object' && 
+            'error' in result
+        );
+    }
+    
     useEffect(() => {
-        if (isAuthenticated && (!recommendations || recommendations.length === 0)) {
+        if (
+            requestSent || 
+            !isAuthenticated || 
+            (recommendations && recommendations.length > 0)
+        ) {
+            return;
+        }
+        
+        if (apiErrorStatus.status === 500 && apiErrorStatus.retryCount >= 3) {
+            console.warn("추천 API 서버 오류가 지속됩니다. 더 이상 시도하지 않습니다.");
+            setSortedRecommendations([]);
+            return;
+        }
+        
+        const loadRecommendations = async () => {
+            setRequestSent(true);
+            
             try {
-                fetchRecommendWebtoons({
+                const result = await fetchRecommendWebtoons({
                     use_popularity: true,
                     use_art_style: true,
                     use_tags: true
-                }).catch(err => {
-                    console.warn("추천 웹툰 로드 중 오류:", err);
-                    setSortedRecommendations([]);
                 });
+                
+                if (isErrorResponse(result)) {
+                    if (result.error === 'SERVER_ERROR' && result.status === 500) {
+                        setApiErrorStatus(prev => ({
+                            status: 500,
+                            retryCount: prev.retryCount + 1
+                        }));
+                    }
+                    setSortedRecommendations([]);
+                }
             } catch (err) {
                 console.error("추천 웹툰 처리 중 오류:", err);
                 setSortedRecommendations([]);
             }
-        }
-    }, [isAuthenticated, recommendations, fetchRecommendWebtoons]);
+        };
+        
+        loadRecommendations();
+    }, [isAuthenticated, recommendations, requestSent, apiErrorStatus]);
 
     const sampleReviews: Review[] = [
         {
@@ -184,15 +232,17 @@ const Main: React.FC = () => {
                                     countType={null}
                                 />
                             ) : (
-                                <div className="p-6 mb-8 rounded-lg bg-gray-50">
-                                    <h2 className="text-xl font-bold mb-2">{`📌 ${userInfo?.nickname || ''}님의 취향 분석`}</h2>
-                                    <p className="text-gray-500 mb-4">{userInfo?.nickname || ''}님을 알아가고 있는 중입니다.</p>
-                                    <Link to="/ai-recommendation" style={{ textDecoration: 'none' }}>
-                                        <Button variant="outline">
-                                            AI 맞춤 추천 설정하러 가기
-                                        </Button>
-                                    </Link>
-                                </div>
+                                <Card className="w-full border border-gray-200 bg-gray-50">
+                                    <CardContent className="p-6">
+                                        <h2 className="text-xl font-bold mb-2">{`📌 ${userInfo?.nickname || ''}님의 취향 분석`}</h2>
+                                        <p className="text-gray-500 mb-4">{userInfo?.nickname || ''}님을 알아가고 있는 중입니다.</p>
+                                        <Link to="/ai-recommendation" style={{ textDecoration: 'none' }}>
+                                            <Button variant="outline">
+                                                AI 맞춤 추천 설정하러 가기
+                                            </Button>
+                                        </Link>
+                                    </CardContent>
+                                </Card>
                             )}
                         </section>
                         <section id="section3" className="pt-5">
