@@ -1,57 +1,91 @@
-import {useAuthStore} from '@/entities/auth/api/store';
-import {useEffect} from "react";
-import { Link, useNavigate } from "react-router-dom";
-import CustomDropdown  from "@/shared/ui/custom/CustomDropdown";
-import {User} from "@/entities/user/model/types";
+import { useAuthStore } from '@/entities/auth/api/store';
+import { useUserStore } from '@/entities/user/api/userStore';
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import CustomDropdown from "@/shared/ui/custom/CustomDropdown";
 import SearchBar from "@/features/webtoon-search/ui/SearchBar";
-import {Button} from "@/shared/ui/shadcn/button";
-import {Search} from "lucide-react";
+import { Button } from "@/shared/ui/shadcn/button";
+import { Search, User as UserIcon, LogOut } from "lucide-react";
 
 interface HeaderActionsProps {
     isSearchOpen: boolean;
     setIsSearchOpen: (isOpen: boolean) => void;
 }
 
+interface MenuItem {
+    id: number;
+    label: string;
+    onClick: () => void;
+    icon?: React.ReactNode;
+    isDanger?: boolean;
+}
+
 const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) => {
     const navigate = useNavigate();
-    const { isAuthenticated, initialize, logout } = useAuthStore();
+    const location = useLocation();
+    const { isAuthenticated, initialize, logout, userInfo } = useAuthStore();
+    const { fetchCurrentUserInfo, userInfo: currentUser } = useUserStore();
+    const [userMenuItems, setUserMenuItems] = useState<MenuItem[]>([]);
 
     useEffect(() => {
         initialize();
-    }, [initialize]);
-
-    // 알림 데이터
-    const publicNotifications: Notification[] = [
-        { id: 1, label: "로그인 후 회원님을 위한 맞춤 추천 웹툰을 확인하세요." }
-    ]
-
-    const users: User[] = [
-        {
-            id: 1,
-            label: "닉네임님",
-            onClick: () => navigate('/mypage')
-        },
-        {
-            id: 2,
-            label: "마이페이지",
-            onClick: () => navigate('/mypage')
-        },
-        {
-            id: 3,
-            label: "로그아웃",
-            onClick: () => {
-                logout();
-                console.log("로그아웃 처리 완료");
-                navigate('/');
-            }
+        
+        if (isAuthenticated && userInfo?.userId) {
+            void fetchCurrentUserInfo();
         }
-    ]
+    }, [initialize, isAuthenticated, userInfo?.userId, fetchCurrentUserInfo]);
 
+    useEffect(() => {
+        const nickname = currentUser?.nickname || '사용자';
+        
+        setUserMenuItems([
+            {
+                id: 1,
+                label: `${nickname}님`,
+                onClick: () => navigate('/mypage')
+            },
+            {
+                id: 2,
+                label: "마이페이지",
+                onClick: () => navigate('/mypage'),
+                icon: <UserIcon size={16} />
+            },
+            // {
+            //     id: 3,
+            //     label: "좋아요한 웹툰",
+            //     onClick: () => navigate('/mypage/liked'),
+            //     icon: <Heart size={16} />
+            // },
+            // {
+            //     id: 4,
+            //     label: "내 댓글",
+            //     onClick: () => navigate('/mypage/comments'),
+            //     icon: <MessageCircle size={16} />
+            // },
+            // {
+            //     id: 5,
+            //     label: "설정",
+            //     onClick: () => navigate('/mypage/settings'),
+            //     icon: <Settings size={16} />
+            // },
+            {
+                id: 6,
+                label: "로그아웃",
+                onClick: () => {
+                    logout();
+                    navigate('/');
+                },
+                icon: <LogOut size={16} />,
+                isDanger: true
+            }
+        ]);
+    }, [currentUser, navigate, logout]);
+
+    const isMyPage = location.pathname.startsWith('/mypage');
 
     function BeforeLogin() {
         return (
             <>
-
                 <div className="hidden md:flex items-center transition-opacity duration-300">
                     <ul className="flex items-center">
                         <li className="mr-4">
@@ -66,29 +100,19 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                     </ul>
                 </div>
 
-                {/*모바일*/}
                 <div className="flex md:hidden items-center transition-opacity duration-300">
                     <ul className="flex items-center">
-                        <li>
+                        <li className="mr-2">
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-gray-600 transition-colors duration-300"
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                             >
-                                <Search />
+                                <Search size={20} />
                             </Button>
                         </li>
-                        <li>
-                            <CustomDropdown
-                                label="알림"
-                                items={publicNotifications.map((notification) => ({
-                                    label: notification.label,
-                                    onClick: () => console.log("알림 클릭됨", notification.id),
-                                }))}
-                            />
-                        </li>
-                        <li className="text-gray-600 text-sm mr-4 hover:text-gray-900 transition-colors duration-300">
+                        <li className="text-gray-600 text-sm hover:text-gray-900 transition-colors duration-300">
                             <Link to="/login">로그인</Link>
                         </li>
                     </ul>
@@ -107,35 +131,38 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                         </li>
                         <li>
                             <CustomDropdown
-                                label="유저"
-                                items={users.map((item) => ({
+                                label={<UserIcon size={20} className="text-gray-600" />}
+                                items={userMenuItems.map((item) => ({
                                     label: item.label,
                                     onClick: item.onClick,
+                                    icon: item.icon,
+                                    isDanger: item.isDanger
                                 }))}
                             />
                         </li>
                     </ul>
                 </div>
 
-                {/*모바일*/}
                 <div className="flex md:hidden items-center transition-opacity duration-300">
                     <ul className="flex items-center">
-                        <li>
+                        <li className="mr-2">
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-gray-600 transition-colors duration-300"
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                             >
-                                <Search />
+                                <Search size={20} />
                             </Button>
                         </li>
                         <li>
                             <CustomDropdown
-                                label="유저"
-                                items={users.map((item) => ({
-                                    label: item.label!,
-                                    onClick: item.onClick!,
+                                label={<UserIcon size={20} className="text-gray-600" />}
+                                items={userMenuItems.map((item) => ({
+                                    label: item.label,
+                                    onClick: item.onClick,
+                                    icon: item.icon,
+                                    isDanger: item.isDanger
                                 }))}
                             />
                         </li>
@@ -145,6 +172,30 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
         );
     }
 
+    function MyPageHeaderActions() {
+        return (
+            <div className="flex items-center transition-opacity duration-300">
+                <ul className="flex items-center">
+                    <li>
+                        <CustomDropdown
+                            label={<UserIcon size={20} className="text-gray-600" />}
+                            items={[userMenuItems[0], userMenuItems[userMenuItems.length - 1]].map((item) => ({
+                                label: item.label,
+                                onClick: item.onClick,
+                                icon: item.icon,
+                                isDanger: item.isDanger
+                            }))}
+                        />
+                    </li>
+                </ul>
+            </div>
+        );
+    }
+
+    if (isMyPage && isAuthenticated) {
+        return <MyPageHeaderActions />;
+    }
+
     return (
         <>
             {!isAuthenticated ? <BeforeLogin /> : <AfterLogin />}
@@ -152,4 +203,4 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
     );
 }
 
-export default HeaderActions;
+export default HeaderActions
