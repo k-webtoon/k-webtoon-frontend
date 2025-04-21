@@ -15,9 +15,8 @@ export const HorizontalWebtoonCard = ({ webtoon, similarity }: HorizontalWebtoon
     // 웹툰 정보가 없는 경우
     if (!webtoon) {
         return (
-            <div className="flex gap-6 pb-6 border-b bg-gray-50 p-4 rounded-md">
-                <p className="text-gray-500">웹툰 정보를 불러올 수 없습니다.</p>
-            </div>
+            <>
+            </>
         );
     }
 

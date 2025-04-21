@@ -13,7 +13,6 @@ const TextBasedRecommendations: React.FC = () => {
     const {
         recommendations,
         isLoading,
-        fetchingDetails,
         webtoonDetails,
         error,
         fetchTextBasedRecommendations
@@ -80,12 +79,6 @@ const TextBasedRecommendations: React.FC = () => {
                 </div>
             ) : (
                 <div className="mt-6">
-                    {fetchingDetails && (
-                        <div className="mb-4 p-2 bg-blue-50 text-blue-600 rounded-md text-sm text-center">
-                            웹툰 상세 정보를 불러오는 중입니다...
-                        </div>
-                    )}
-
                     {recommendations && recommendations.length > 0 ? (
                         <div className="space-y-6">
                             {recommendations.map((item) => {
