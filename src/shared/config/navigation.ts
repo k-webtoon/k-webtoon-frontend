@@ -10,16 +10,16 @@ export const homeSubNavItems: SubNavItem[] = [
   { title: "AI 취향 분석", href: "/1", path: "/user-based-recommendations" },
   { title: "AI 맞춤 텍스트 검색", href: "/2", path: "/text-based-recommendations" },
   { title: "인기웹툰", href: "/3", path: "/webtoon/list/top" },
-  { title: "웹툰 캐릭터와 대화", href: "/4", path: "/character-chat" },
-  { title: "인기 리뷰", href: "/5", path: "/reviews" }
+  { title: "웹툰 캐릭터와 대화", href: "/4", path: "/" },
+  { title: "인기 리뷰", href: "/5", path: "/" }
 ];
 
 // 홈 페이지 - 로그인
 export const homeLoggedInSubNavItems: SubNavItem[] = [
-  { title: "AI 맞춤 텍스트 검색", href: "/1", path: "/ai-recommendation" },
-  { title: "AI 취향 분석", href: "/2", path: "/text-based-recommendations" },
-  { title: "웹툰 캐릭터와 대화", href: "/3", path: "/character-chat" },
-  { title: "인기 리뷰", href: "/4", path: "/reviews" }
+  { title: "AI 맞춤 텍스트 검색", href: "/1", path: "/text-based-recommendations" },
+  { title: "AI 취향 분석", href: "/2", path: "/" },
+  { title: "웹툰 캐릭터와 대화", href: "/3", path: "/" },
+  { title: "인기 리뷰", href: "/4", path: "/" }
 ];
 
 // 웹툰 페이지
