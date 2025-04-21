@@ -14,7 +14,7 @@ interface NavItem {
 }
 
 const HEADER_HEIGHT = 120;
-const OBSERVER_THRESHOLD = 0.5;
+const OBSERVER_THRESHOLD = 1.0;
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -68,6 +68,13 @@ const Header: React.FC = () => {
         const items = activeTab === "home" 
             ? (isAuthenticated ? homeLoggedInSubNavItems : homeSubNavItems) 
             : webtoonSubNavItems;
+        
+        if (currentPath === '/login' || currentPath.startsWith('/auth/') || currentPath.startsWith('/signup')) {
+            if (items.length > 0) {
+                setActiveSubNav(items[0]);
+            }
+            return;
+        }
         
         if (currentPath === '/user-based-recommendations') {
             const aiRecommendationItem = webtoonSubNavItems.find(item => item.path === '/user-based-recommendations');
@@ -135,7 +142,7 @@ const Header: React.FC = () => {
 
             if (intersectingEntries.length > 0) {
                 const newActiveTab = intersectingEntries[0].target.id;
-                
+
                 const items = activeTab === "home"
                     ? (isAuthenticated ? homeLoggedInSubNavItems : homeSubNavItems) 
                     : webtoonSubNavItems;

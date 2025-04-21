@@ -8,6 +8,7 @@ import {useAuthStore} from "@/entities/auth/api/store";
 import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner";
 import {useUserStore} from "@/entities/user/api/userStore.ts";
 import {Button} from "@/shared/ui/shadcn/button";
+import { Card, CardContent } from "@/shared/ui/shadcn/card.tsx";
 
 function WebtoonMain() {
     const { isAuthenticated } = useAuthStore();
@@ -23,7 +24,6 @@ function WebtoonMain() {
         fetchPopularByLikes, 
         fetchPopularByFavorites, 
         fetchPopularByWatched,
-        isLoading,
         error
     } = useWebtoonStore();
 
@@ -78,59 +78,59 @@ function WebtoonMain() {
         const loadData = async () => {
             setLocalLoading(true);
             try {
-                const promises = [];
-                
+                // 인기 웹툰 로드
                 if (!topWebtoonList || !topWebtoonList.content || topWebtoonList.content.length === 0) {
-                    promises.push(fetchTopWebtoons(0, 12));
+                    fetchTopWebtoons(0, 12).catch(err => {
+                        console.error("인기 웹툰 로드 실패:", err);
+                    });
                 }
                 
+                // 좋아요 기준 인기 웹툰 로드
                 if (!popularByLikes || popularByLikes.length === 0) {
-                    promises.push(fetchPopularByLikes(0, 10));
+                    fetchPopularByLikes(10).catch(err => {
+                        console.error("좋아요 웹툰 로드 실패:", err);
+                    });
                 }
                 
+                // 즐겨찾기 기준 인기 웹툰 로드
                 if (!popularByFavorites || popularByFavorites.length === 0) {
-                    promises.push(fetchPopularByFavorites(0, 10));
+                    fetchPopularByFavorites(10).catch(err => {
+                        console.error("즐겨찾기 웹툰 로드 실패:", err);
+                    });
                 }
                 
+                // 조회수 기준 인기 웹툰 로드
                 if (!popularByWatched || popularByWatched.length === 0) {
-                    promises.push(fetchPopularByWatched(0, 10));
+                    fetchPopularByWatched(10).catch(err => {
+                        console.error("조회수 웹툰 로드 실패:", err);
+                    });
                 }
                 
                 // 추천 웹툰 데이터 로드
                 if (isAuthenticated && (!recommendations || recommendations.length === 0)) {
-                    try {
-                        const recommendationPromise = fetchRecommendWebtoons({
-                            use_popularity: true,
-                            use_art_style: true,
-                            use_tags: true
-                        }).catch(err => {
-                            console.warn("추천 웹툰 로드 중 오류:", err);
-                            setSortedRecommendations([]);
-                            return null;
-                        });
-                        
-                        if (recommendationPromise) {
-                            promises.push(recommendationPromise);
-                        }
-                    } catch (err) {
-                        console.error("추천 웹툰 처리 중 오류:", err);
+                    fetchRecommendWebtoons({
+                        use_popularity: true,
+                        use_art_style: true,
+                        use_tags: true
+                    }).catch(err => {
+                        console.warn("추천 웹툰(sendL_if) 로드 실패:", err);
                         setSortedRecommendations([]);
-                    }
+                    });
                 }
-                
-                await Promise.allSettled(promises);
                 
             } catch (err) {
                 console.error("웹툰 데이터 로드 중 오류 발생:", err);
             } finally {
-                setLocalLoading(false);
+                setTimeout(() => {
+                    setLocalLoading(false);
+                }, 500);
             }
         };
         
         loadData();
-    }, [fetchTopWebtoons, fetchPopularByLikes, fetchPopularByFavorites, fetchPopularByWatched, fetchRecommendWebtoons]);
+    }, [isAuthenticated]);
 
-    if (localLoading || isLoading) {
+    if (localLoading && !topWebtoonList && !popularByLikes && !popularByWatched && !popularByFavorites) {
         return (
             <div className="bg-white rounded-lg p-8 text-center my-8 mt-70 mb-50">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -140,7 +140,8 @@ function WebtoonMain() {
         );
     }
 
-    if (error) {
+    // 모든 API가 실패한 경우에만 에러 화면 표시
+    if (error && !topWebtoonList && !popularByLikes && !popularByWatched && !popularByFavorites) {
         return (
             <div className="container pt-20 flex flex-col items-center justify-center min-h-[50vh]">
                 <div className="text-red-500 mb-4">
@@ -180,7 +181,8 @@ function WebtoonMain() {
                                 countType={null}
                             />
                         ) : (
-                            <div className="p-6 mb-8 rounded-lg bg-gray-50">
+                            <Card className="w-full border border-gray-200 bg-gray-50">
+                                <CardContent className="p-6">
                                 <h2 className="text-xl font-bold mb-2">{`📌 ${userInfo?.nickname || ''}님의 취향 분석`}</h2>
                                 <p className="text-gray-500 mb-4">{userInfo?.nickname || ''}님을 알아가고 있는 중입니다.</p>
                                 <Link to="/ai-recommendation" style={{ textDecoration: 'none' }}>
@@ -188,14 +190,14 @@ function WebtoonMain() {
                                         AI 맞춤 추천 설정하러 가기
                                     </Button>
                                 </Link>
-
-                            </div>
+                                </CardContent>
+                            </Card>
                         )
                     }
                 </section>
 
                 {topWebtoonList && topWebtoonList.content && topWebtoonList.content.length > 0 && (
-                    <section id="section2" className="pt-5">
+                    <section id="section2" className="pt-10">
                         <div>
                             <div className="flex justify-between items-center mb-4">
                                 <CategoryLink to="/webtoon/list/top" title="🔥 전체" />

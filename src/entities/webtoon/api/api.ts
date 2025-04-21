@@ -115,7 +115,8 @@ export const fetchWebtoonRecommendations = async (recommendationRequest: Recomme
         const response = await Promise.race([apiRequest, timeout]) as any;
         
         if (!response || !response.data || !Array.isArray(response.data)) {
-            return [];
+            console.warn('추천 API 응답이 유효하지 않음:', response?.data);
+            throw new Error('유효하지 않은 응답 데이터');
         }
         
         // 필터별 테스트용 로직 (실제 서버 작동 시 제거)
@@ -132,8 +133,16 @@ export const fetchWebtoonRecommendations = async (recommendationRequest: Recomme
         }
         
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
+        // API 응답이 500인 경우를 명시적으로 확인
+        if (error.response && error.response.status === 500) {
+            console.error('웹툰 추천 API 서버 오류(500):', error.message);
+            // 서버 오류 상태를 알리기 위해 별도의 형식으로 반환
+            return { error: 'SERVER_ERROR', status: 500 };
+        }
+        
         console.error('웹툰 추천 API 호출 중 오류:', error);
-        return [];
+        // 다른 모든 오류에 대한 일반적인 에러 객체 반환
+        return { error: 'REQUEST_FAILED', message: error.message || '알 수 없는 오류' };
     }
 };
