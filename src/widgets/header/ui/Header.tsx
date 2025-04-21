@@ -225,6 +225,7 @@ const Header: React.FC = () => {
     };
 
     const isMyPage = location.pathname.startsWith('/mypage');
+    const isAdminPage = location.pathname.startsWith('/admin');
     const headerBgClass = useMemo(() => {
         return "bg-white";
     }, []);
@@ -237,13 +238,13 @@ const Header: React.FC = () => {
         <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${headerBgClass} ${headerShadowClass}`}>
             <div className="max-w-screen-xl mx-auto">
                 <div className="mx-auto border-b transition-colors duration-300">
-                    <div className="flex items-center justify-between h-16 px-4 transition-all duration-300">
+                    <div className="flex items-center justify-between h-16 px-4 transition-all duration-300 relative">
                         <div className="flex items-center gap-2 transition-all duration-300">
                             <Link to="/" className="flex items-center">
                                 <img src={logo} alt="Logo" className="h-8 transition-transform duration-300" />
                             </Link>
 
-                            {!isMyPage && (
+                            {!isMyPage && !isAdminPage && (
                                 <Tabs value={activeTab} onValueChange={setActiveTab} className="transition-opacity duration-300">
                                     <TabsList className="bg-transparent h-16">
                                         {navItems.map((item) => (
@@ -267,6 +268,10 @@ const Header: React.FC = () => {
                             
                             {isMyPage && (
                                 <div className="ml-4 text-xl font-bold">마이페이지</div>
+                            )}
+                            
+                            {isAdminPage && (
+                                <div className="ml-4 text-xl font-bold">관리자 페이지</div>
                             )}
                         </div>
 
@@ -292,7 +297,7 @@ const Header: React.FC = () => {
                 </div>
             </div>
 
-            {((activeTab === "home" || activeTab === "webtoon") && !isMyPage) && (
+            {((activeTab === "home" || activeTab === "webtoon") && !isMyPage && !isAdminPage) && (
                 <div className="max-w-screen-xl mx-auto border-b transition-all duration-300">
                     <ul className="flex overflow-x-auto py-3 px-4 whitespace-nowrap transition-all duration-300">
                         {currentSubNavItems.map((item, index) => {
@@ -327,13 +332,45 @@ const Header: React.FC = () => {
                             </Link>
                         </li>
                         <li className="mr-6">
-                            <Link to="/mypage/liked" className={`text-sm ${location.pathname === '/mypage' ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                            <Link to="/mypage/liked" className={`text-sm ${location.pathname === '/mypage/liked' ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
                                 좋아요한 웹툰
                             </Link>
                         </li>
                         <li className="mr-6">
-                            <Link to="/mypage/comments" className={`text-sm ${location.pathname === '/mypage' ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                            <Link to="/mypage/comments" className={`text-sm ${location.pathname === '/mypage/comments' ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
                                 내 댓글
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+            )}
+            
+            {isAdminPage && (
+                <div className="max-w-screen-xl mx-auto border-b transition-all duration-300">
+                    <ul className="flex overflow-x-auto py-3 px-4 whitespace-nowrap transition-all duration-300">
+                        <li className="mr-6">
+                            <Link to="/admin" className={`text-sm ${location.pathname === '/admin' ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                                대시보드
+                            </Link>
+                        </li>
+                        <li className="mr-6">
+                            <Link to="/admin/management/users" className={`text-sm ${location.pathname.startsWith('/admin/management') ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                                관리
+                            </Link>
+                        </li>
+                        <li className="mr-6">
+                            <Link to="/admin/stats/users" className={`text-sm ${location.pathname.startsWith('/admin/stats') ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                                통계
+                            </Link>
+                        </li>
+                        <li className="mr-6">
+                            <Link to="/admin/visualization/users" className={`text-sm ${location.pathname.startsWith('/admin/visualization') ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                                분석/시각화
+                            </Link>
+                        </li>
+                        <li className="mr-6">
+                            <Link to="/admin/settings/permissions" className={`text-sm ${location.pathname.startsWith('/admin/settings') ? 'font-bold text-yellow-500' : 'text-gray-700 hover:text-gray-900'} transition-colors duration-300`}>
+                                설정
                             </Link>
                         </li>
                     </ul>
