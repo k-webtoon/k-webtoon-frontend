@@ -8,6 +8,9 @@ import {
 import { CommentRequest } from "@/entities/webtoondetail/model/types";
 import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { CommentSection } from "@/pages/webtoon/WebtoonComment.tsx";
+import WebtoonLikeButton from "@/features/webtoon-like/ui/WebtoonLikeButton.tsx";
+import WebtoonFavoriteButton from "@/features/webtoon-favorite/ui/WebtoonFavoriteButton.tsx";
+import WebtoonWatchedButton from "@/features/webtoon-watched/ui/WebtoonWatchedButton";
 
 function WebtoonDetail() {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +30,6 @@ function WebtoonDetail() {
     setTotalPages,
     addComment,
     removeComment,
-    updateComment: updateCommentInStore,
     updateCommentLike,
   } = useWebtoonDetailStore();
 
@@ -205,6 +207,7 @@ function WebtoonDetail() {
                       alt={webtoon.titleName}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
+
                     <div className="absolute top-4 left-4 flex flex-wrap gap-2 p-1">
                       {mediaMixTags.map((tag, index) => (
                         <span
@@ -225,6 +228,13 @@ function WebtoonDetail() {
                     </span>
                   </div>
                 </div>
+                {isAuthenticated && (
+                  <div className="absolute bottom-4 right-4 flex gap-2 z-10">
+                    <WebtoonLikeButton webtoonId={webtoon.id} />
+                    <WebtoonFavoriteButton webtoonId={webtoon.id} />
+                    <WebtoonWatchedButton webtoonId={webtoon.id} />
+                  </div>
+                )}
               </div>
             </div>
 
