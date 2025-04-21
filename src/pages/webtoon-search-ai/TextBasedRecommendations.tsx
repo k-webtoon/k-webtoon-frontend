@@ -19,7 +19,6 @@ const TextBasedRecommendations: React.FC = () => {
         fetchTextBasedRecommendations
     } = useTextBasedRecommendationStore();
 
-    // URL에서 검색어 파라미터 추출
     const queryParams = new URLSearchParams(location.search);
     const query = queryParams.get('query') || '';
 
@@ -40,19 +39,16 @@ const TextBasedRecommendations: React.FC = () => {
         }
     }, [query, fetchTextBasedRecommendations]);
 
-    // 웹툰 세부 정보 가져오기
     const getWebtoonDetail = (id: number) => {
         return webtoonDetails[id] || null;
     };
 
     return (
         <div className="min-h-screen pt-20 pb-10">
-            {/* 상단 검색 컴포넌트 */}
             <div key={`search-${query}`} className="mb-8">
                 <WebtoonTextSearchForm />
             </div>
 
-            {/* 검색 결과 헤더 */}
             {query && (
                 <div className="flex flex-col items-start mb-6">
                     <h1 className="text-xl font-bold">
@@ -65,10 +61,11 @@ const TextBasedRecommendations: React.FC = () => {
                 </div>
             )}
 
-            {/* 로딩 및 오류 상태 */}
             {isLoading ? (
-                <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+                <div className="bg-white rounded-lg p-8 text-center my-8 mt-20 mb-50">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
+                    <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
                 </div>
             ) : error ? (
                 <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200 text-red-600 p-6">
@@ -83,7 +80,6 @@ const TextBasedRecommendations: React.FC = () => {
                 </div>
             ) : (
                 <div className="mt-6">
-                    {/* 세부 정보 로딩 중 표시 */}
                     {fetchingDetails && (
                         <div className="mb-4 p-2 bg-blue-50 text-blue-600 rounded-md text-sm text-center">
                             웹툰 상세 정보를 불러오는 중입니다...

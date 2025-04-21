@@ -112,8 +112,10 @@ export default function WebtoonSearchResults() {
 
             <div className="mt-6">
                 {isLoading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+                    <div className="bg-white rounded-lg p-8 text-center my-8 mt-20 mb-50">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
+                        <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
                     </div>
                 ) : results.content && results.content.length > 0 ? (
                     <div className="space-y-6">
@@ -121,7 +123,6 @@ export default function WebtoonSearchResults() {
                             <div key={webtoon.id} className="hover:bg-gray-50 rounded-lg p-2">
                                 <HorizontalWebtoonCard webtoon={{
                                     ...webtoon,
-                                    // 원본 웹툰 데이터는 유지하되, 표시용으로만 하이라이트된 텍스트 전달
                                     titleNameWithHighlight: highlightMatch(webtoon.titleName, ex_searchQuery),
                                     authorWithHighlight: highlightMatch(webtoon.author, ex_searchQuery)
                                 }} />

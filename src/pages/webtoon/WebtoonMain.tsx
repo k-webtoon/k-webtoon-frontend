@@ -132,7 +132,7 @@ function WebtoonMain() {
 
     if (localLoading || isLoading) {
         return (
-            <div className="bg-white rounded-lg p-8 text-center my-8 mt-50 mb-50">
+            <div className="bg-white rounded-lg p-8 text-center my-8 mt-70 mb-50">
                 <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
                 <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
