@@ -117,5 +117,26 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-y: scroll;
+  }
+  
+  /* 스크롤바 너비를 일관되게 유지 */
+  html {
+    scrollbar-width: thin; /* Firefox에서 적용 */
+  }
+  
+  /* WebKit 브라우저(Chrome, Safari 등)용 스크롤바 스타일 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
   }
 }

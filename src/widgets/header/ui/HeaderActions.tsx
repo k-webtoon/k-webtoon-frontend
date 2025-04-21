@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import CustomDropdown from "@/shared/ui/custom/CustomDropdown";
 import SearchBar from "@/features/webtoon-search/ui/SearchBar";
 import { Button } from "@/shared/ui/shadcn/button";
-import { Search, User as UserIcon, LogOut } from "lucide-react";
+import { Search, User as UserIcon, LogOut, Settings } from "lucide-react";
 
 interface HeaderActionsProps {
     isSearchOpen: boolean;
@@ -37,8 +37,9 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
 
     useEffect(() => {
         const nickname = currentUser?.nickname || '사용자';
+        const isAdmin = userInfo?.role === 'ADMIN';
         
-        setUserMenuItems([
+        const menuItems: MenuItem[] = [
             {
                 id: 1,
                 label: `${nickname}님`,
@@ -68,18 +69,30 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
             //     onClick: () => navigate('/mypage/settings'),
             //     icon: <Settings size={16} />
             // },
-            {
-                id: 6,
-                label: "로그아웃",
-                onClick: () => {
-                    logout();
-                    navigate('/');
-                },
-                icon: <LogOut size={16} />,
-                isDanger: true
-            }
-        ]);
-    }, [currentUser, navigate, logout]);
+        ];
+
+        if (isAdmin) {
+            menuItems.push({
+                id: 5,
+                label: "관리자 페이지",
+                onClick: () => navigate('/admin'),
+                icon: <Settings size={16} />
+            });
+        }
+
+        menuItems.push({
+            id: 6,
+            label: "로그아웃",
+            onClick: () => {
+                logout();
+                navigate('/');
+            },
+            icon: <LogOut size={16} />,
+            isDanger: true
+        });
+
+        setUserMenuItems(menuItems);
+    }, [currentUser, navigate, logout, userInfo]);
 
     const isMyPage = location.pathname.startsWith('/mypage');
 
@@ -130,15 +143,17 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                             <SearchBar />
                         </li>
                         <li>
-                            <CustomDropdown
-                                label={<UserIcon size={20} className="text-gray-600" />}
-                                items={userMenuItems.map((item) => ({
-                                    label: item.label,
-                                    onClick: item.onClick,
-                                    icon: item.icon,
-                                    isDanger: item.isDanger
-                                }))}
-                            />
+                            <div className="h-9 w-9 flex items-center justify-center">
+                                <CustomDropdown
+                                    label={<UserIcon size={20} className="text-gray-600" />}
+                                    items={userMenuItems.map((item) => ({
+                                        label: item.label,
+                                        onClick: item.onClick,
+                                        icon: item.icon,
+                                        isDanger: item.isDanger
+                                    }))}
+                                />
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -156,15 +171,17 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
                             </Button>
                         </li>
                         <li>
-                            <CustomDropdown
-                                label={<UserIcon size={20} className="text-gray-600" />}
-                                items={userMenuItems.map((item) => ({
-                                    label: item.label,
-                                    onClick: item.onClick,
-                                    icon: item.icon,
-                                    isDanger: item.isDanger
-                                }))}
-                            />
+                            <div className="h-9 w-9 flex items-center justify-center">
+                                <CustomDropdown
+                                    label={<UserIcon size={20} className="text-gray-600" />}
+                                    items={userMenuItems.map((item) => ({
+                                        label: item.label,
+                                        onClick: item.onClick,
+                                        icon: item.icon,
+                                        isDanger: item.isDanger
+                                    }))}
+                                />
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -173,27 +190,71 @@ const HeaderActions = ({ isSearchOpen, setIsSearchOpen }: HeaderActionsProps) =>
     }
 
     function MyPageHeaderActions() {
+        const myPageMenuItems = userMenuItems.filter(item =>
+            item.id === 1 ||
+            item.id === 2 ||
+            item.id === 5 ||
+            item.id === 6
+        );
+        
         return (
             <div className="flex items-center transition-opacity duration-300">
                 <ul className="flex items-center">
                     <li>
-                        <CustomDropdown
-                            label={<UserIcon size={20} className="text-gray-600" />}
-                            items={[userMenuItems[0], userMenuItems[userMenuItems.length - 1]].map((item) => ({
-                                label: item.label,
-                                onClick: item.onClick,
-                                icon: item.icon,
-                                isDanger: item.isDanger
-                            }))}
-                        />
+                        <div className="h-9 w-9 flex items-center justify-center">
+                            <CustomDropdown
+                                label={<UserIcon size={20} className="text-gray-600" />}
+                                items={myPageMenuItems.map((item) => ({
+                                    label: item.label,
+                                    onClick: item.onClick,
+                                    icon: item.icon,
+                                    isDanger: item.isDanger
+                                }))}
+                            />
+                        </div>
                     </li>
                 </ul>
             </div>
         );
     }
 
+    function AdminPageHeaderActions() {
+        const adminMenuItems = userMenuItems.filter(item =>
+            item.id === 1 ||
+            item.id === 2 ||
+            item.id === 5 ||
+            item.id === 6
+        );
+        
+        return (
+            <div className="flex items-center transition-opacity duration-300">
+                <ul className="flex items-center">
+                    <li>
+                        <div className="h-9 w-9 flex items-center justify-center">
+                            <CustomDropdown
+                                label={<UserIcon size={20} className="text-gray-600" />}
+                                items={adminMenuItems.map((item) => ({
+                                    label: item.label,
+                                    onClick: item.onClick,
+                                    icon: item.icon,
+                                    isDanger: item.isDanger
+                                }))}
+                            />
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        );
+    }
+
+    const isAdminPage = location.pathname.startsWith('/admin');
+
     if (isMyPage && isAuthenticated) {
         return <MyPageHeaderActions />;
+    }
+    
+    if (isAdminPage && isAuthenticated) {
+        return <AdminPageHeaderActions />;
     }
 
     return (

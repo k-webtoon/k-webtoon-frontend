@@ -39,9 +39,21 @@ const LoginForm: React.FC<LoginFormProps> = ({
     try {
       // userEmail과 userPassword로 정확히 매핑
       await login(email, password);
+      
       if (onSuccess) onSuccess();
       console.log("로그인 시도:", { userEmail: email, userPassword: password });
-      navigate(redirectUrl);
+      
+      // 로그인 성공 후 사용자 역할에 따라 리다이렉션
+      const { getUserInfo } = useAuthStore.getState();
+      const userInfo = getUserInfo();
+      
+      if (userInfo?.role === 'ADMIN') {
+        // 관리자인 경우 관리자 페이지로 리다이렉션
+        navigate('/admin');
+      } else {
+        // 일반 사용자인 경우 기본 리다이렉션 URL로 이동
+        navigate(redirectUrl);
+      }
 
     } catch (err: any) {
       console.error("로그인 에러:", err);
