@@ -18,8 +18,13 @@ export const authApi = {
     try {
       const response = await axios.post(`${API_BASE_URL}/login`, loginData);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("로그인 오류:", error);
+      if (error.response) {
+        const errorMessage = error.response.data?.message || '로그인에 실패했습니다.';
+        const err = new Error(errorMessage);
+        throw err;
+      }
       throw error;
     }
   },

@@ -24,6 +24,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login, loading, error } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,6 +32,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
     // 입력값 검증
     if (!email || !password) {
+      setErrorMessage("이메일과 비밀번호를 모두 입력해주세요.");
       return;
     }
 
@@ -40,8 +42,20 @@ const LoginForm: React.FC<LoginFormProps> = ({
       if (onSuccess) onSuccess();
       console.log("로그인 시도:", { userEmail: email, userPassword: password });
       navigate(redirectUrl);
-    } catch (err) {
+
+    } catch (err: any) {
       console.error("로그인 에러:", err);
+
+      // 에러 메시지 상세 처리
+      let errorMsg = '로그인에 실패했습니다.';
+
+      if (err.message && err.message.includes('일치하지 않는 비밀번호')) {
+        errorMsg = '비밀번호가 일치하지 않습니다.';
+      } else if (err.message && (err.message.includes('존재하지 않는') || err.message.includes('찾을 수 없'))) {
+        errorMsg = '존재하지 않는 이메일입니다.';
+      }
+
+      setErrorMessage(errorMsg);
     }
   };
 
@@ -67,10 +81,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
+        {(error || errorMessage) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errorMessage || error}</AlertDescription>
           </Alert>
         )}
 
