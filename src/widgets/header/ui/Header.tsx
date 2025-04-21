@@ -77,6 +77,14 @@ const Header: React.FC = () => {
             }
         }
         
+        if (currentPath === '/text-based-recommendations') {
+            const textSearchItem = items.find(item => item.path === '/text-based-recommendations');
+            if (textSearchItem) {
+                setActiveSubNav(textSearchItem);
+                return;
+            }
+        }
+        
         const activeItem = findActiveSubNavItemByPath(items, currentPath);
         
         if (activeItem) {
