@@ -188,7 +188,7 @@ const WebtoonGridHorizontal: React.FC<WebtoonGridHorizontalProps> = ({
                     <Button
                         onClick={handleLoadMore}
                         variant="outline"
-                        className="flex items-center px-4 text-blue-600 border border-blue-600 rounded-full hover:bg-blue-50 transition-colors"
+                        className="px-6 py-2 border border-gray-200 rounded-full text-sm text-gray-600 hover:bg-gray-50 transition-colors"
                     >
                         <span>더보기</span>
                         <ChevronDown className="ml-1 h-4 w-4" />

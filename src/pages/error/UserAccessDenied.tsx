@@ -28,7 +28,7 @@ export default function UserAccessDenied({
 
     return (
         <div className="flex min-h-[80vh] items-center justify-center p-4">
-            <Card className="mx-auto max-w-md text-center shadow-lg">
+            <Card className="mx-auto max-w-md text-center shadow-lg p-8">
                 <CardHeader>
                     <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
                         <AlertCircle className="h-10 w-10 text-blue-500" />
