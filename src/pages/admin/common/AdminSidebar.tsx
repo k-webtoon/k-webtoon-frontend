@@ -2,6 +2,7 @@ import { FC, memo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useSidebarStore } from "@/entities/admin/api/store";
+import image from "@/shared/assets/admin.jpg";
 
 interface MenuItem {
   title: string;
@@ -23,7 +24,7 @@ const menuGroups: MenuGroup[] = [
     title: "관리",
     items: [
       { title: "사용자 관리", path: "/admin/management/users" },
-      { title: "웹툰 관리", path: "/admin/management/webtoons" }
+      { title: "웹툰 관리", path: "/admin/management/webtoons" },
     ],
   },
   {
@@ -41,7 +42,7 @@ const menuGroups: MenuGroup[] = [
   {
     title: "설정",
     items: [{ title: "권한 관리", path: "/admin/settings/permissions" }],
-  }
+  },
 ];
 
 export const AdminSidebar: FC<AdminSidebarProps> = memo(
@@ -77,13 +78,13 @@ export const AdminSidebar: FC<AdminSidebarProps> = memo(
           <div className="mb-4">
             <div className="w-full aspect-square rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
               <img
-                src="/images/admin-placeholder.jpg"
+                src={image}
                 alt="관리자"
                 className="w-full h-full object-cover"
               />
             </div>
             <h1 className="text-2xl font-bold mb-1">관리자</h1>
-            <p className="text-gray-600 mb-4">admin@kwebtoon.com</p>
+            <p className="text-gray-600 mb-4">admin</p>
           </div>
 
           {/* 관리자 메뉴 네비게이션 */}

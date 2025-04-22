@@ -1,17 +1,16 @@
-import { FC } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { FC } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/shared/ui/shadcn/card";
-import { Button } from "@/shared/ui/shadcn/button";
 
 const Stats: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const statsMenu = [
-    { title: '사용자 통계', path: '/admin/stats/users' },
-    { title: '작가 통계', path: '/admin/stats/authors' },
-    { title: '웹툰 통계', path: '/admin/stats/webtoons' },
-    { title: '댓글 통계', path: '/admin/stats/comments' },
+    { title: "사용자 통계", path: "/admin/stats/users" },
+    { title: "작가 통계", path: "/admin/stats/authors" },
+    { title: "웹툰 통계", path: "/admin/stats/webtoons" },
+    { title: "댓글 통계", path: "/admin/stats/comments" },
   ];
 
   return (
@@ -57,4 +56,4 @@ const Stats: FC = () => {
   );
 };
 
-export default Stats; 
+export default Stats;
