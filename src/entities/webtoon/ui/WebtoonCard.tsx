@@ -16,7 +16,7 @@ import {CSSProperties, MouseEvent} from "react";
 
 export interface WebtoonCardProps {
     webtoon: WebtoonInfo;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg';
     showBadges?: boolean;
     showTitle?: boolean;
     showGenre?: boolean;
@@ -24,6 +24,7 @@ export interface WebtoonCardProps {
     showAI?: boolean;
     aiPercent?: number;
     countType?: 'likes' | 'favorites' | 'watched' | null;
+    isLink?: boolean;
 }
 
 // 카드 뒤집기 애니메이션 컴포넌트
@@ -77,10 +78,12 @@ export default function WebtoonCard({
                                         showActionButtons = true,
                                         showAI = false,
                                         aiPercent,
-                                        countType = null
+                                        countType = null,
+                                        isLink = true
                                     }: WebtoonCardProps) {
 
     const sizeStyles = {
+        xs: 'w-52 md:w-60 h-64 md:h-80',
         sm: 'w-64 md:w-72 h-80 md:h-96',
         md: 'w-72 md:w-80 h-96 md:h-110',
         lg: 'w-80 md:w-96 h-110 md:h-120',
@@ -208,7 +211,9 @@ export default function WebtoonCard({
                                     <div className="flex items-center">
                                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400"/>
                                         <span className="text-xs ml-1 text-white">
-                                          {webtoon.starScore.toFixed(1)}
+                                          {(typeof webtoon.starScore === 'number' 
+                                            ? webtoon.starScore 
+                                            : (parseFloat(webtoon.starScore as any) || 0)).toFixed(1)}
                                         </span>
                                     </div>
                                 </div>
@@ -217,18 +222,36 @@ export default function WebtoonCard({
                             {showGenre && (
                                 <div className="flex items-center text-xs text-white/80 mb-2">
                                   <span>
-                                    {Array.isArray(webtoon.rankGenreTypes) && webtoon.rankGenreTypes.length > 0
-                                        ? webtoon.rankGenreTypes.map(genre => {
-                                            if (Object.keys(GENRE_MAPPING).includes(genre)) {
-                                                return GENRE_MAPPING[genre];
-                                            }
-                                            return genre;
-                                        }).join(', ')
-                                        : '장르 없음'
-                                    }
+                                    {(() => {
+                                      // 장르 표시 로직
+                                      // 1. rankGenreTypes 배열이 유효하면 사용
+                                      if (Array.isArray(webtoon.rankGenreTypes) && webtoon.rankGenreTypes.length > 0) {
+                                        return webtoon.rankGenreTypes.map(genre => {
+                                          // GENRE_MAPPING 객체에 있는 장르면 매핑된 한글명 사용
+                                          if (typeof genre === 'string' && Object.keys(GENRE_MAPPING).includes(genre)) {
+                                            return GENRE_MAPPING[genre];
+                                          }
+                                          // 문자열이면 그대로 표시, 아니면 '기타'로 표시
+                                          return typeof genre === 'string' ? genre : '기타';
+                                        }).join(', ');
+                                      }
+                                      
+                                      // 2. genre_list 배열이 유효하면 사용
+                                      if (Array.isArray(webtoon.genre_list) && webtoon.genre_list.length > 0) {
+                                        return webtoon.genre_list.join(', ');
+                                      }
+                                      
+                                      // 3. genre 필드가 있으면 사용
+                                      if (webtoon.genre) {
+                                        return typeof webtoon.genre === 'string' ? webtoon.genre : '장르 정보';
+                                      }
+                                      
+                                      // 4. 모든 필드가 없으면 '장르 없음' 표시
+                                      return '장르 없음';
+                                    })()}
                                   </span>
-                                    <span className="mx-1">•</span>
-                                    <span>{webtoon.author}</span>
+                                  <span className="mx-1">•</span>
+                                  <span>{webtoon.author || '작가 미상'}</span>
                                 </div>
                             )}
 
@@ -249,11 +272,13 @@ export default function WebtoonCard({
                         />
                         
                         {/* 카드 클릭 시 상세 페이지로 이동 */}
-                        <div className="absolute inset-0 z-10">
-                            <Link to={`/webtoon/${webtoon.id}`} className="absolute inset-0">
-                                <span className="sr-only">웹툰 상세 페이지로 이동</span>
-                            </Link>
-                        </div>
+                        {isLink && (
+                            <div className="absolute inset-0 z-10">
+                                <Link to={`/webtoon/${webtoon.id}`} className="absolute inset-0">
+                                    <span className="sr-only">웹툰 상세 페이지로 이동</span>
+                                </Link>
+                            </div>
+                        )}
 
                         <Fade in={true} timeout={600}>
                             <div className="p-5 text-center relative z-20">

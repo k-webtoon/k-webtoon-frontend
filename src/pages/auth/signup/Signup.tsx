@@ -29,7 +29,7 @@ const SignupLayout: React.FC<{ children: React.ReactNode }> = ({
   const isAIRecommendation = currentPath === "ai-recommendation";
 
   return (
-    <div className="min-h-screen bg-background pt-10">
+    <div className="min-h-screen bg-background pt-20">
       <div className="w-full h-full p-8 md:p-10 flex flex-col items-center justify-center">
         {!isAIRecommendation && currentStepIndex !== -1 && (
           <div className="w-full max-w-md space-y-8">

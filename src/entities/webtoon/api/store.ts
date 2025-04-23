@@ -196,5 +196,9 @@ export const useWebtoonStore = create<WebtoonState>((set) => ({
             return { error: 'UNEXPECTED_ERROR', message: String(error) };
         }
     },
+
+    resetRecommendations: () => {
+        set({ recommendations: [] });
+    },
 }));
 
