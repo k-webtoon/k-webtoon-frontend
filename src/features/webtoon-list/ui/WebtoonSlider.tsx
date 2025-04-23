@@ -276,7 +276,10 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
 };
 
 export default React.memo(WebtoonSlider, (prevProps, nextProps) => {
+    const isSameWebtoons = typeof prevProps.webtoons === 'function' && typeof nextProps.webtoons === 'function'
+        ? prevProps.webtoons === nextProps.webtoons
+        : true;
     return prevProps.title === nextProps.title &&
-        prevProps.webtoons === nextProps.webtoons &&
+        isSameWebtoons &&
         prevProps.autoSlideInterval === nextProps.autoSlideInterval;
 });

@@ -38,6 +38,12 @@ export interface WebtoonInfo {
     starScore: number;
     totalCount?: number;
     sim?: number;
+    
+    // AI 추천 API 필드
+    title_name?: string;
+    thumbnail?: string;
+    genre?: string;
+    genre_list?: string[];
 }
 
 // ===============
@@ -111,4 +117,5 @@ export interface WebtoonState {
     fetchRecommendWebtoons: (requestData: RecommendationRequest) => Promise<void>;
     resetCurrentWebtoon: () => void;
     resetSearchResults: () => void;
+    resetRecommendations: () => void;
 }

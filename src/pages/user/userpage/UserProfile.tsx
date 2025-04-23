@@ -173,7 +173,7 @@ const UserProfile = () => {
                     <WebtoonCard
                       key={`${webtoon.id}-${webtoon.title}`}
                       webtoon={convertToTopWebtoonInfo(webtoon)}
-                      size="sm"
+                      size="xs"
                       showActionButtons={false}
                     />
                   ))}
