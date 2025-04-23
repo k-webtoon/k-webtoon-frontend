@@ -40,51 +40,40 @@ const Main: React.FC = () => {
     }, [initialize]);
 
     useEffect(() => {
-        fetchTopWebtoons(0, 10); // 첫 페이지, 10개 항목 로드
+        fetchTopWebtoons(0, 10);
     }, [fetchTopWebtoons]);
 
-    // 사용자 정보 가져오기
     useEffect(() => {
         if (isAuthenticated) {
             fetchCurrentUserInfo();
         }
     }, [isAuthenticated, fetchCurrentUserInfo]);
 
-    // 추천 데이터 정렬 처리
     useEffect(() => {
+        if (!recommendations || !Array.isArray(recommendations) || recommendations.length === 0) {
+            setSortedRecommendations([]);
+            return;
+        }
+        
         try {
-            if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
-                const validRecommendations = recommendations.filter(item => 
-                    item && typeof item === 'object' && 'sim' in item
-                );
+            const sortedData = recommendations
+                .filter(item => item && typeof item === 'object' && 'sim' in item)
+                .sort((a, b) => (b.sim ?? 0) - (a.sim ?? 0));
                 
-                if (validRecommendations.length > 0) {
-                    const sorted = [...validRecommendations].sort((a, b) => {
-                        const simA = a.sim !== undefined ? a.sim : 0;
-                        const simB = b.sim !== undefined ? b.sim : 0;
-                        return simB - simA;
-                    });
-                    setSortedRecommendations(sorted);
-                } else {
-                    setSortedRecommendations([]);
-                }
-            } else {
-                setSortedRecommendations([]);
-            }
+            setSortedRecommendations(sortedData);
         } catch (error) {
             console.error('추천 데이터 처리 중 오류:', error);
             setSortedRecommendations([]);
         }
     }, [recommendations]);
 
-    // 추천 데이터 로드 로직
     const [apiErrorStatus, setApiErrorStatus] = useState<{ status: number | null, retryCount: number }>({
         status: null,
         retryCount: 0
     });
     
     const [requestSent, setRequestSent] = useState(false);
-    const [localLoading, setLocalLoading] = useState(true);
+    const [localLoading, setLocalLoading] = useState(false);
     
     interface ErrorResponse {
         error: string;
@@ -92,7 +81,6 @@ const Main: React.FC = () => {
         message?: string;
     }
     
-    // 타입 가드 함수: API 응답이 에러인지 확인
     function isErrorResponse(result: unknown): result is ErrorResponse {
         return Boolean(
             result && 
@@ -113,17 +101,19 @@ const Main: React.FC = () => {
     );
     
     useEffect(() => {
-        if (
-            requestSent || 
-            !isAuthenticated || 
-            (recommendations && recommendations.length > 0)
-        ) {
+        if (requestSent || !isAuthenticated) {
+            return;
+        }
+        
+        if (recommendations && recommendations.length > 0) {
+            setLocalLoading(false);
             return;
         }
         
         if (apiErrorStatus.status === 500 && apiErrorStatus.retryCount >= 3) {
             console.warn("추천 API 서버 오류가 지속됩니다. 더 이상 시도하지 않습니다.");
             setSortedRecommendations([]);
+            setLocalLoading(false);
             return;
         }
         
@@ -151,14 +141,12 @@ const Main: React.FC = () => {
                 console.error("추천 웹툰 처리 중 오류:", err);
                 setSortedRecommendations([]);
             } finally {
-                setTimeout(() => {
-                    setLocalLoading(false);
-                }, 0);
+                setLocalLoading(false);
             }
         };
         
         loadRecommendations();
-    }, [isAuthenticated, recommendations, requestSent, apiErrorStatus]);
+    }, [isAuthenticated, recommendations, requestSent, apiErrorStatus, fetchRecommendWebtoons]);
 
     const sampleReviews: Review[] = [
         {
@@ -168,7 +156,7 @@ const Main: React.FC = () => {
             content: '캐릭터들의 성격과 능력이 다양해서 매화마다 새로운 볼거리가 있습니다. 특히 주인공의 성장 과정이 정말 인상적이었고, 스토리 전개도 탄탄해서 정주행하게 되었어요.',
             rating: 5,
             authorName: '웹툰러버',
-            createdAt: new Date(Date.now() - 5 * 60 * 1000) // 5분 전
+            createdAt: new Date(Date.now() - 5 * 60 * 1000)
         },
         {
             id: '2',
@@ -177,7 +165,7 @@ const Main: React.FC = () => {
             content: '일상 에피소드가 너무 공감되고 항상 웃음이 나옵니다. 간단한 그림체지만 그 안에 담긴 유머와 철학이 정말 대단해요. 10년 넘게 보고 있는데 여전히 최고의 웹툰입니다.',
             rating: 4.5,
             authorName: '만화광',
-            createdAt: new Date(Date.now() - 10 * 60 * 1000) // 10분 전
+            createdAt: new Date(Date.now() - 10 * 60 * 1000)
         },
         {
             id: '3',
@@ -186,7 +174,7 @@ const Main: React.FC = () => {
             content: '주인공의 성장 이야기가 정말 감동적입니다. 학교 폭력과 외모 지상주의라는 사회적 문제를 잘 녹여낸 작품이라고 생각해요. 그림체도 점점 발전해서 보는 재미가 있습니다.',
             rating: 4,
             authorName: '웹툰팬',
-            createdAt: new Date(Date.now() - 30 * 60 * 1000) // 30분 전
+            createdAt: new Date(Date.now() - 30 * 60 * 1000)
         },
     ];
 
@@ -248,10 +236,9 @@ const Main: React.FC = () => {
                                     </div>
                                     
                                     {localLoading ? (
-                                        <div className="bg-white rounded-lg p-8 text-center my-8">
-                                            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                            <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
-                                            <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
+                                        <div className="bg-white rounded-lg p-6 text-center my-4">
+                                            <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                                            <p className="text-lg font-semibold text-gray-700">추천 데이터를 분석 중...</p>
                                         </div>
                                     ) : sortedRecommendations && sortedRecommendations.length > 0 ? (
                                         <WebtoonGridHorizontal
@@ -266,7 +253,7 @@ const Main: React.FC = () => {
                                             countType={null}
                                         />
                                     ) : (
-                                        <div className="bg-white rounded-lg p-8 text-center my-8">
+                                        <div className="bg-white rounded-lg p-6 text-center my-4">
                                             <p className="text-gray-700">아직 추천 데이터가 준비되지 않았습니다.</p>
                                         </div>
                                     )}
