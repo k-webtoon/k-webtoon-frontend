@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import { WebtoonPaginatedResponse, WebtoonInfo } from '@/entities/webtoon/model/types.ts';
 import HorizontalRecommendWebtoonCard from "@/entities/webtoon/ui/HorizontalRecommendWebtoonCard.tsx";
 import { Button } from '@/shared/ui/shadcn/button';
@@ -20,7 +19,6 @@ interface WebtoonGridHorizontalProps {
 
 const WebtoonGridHorizontal: React.FC<WebtoonGridHorizontalProps> = ({
                                                                          title,
-                                                                         comment,
                                                                          webtoons,
                                                                          showActionButtons = true,
                                                                          showAI = true,
@@ -153,17 +151,17 @@ const WebtoonGridHorizontal: React.FC<WebtoonGridHorizontalProps> = ({
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">{title}</h2>
-                <Link
-                    to="/user-based-recommendations"
-                    className="flex items-center text-blue-500 hover:text-blue-700 transition-colors"
-                >
-                    전체 보기
-                    <ChevronRight className="ml-1 h-5 w-5" />
-                </Link>
-            </div>
-            <p className="text-left text-xs text-gray-500 mb-5">{comment}</p>
+            {/*<div className="flex justify-between items-center mb-4">*/}
+            {/*    <h2 className="text-xl font-bold">{title}</h2>*/}
+            {/*    <Link*/}
+            {/*        to="/user-based-recommendations"*/}
+            {/*        className="flex items-center text-blue-500 hover:text-blue-700 transition-colors"*/}
+            {/*    >*/}
+            {/*        전체 보기*/}
+            {/*        <ChevronRight className="ml-1 h-5 w-5" />*/}
+            {/*    </Link>*/}
+            {/*</div>*/}
+            {/*<p className="text-left text-xs text-gray-500 mb-5">{comment}</p>*/}
 
             <div className="grid gap-4">
                 {grid.map((row, rowIndex) => (

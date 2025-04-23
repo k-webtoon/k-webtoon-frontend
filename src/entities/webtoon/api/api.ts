@@ -102,17 +102,13 @@ export const getPopularByWatched = async (size: number = 10): Promise<WebtoonInf
 
 export const fetchWebtoonRecommendations = async (recommendationRequest: RecommendationRequest) => {
     try {
-        const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('요청 시간 초과')), 10000)
-        );
-        
         const apiRequest = apiClient.post(
             `http://localhost:8080/api/connector/sendL_if`,
             recommendationRequest,
             {}
         );
         
-        const response = await Promise.race([apiRequest, timeout]) as any;
+        const response = await apiRequest;
         
         if (!response || !response.data || !Array.isArray(response.data)) {
             console.warn('추천 API 응답이 유효하지 않음:', response?.data);
