@@ -25,18 +25,21 @@ export interface WebtoonCardProps {
     aiPercent?: number;
     countType?: 'likes' | 'favorites' | 'watched' | null;
     isLink?: boolean;
+    disableFlip?: boolean;
 }
 
 // 카드 뒤집기 애니메이션 컴포넌트
-const CardContainer = styled('div')({
+const CardContainer = styled('div')<{ disableFlip?: boolean }>(({ disableFlip }) => ({
     position: 'relative',
     perspective: '1000px',
     width: '100%',
     height: '100%',
-    '&:hover .card-inner': {
-        transform: 'rotateY(180deg)',
-    }
-});
+    ...(!disableFlip && {
+        '&:hover .card-inner': {
+            transform: 'rotateY(180deg)',
+        }
+    })
+}));
 
 const CardInner = styled('div')({
     position: 'relative',
@@ -79,7 +82,8 @@ export default function WebtoonCard({
                                         showAI = false,
                                         aiPercent,
                                         countType = null,
-                                        isLink = true
+                                        isLink = true,
+                                        disableFlip = false
                                     }: WebtoonCardProps) {
 
     const sizeStyles = {
@@ -124,9 +128,17 @@ export default function WebtoonCard({
             "flex-shrink-0 overflow-hidden relative group",
             sizeStyles[size]
         )}>
-            <CardContainer>
+            <CardContainer disableFlip={disableFlip}>
                 <CardInner className="card-inner">
                     <CardFront>
+                        {/* 카드 앞면에도 링크 추가 - 뒤집기가 비활성화된 경우에만 */}
+                        {isLink && disableFlip && (
+                            <div className="absolute inset-0 z-10">
+                                <Link to={`/webtoon/${webtoon.id}`} className="absolute inset-0">
+                                    <span className="sr-only">웹툰 상세 페이지로 이동</span>
+                                </Link>
+                            </div>
+                        )}
                         <div className="absolute inset-0 w-full h-full">
                             <img
                                 src={webtoon.thumbnailUrl || "/placeholder.svg"}

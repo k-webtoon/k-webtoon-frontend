@@ -84,6 +84,7 @@ const Main: React.FC = () => {
     });
     
     const [requestSent, setRequestSent] = useState(false);
+    const [localLoading, setLocalLoading] = useState(true);
     
     interface ErrorResponse {
         error: string;
@@ -99,6 +100,17 @@ const Main: React.FC = () => {
             'error' in result
         );
     }
+
+    const CategoryLink = ({ to, title }: { to: string; title: string }) => (
+        <Link
+            to={to}
+            state={{ title }}
+            className="flex items-center text-xl font-bold hover:text-blue-500 transition-colors"
+        >
+            {title}
+            <ChevronRight className="ml-1 h-5 w-5" />
+        </Link>
+    );
     
     useEffect(() => {
         if (
@@ -117,6 +129,7 @@ const Main: React.FC = () => {
         
         const loadRecommendations = async () => {
             setRequestSent(true);
+            setLocalLoading(true);
             
             try {
                 const result = await fetchRecommendWebtoons({
@@ -137,6 +150,10 @@ const Main: React.FC = () => {
             } catch (err) {
                 console.error("추천 웹툰 처리 중 오류:", err);
                 setSortedRecommendations([]);
+            } finally {
+                setTimeout(() => {
+                    setLocalLoading(false);
+                }, 0);
             }
         };
         
@@ -219,18 +236,41 @@ const Main: React.FC = () => {
                             <WebtoonTextSearchForm />
                         </section>
                         <section id="section2" className="pt-10">
-                            {(sortedRecommendations && sortedRecommendations.length > 0) ? (
-                                <WebtoonGridHorizontal
-                                    title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`}
-                                    comment={`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}
-                                    webtoons={() => Promise.resolve(sortedRecommendations)}
-                                    cardSize="md"
-                                    showActionButtons={true}
-                                    showAI={true}
-                                    initialLoad={false}
-                                    rows={2}
-                                    countType={null}
-                                />
+                            {apiErrorStatus.status !== 500 ? (
+                                <div>
+                                    <div>
+                                        <div>
+                                            <CategoryLink to="/webtoon/list/likes" title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`} />
+                                        </div>
+                                        <div className="pt-4 pb-6">
+                                            <p className="text-left text-gray-500">{`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    {localLoading ? (
+                                        <div className="bg-white rounded-lg p-8 text-center my-8">
+                                            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                            <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
+                                            <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
+                                        </div>
+                                    ) : sortedRecommendations && sortedRecommendations.length > 0 ? (
+                                        <WebtoonGridHorizontal
+                                            title=""
+                                            comment=""
+                                            webtoons={() => Promise.resolve(sortedRecommendations)}
+                                            cardSize="md"
+                                            showActionButtons={true}
+                                            showAI={true}
+                                            initialLoad={false}
+                                            rows={2}
+                                            countType={null}
+                                        />
+                                    ) : (
+                                        <div className="bg-white rounded-lg p-8 text-center my-8">
+                                            <p className="text-gray-700">아직 추천 데이터가 준비되지 않았습니다.</p>
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
                                 <Card className="w-full border border-gray-200 bg-gray-50">
                                     <CardContent className="p-6">

@@ -10,11 +10,14 @@ interface WebtoonSliderProps {
     webtoons: () => Promise<WebtoonPaginatedResponse | WebtoonInfo[]>;
     cardSize?: 'sm' | 'md' | 'lg';
     showBadges?: boolean;
+    showTitle?: boolean;
+    showGenre?: boolean;
     showActionButtons?: boolean;
     showAI?: boolean;
     initialLoad?: boolean;
     countType?: 'likes' | 'favorites' | 'watched' | null;
-    autoSlideInterval?: number; // 자동 슬라이드 간격 (ms)
+    autoSlideInterval?: number;
+    disableFlip?: boolean;
 }
 
 const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
@@ -23,11 +26,14 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                                                          webtoons,
                                                          cardSize,
                                                          showBadges = false,
+                                                         showTitle,
+                                                         showGenre,
                                                          showActionButtons,
                                                          showAI,
                                                          initialLoad = true,
                                                          countType = null,
-                                                         autoSlideInterval = 1000 // 기본값 1초로 설정
+                                                         autoSlideInterval = 1000,
+                                                         disableFlip
                                                      }) => {
     const sliderRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -218,7 +224,7 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
     return (
         <div className="bg-white text-black" ref={containerRef}>
             <h2 className="text-xl font-bold text-left">{title}</h2>
-            <p className="text-xs text-gray-500 text-left mb-5">{coment}</p>
+            <p className="text-gray-500 text-left mb-5">{coment}</p>
 
             <div className="relative">
                 {/* 슬라이더 컨테이너 */}
@@ -261,9 +267,12 @@ const WebtoonSlider: React.FC<WebtoonSliderProps> = ({
                                     webtoon={webtoon}
                                     size={cardSize}
                                     showAI={showAI}
+                                    showTitle={showTitle}
                                     showBadges={showBadges}
+                                    showGenre={showGenre}
                                     showActionButtons={showActionButtons}
                                     countType={countType}
+                                    disableFlip={disableFlip}
                                     aiPercent={webtoon.sim !== undefined ? Math.round(webtoon.sim) : undefined}
                                 />
                             </div>
