@@ -59,7 +59,7 @@ export const MyProfile = () => {
 
   useEffect(() => {
     resetRecommendations();
-  }, [likedWebtoonInfoList]);
+  }, [likedWebtoonInfoList, favoriteWebtoonInfoList]);
 
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [privacySettings, setPrivacySettings] = useState({
@@ -97,7 +97,6 @@ export const MyProfile = () => {
     fetchData();
   }, []);
 
-  // 좋아요한 웹툰 ID 목록을 문자열로 메모이제이션
   const likedWebtoonIdsString = useMemo(() => {
     const likedWebtoonIds: number[] = [];
     likedWebtoons.forEach((isLiked, webtoonId) => {
@@ -118,21 +117,21 @@ export const MyProfile = () => {
     return favoriteWebtoonIds.sort().join(',');
   }, [favoriteWebtoons]);
   
-  // 좋아요한 웹툰 정보 가져오기
+  // 좋아요한 웹툰과 즐겨찾기한 웹툰 정보 가져오기
   useEffect(() => {
     const updateWebtoonData = async () => {
       const likedWebtoonIds = likedWebtoonIdsString.split(',').filter(id => id !== '').map(Number);
       const favoriteWebtoonIds = favoriteWebtoonIdsString.split(',').filter(id => id !== '').map(Number);
+      
       if (likedWebtoonIds.length === 0) {
         setLikedWebtoonInfoList([]);
-        setFavoriteWebtoonInfoList([]);
-        return;
       }
-
-      // 이미 데이터를 로드한 적이 있고, ID 목록이 같다면 다시 로드하지 않음
-      if (likedWebtoonInfoList.length > 0 &&
-          likedWebtoonInfoList.length === likedWebtoonIds.length &&
-          likedWebtoonIds.every(id => likedWebtoonInfoList.some(info => info.id === id))) {
+      
+      if (favoriteWebtoonIds.length === 0) {
+        setFavoriteWebtoonInfoList([]);
+      }
+      
+      if (likedWebtoonIds.length === 0 && favoriteWebtoonIds.length === 0) {
         return;
       }
 
@@ -147,36 +146,69 @@ export const MyProfile = () => {
         }
       };
       
-      // 병렬로 웹툰 정보 요청
-      const webtoonDetailsPromises = likedWebtoonIds.map(id => fetchWebtoonData(id));
-      const webtoonDetailsResults = await Promise.all(webtoonDetailsPromises);
-
-      // null이 아닌 결과만 필터링하여 상태 업데이트
-      const validWebtoonDetails = webtoonDetailsResults.filter(
-          (detail): detail is WebtoonInfo => detail !== null
-      ).map(webtoon => {
-        if(webtoon && webtoon.starScore !== undefined && webtoon.starScore !== null) {
-          if(typeof webtoon.starScore !== 'number') {
-            try {
-              webtoon.starScore = parseFloat(webtoon.starScore as any) || 0;
-            } catch(e) {
+      // 좋아요한 웹툰 정보 가져오기
+      if (likedWebtoonIds.length > 0) {
+        if (!(likedWebtoonInfoList.length > 0 &&
+            likedWebtoonInfoList.length === likedWebtoonIds.length &&
+            likedWebtoonIds.every(id => likedWebtoonInfoList.some(info => info.id === id)))) {
+          
+          const likedWebtoonDetailsPromises = likedWebtoonIds.map(id => fetchWebtoonData(id));
+          const likedWebtoonDetailsResults = await Promise.all(likedWebtoonDetailsPromises);
+  
+          const validLikedWebtoonDetails = likedWebtoonDetailsResults.filter(
+              (detail): detail is WebtoonInfo => detail !== null
+          ).map(webtoon => {
+            if(webtoon && webtoon.starScore !== undefined && webtoon.starScore !== null) {
+              if(typeof webtoon.starScore !== 'number') {
+                try {
+                  webtoon.starScore = parseFloat(webtoon.starScore as any) || 0;
+                } catch(e) {
+                  webtoon.starScore = 0;
+                }
+              }
+            } else {
               webtoon.starScore = 0;
             }
-          }
-        } else {
-          webtoon.starScore = 0;
+            return webtoon;
+          });
+  
+          setLikedWebtoonInfoList(validLikedWebtoonDetails);
         }
-        return webtoon;
-      });
-
-      setLikedWebtoonInfoList(validWebtoonDetails);
-
-
-
+      }
+      
+      // 즐겨찾기한 웹툰 정보 가져오기
+      if (favoriteWebtoonIds.length > 0) {
+        if (!(favoriteWebtoonInfoList.length > 0 &&
+            favoriteWebtoonInfoList.length === favoriteWebtoonIds.length &&
+            favoriteWebtoonIds.every(id => favoriteWebtoonInfoList.some(info => info.id === id)))) {
+          
+          const favoriteWebtoonDetailsPromises = favoriteWebtoonIds.map(id => fetchWebtoonData(id));
+          const favoriteWebtoonDetailsResults = await Promise.all(favoriteWebtoonDetailsPromises);
+  
+          const validFavoriteWebtoonDetails = favoriteWebtoonDetailsResults.filter(
+              (detail): detail is WebtoonInfo => detail !== null
+          ).map(webtoon => {
+            if(webtoon && webtoon.starScore !== undefined && webtoon.starScore !== null) {
+              if(typeof webtoon.starScore !== 'number') {
+                try {
+                  webtoon.starScore = parseFloat(webtoon.starScore as any) || 0;
+                } catch(e) {
+                  webtoon.starScore = 0;
+                }
+              }
+            } else {
+              webtoon.starScore = 0;
+            }
+            return webtoon;
+          });
+  
+          setFavoriteWebtoonInfoList(validFavoriteWebtoonDetails);
+        }
+      }
     };
 
     updateWebtoonData();
-  }, [likedWebtoonIdsString, favoriteWebtoonIdsString, likedWebtoonInfoList.length, fetchWebtoonById]);
+  }, [likedWebtoonIdsString, favoriteWebtoonIdsString, likedWebtoonInfoList.length, favoriteWebtoonInfoList.length, fetchWebtoonById]);
 
   const { fetchUserActivity } = useUserActivityStore();
 
@@ -201,25 +233,27 @@ export const MyProfile = () => {
             <>
               <div className="bg-white rounded-lg shadow-sm p-6 mb-8 ">
                 <h2 className="text-xl font-bold mb-4">활동 요약</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Card>
                     <CardContent>
                       <h3 className="text-lg font-medium">찜한 웹툰</h3>
                       <p className="text-2xl font-bold">{likedWebtoonInfoList.length}</p>
                     </CardContent>
                   </Card>
-                  {/*<Card>*/}
-                  {/*  <CardContent>*/}
-                  {/*    <h3 className="text-lg font-medium">즐겨찾기한 웹툰</h3>*/}
-                  {/*    <p className="text-2xl font-bold">{favoriteWebtoonInfoList.length}</p>*/}
-                  {/*  </CardContent>*/}
-                  {/*</Card>*/}
+                  <Card>
+                    <CardContent>
+                      <h3 className="text-lg font-medium">즐겨찾기한 웹툰</h3>
+                      <p className="text-2xl font-bold">{favoriteWebtoonInfoList.length}</p>
+                    </CardContent>
+                  </Card>
                   <Card>
                     <CardContent>
                       <h3 className="text-lg font-medium">작성한 댓글</h3>
                       <p className="text-2xl font-bold">{comments.length}</p>
                     </CardContent>
                   </Card>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <Card>
                     <CardContent>
                       <h3 className="text-lg font-medium">팔로워</h3>
@@ -265,36 +299,36 @@ export const MyProfile = () => {
                 </div>
               </div>
 
-              {/*<div className="bg-white rounded-lg shadow-sm p-6 mb-8 ">*/}
-              {/*  <div className="flex justify-between items-center mb-6">*/}
-              {/*    <h2 className="text-xl font-bold">즐겨찾기한 웹툰</h2>*/}
-              {/*  </div>*/}
-              {/*  <div>*/}
-              {/*    { showLoading ? (*/}
-              {/*        // 빈 배열일 때*/}
-              {/*        <div className="flex flex-col items-center justify-center h-64 mt-20 mb-20">*/}
-              {/*          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>*/}
-              {/*          <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>*/}
-              {/*          <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>*/}
-              {/*        </div>*/}
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-8 ">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">즐겨찾기한 웹툰</h2>
+                </div>
+                <div>
+                  { showLoading ? (
+                      // 빈 배열일 때
+                      <div className="flex flex-col items-center justify-center h-64 mt-20 mb-20">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
+                        <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
+                      </div>
 
-              {/*    ) : favoriteWebtoonInfoList.length > 0 ? (*/}
-              {/*        // 데이터 있을 때*/}
-              {/*        <WebtoonSlider*/}
-              {/*            title=""*/}
-              {/*            webtoons={() => Promise.resolve(favoriteWebtoonInfoList)}*/}
-              {/*            cardSize={'sm'}*/}
-              {/*            initialLoad={false}*/}
-              {/*        />*/}
-              {/*    ) : (*/}
-              {/*        // 로딩 중*/}
-              {/*        <div className="flex flex-col items-center justify-center h-64 mt-10 mb-10">*/}
-              {/*          <p className="text-xl font-semibold text-gray-700">즐겨찾기한 웹툰이 없습니다.</p>*/}
-              {/*          <p className="text-gray-500 mt-2">관심 있는 웹툰에 즐겨찾기를 눌러보세요!</p>*/}
-              {/*        </div>*/}
-              {/*    )}*/}
-              {/*  </div>*/}
-              {/*</div>*/}
+                  ) : favoriteWebtoonInfoList.length > 0 ? (
+                      // 데이터 있을 때
+                      <WebtoonSlider
+                          title=""
+                          webtoons={() => Promise.resolve(favoriteWebtoonInfoList)}
+                          cardSize={'sm'}
+                          initialLoad={false}
+                      />
+                  ) : (
+                      // 로딩 중
+                      <div className="flex flex-col items-center justify-center h-64 mt-10 mb-10">
+                        <p className="text-xl font-semibold text-gray-700">즐겨찾기한 웹툰이 없습니다.</p>
+                        <p className="text-gray-500 mt-2">관심 있는 웹툰에 즐겨찾기를 눌러보세요!</p>
+                      </div>
+                  )}
+                </div>
+              </div>
 
               <CommentSection comments={comments} />
             </>
