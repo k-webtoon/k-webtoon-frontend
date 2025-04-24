@@ -3,15 +3,14 @@ import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider.tsx";
 import WebtoonTextSearchForm from "@/features/webtoon-search-ai/ui/WebtoonTextSearchForm.tsx";
 import CharacterChat from "@/features/webtoon-character-chat/ui/CharacterChat.tsx";
 import CommunityReviews from "@/features/webtoon-reviews/ui/CommunityReviews.tsx";
-import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner.tsx";
+import AiRecommendCard from "@/features/webtoon-recommendation/ui/AiRecommendCard.tsx";
+import AiAnalysisCard from "@/features/webtoon-recommendation/ui/AiAnalysisCard.tsx";
 import { useWebtoonStore } from '@/entities/webtoon/api/store.ts';
 import { useAuthStore } from "@/entities/auth/api/store.ts";
 import { useUserStore } from "@/entities/user/api/userStore.ts";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import WebtoonGridHorizontal from "@/features/webtoon-list/ui/WebtoonGridHorizontal.tsx";
-import { Button } from "@/shared/ui/shadcn/button.tsx";
-import {Card, CardContent} from "@/shared/ui/shadcn/card.tsx";
 
 interface Review {
     id: string;
@@ -184,7 +183,7 @@ const Main: React.FC = () => {
                 {!isAuthenticated ?
                     <>
                         <section id="section1" className="pt-10">
-                            <AIAnalysisBanner />
+                            <AiRecommendCard />
                         </section>
                         <section id="section2" className="pt-5">
                             <WebtoonTextSearchForm />
@@ -228,7 +227,7 @@ const Main: React.FC = () => {
                                 <div>
                                     <div>
                                         <div>
-                                            <CategoryLink to="/webtoon/list/likes" title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`} />
+                                            <CategoryLink to="/user-based-recommendations" title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`} />
                                         </div>
                                         <div className="pt-4 pb-6">
                                             <p className="text-left text-gray-500">{`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}</p>
@@ -259,17 +258,7 @@ const Main: React.FC = () => {
                                     )}
                                 </div>
                             ) : (
-                                <Card className="w-full border border-gray-200 bg-gray-50">
-                                    <CardContent className="p-6">
-                                        <h2 className="text-xl font-bold mb-2">{`📌 ${userInfo?.nickname || ''}님의 취향 분석`}</h2>
-                                        <p className="text-gray-500 mb-4">{userInfo?.nickname || ''}님을 알아가고 있는 중입니다.</p>
-                                        <Link to="/ai-recommendation" style={{ textDecoration: 'none' }}>
-                                            <Button variant="outline">
-                                                AI 맞춤 추천 설정하러 가기
-                                            </Button>
-                                        </Link>
-                                    </CardContent>
-                                </Card>
+                                <AiAnalysisCard nickname={userInfo?.nickname || ''} />
                             )}
                         </section>
                         <section id="section3" className="pt-5">

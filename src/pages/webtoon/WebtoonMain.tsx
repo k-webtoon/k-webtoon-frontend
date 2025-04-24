@@ -5,10 +5,9 @@ import WebtoonSlider from "@/features/webtoon-list/ui/WebtoonSlider";
 import WebtoonGridHorizontal from "@/features/webtoon-list/ui/WebtoonGridHorizontal";
 import {useWebtoonStore} from '@/entities/webtoon/api/store';
 import {useAuthStore} from "@/entities/auth/api/store";
-import AIAnalysisBanner from "@/features/ai-banner/ui/AIAnalysisBanner";
 import {useUserStore} from "@/entities/user/api/userStore.ts";
-import {Button} from "@/shared/ui/shadcn/button";
-import {Card, CardContent} from "@/shared/ui/shadcn/card.tsx";
+import AiRecommendCard from "@/features/webtoon-recommendation/ui/AiRecommendCard.tsx";
+import AiAnalysisCard from "@/features/webtoon-recommendation/ui/AiAnalysisCard.tsx";
 
 function WebtoonMain() {
     const {isAuthenticated} = useAuthStore();
@@ -27,8 +26,28 @@ function WebtoonMain() {
         error
     } = useWebtoonStore();
 
-    const [localLoading, setLocalLoading] = useState(true);
+    const [localLoading, setLocalLoading] = useState(false);
     const [sortedRecommendations, setSortedRecommendations] = useState<any[]>([]);
+    const [apiErrorStatus, setApiErrorStatus] = useState<{ status: number | null, retryCount: number }>({
+        status: null,
+        retryCount: 0
+    });
+    
+    const [requestSent, setRequestSent] = useState(false);
+    
+    interface ErrorResponse {
+        error: string;
+        status?: number;
+        message?: string;
+    }
+    
+    function isErrorResponse(result: unknown): result is ErrorResponse {
+        return Boolean(
+            result && 
+            typeof result === 'object' && 
+            'error' in result
+        );
+    }
 
     const CategoryLink = ({to, title}: { to: string; title: string }) => (
         <Link
@@ -74,9 +93,64 @@ function WebtoonMain() {
         }
     }, [isAuthenticated, fetchCurrentUserInfo]);
 
+    // 추천 API 호출 관련 효과
+    useEffect(() => {
+        if (requestSent || !isAuthenticated) {
+            return;
+        }
+        
+        if (recommendations && recommendations.length > 0) {
+            setLocalLoading(false);
+            return;
+        }
+        
+        if (apiErrorStatus.status === 500 && apiErrorStatus.retryCount >= 3) {
+            console.warn("추천 API 서버 오류가 지속됩니다. 더 이상 시도하지 않습니다.");
+            setSortedRecommendations([]);
+            setLocalLoading(false);
+            return;
+        }
+        
+        const loadRecommendations = async () => {
+            setRequestSent(true);
+            setLocalLoading(true);
+            
+            try {
+                const result = await fetchRecommendWebtoons({
+                    use_popularity: true,
+                    use_art_style: true,
+                    use_tags: true
+                });
+                
+                if (isErrorResponse(result)) {
+                    if (result.error === 'SERVER_ERROR' && result.status === 500) {
+                        setApiErrorStatus(prev => ({
+                            status: 500,
+                            retryCount: prev.retryCount + 1
+                        }));
+                    }
+                    setSortedRecommendations([]);
+                }
+            } catch (err) {
+                console.error("추천 웹툰 처리 중 오류:", err);
+                setSortedRecommendations([]);
+            } finally {
+                setLocalLoading(false);
+            }
+        };
+        
+        loadRecommendations();
+    }, [isAuthenticated, recommendations, requestSent, apiErrorStatus, fetchRecommendWebtoons]);
+
+    // 웹툰 데이터 로드 효과
     useEffect(() => {
         const loadData = async () => {
-            setLocalLoading(true);
+            // 추천 데이터를 불러오는 과정에서 이미 localLoading이 설정되므로 
+            // 여기서는 추천 데이터가 없는 경우에만 로딩 상태 설정
+            if (!recommendations || recommendations.length === 0) {
+                setLocalLoading(true);
+            }
+            
             try {
                 // 인기 웹툰 로드
                 if (!topWebtoonList || !topWebtoonList.content || topWebtoonList.content.length === 0) {
@@ -106,29 +180,20 @@ function WebtoonMain() {
                     });
                 }
 
-                // 추천 웹툰 데이터 로드
-                if (isAuthenticated && (!recommendations || recommendations.length === 0)) {
-                    fetchRecommendWebtoons({
-                        use_popularity: true,
-                        use_art_style: true,
-                        use_tags: true
-                    }).catch(err => {
-                        console.warn("추천 웹툰 로드 실패:", err);
-                        setSortedRecommendations([]);
-                    });
-                }
-
             } catch (err) {
                 console.error("웹툰 데이터 로드 중 오류 발생:", err);
             } finally {
-                setTimeout(() => {
-                    setLocalLoading(false);
-                }, 0);
+                // 추천 데이터가 이미 로드된 경우에만 로딩 상태 해제
+                if (topWebtoonList && popularByLikes && popularByFavorites && popularByWatched) {
+                    setTimeout(() => {
+                        setLocalLoading(false);
+                    }, 0);
+                }
             }
         };
 
         loadData();
-    }, [isAuthenticated]);
+    }, [isAuthenticated, recommendations]);
 
     if (localLoading && !topWebtoonList && !popularByLikes && !popularByWatched && !popularByFavorites) {
         return (
@@ -166,136 +231,205 @@ function WebtoonMain() {
     return (
         <div className="container">
             <div className="pt-10">
+                {!isAuthenticated ? (
+                    <>
+                        <section id="section1" className="pt-10">
+                            <AiRecommendCard />
+                        </section>
 
-                <section id="section1" className="pt-10">
-                    {!isAuthenticated ?
-                        <AIAnalysisBanner/> :
-                        (error !== 'SERVER_ERROR') ? (
-                            <div>
+                        {topWebtoonList && topWebtoonList.content && topWebtoonList.content.length > 0 && (
+                            <section id="section2" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/top" title="🔥 전체"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="누가 봐도 인정하는 인기 웹툰! 신규 입덕자도 바로 정주행 각!"
+                                        webtoons={() => Promise.resolve(topWebtoonList)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {popularByLikes && popularByLikes.length > 0 && (
+                            <section id="section3" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/likes" title="✨ 심장을 저격한 작품들"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="유저들이 따봉을 마구 날린 웹툰들!"
+                                        webtoons={() => Promise.resolve(popularByLikes)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'likes'}
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {popularByWatched && popularByWatched.length > 0 && (
+                            <section id="section4" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/watched" title="👀 이건 봐야 해"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="다들 본 그 웹툰! 안 보면 손해?!"
+                                        webtoons={() => Promise.resolve(popularByWatched)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'watched'}
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {popularByFavorites && popularByFavorites.length > 0 && (
+                            <section id="section5" className="pt-10 pb-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/favorites" title="🔖 찜 안 하면 섭섭해"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="찜했다 === 믿고 본다! 유저들이 북마크 꽂고 간 찐-작들!"
+                                        webtoons={() => Promise.resolve(popularByFavorites)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'favorites'}
+                                    />
+                                </div>
+                            </section>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <section id="section1" className="pt-10">
+                            {apiErrorStatus.status !== 500 ? (
                                 <div>
                                     <div>
-                                        <CategoryLink to="/webtoon/list/likes"
-                                                      title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`}/>
+                                        <div>
+                                            <CategoryLink to="/user-based-recommendations" title={`📌 ${userInfo?.nickname || ''}님의 취향 분석`} />
+                                        </div>
+                                        <div className="pt-4 pb-6">
+                                            <p className="text-left text-gray-500">{`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}</p>
+                                        </div>
                                     </div>
-                                    <div className="pt-4 pb-6">
-                                        <p className="text-left text-gray-500">{`큐레이툰이 분석한 ${userInfo?.nickname || ''}님의 취향과 유사한 웹툰입니다. 전체보기에서 더 상세하게 조절하실 수 있습니다.`}</p>
-                                    </div>
+
+                                    {localLoading ? (
+                                        <div className="bg-white rounded-lg p-6 text-center my-4">
+                                            <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                                            <p className="text-lg font-semibold text-gray-700">추천 데이터를 분석 중...</p>
+                                            <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
+                                        </div>
+                                    ) : sortedRecommendations && sortedRecommendations.length > 0 ? (
+                                        <WebtoonGridHorizontal
+                                            title=""
+                                            comment=""
+                                            webtoons={() => Promise.resolve(sortedRecommendations)}
+                                            cardSize="md"
+                                            showActionButtons={true}
+                                            showAI={true}
+                                            initialLoad={false}
+                                            rows={2}
+                                            countType={null}
+                                        />
+                                    ) : (
+                                        <div className="bg-white rounded-lg p-6 text-center my-4">
+                                            <p className="text-gray-700">아직 추천 데이터가 준비되지 않았습니다.</p>
+                                        </div>
+                                    )}
                                 </div>
+                            ) : (
+                                <AiAnalysisCard nickname={userInfo?.nickname || ''} />
+                            )}
+                        </section>
 
-                                {localLoading ? (
-                                    <div className="bg-white rounded-lg p-8 text-center my-8">
-                                        <div
-                                            className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p className="text-xl font-semibold text-gray-700">데이터를 불러오는 중입니다...</p>
-                                        <p className="text-gray-500 mt-2">잠시만 기다려주세요</p>
+                        {topWebtoonList && topWebtoonList.content && topWebtoonList.content.length > 0 && (
+                            <section id="section2" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/top" title="🔥 전체"/>
                                     </div>
-                                ) : sortedRecommendations && sortedRecommendations.length > 0 ? (
-                                    <WebtoonGridHorizontal
+                                    <WebtoonSlider
                                         title=""
-                                        comment=""
-                                        webtoons={() => Promise.resolve(sortedRecommendations)}
-                                        cardSize="md"
-                                        showActionButtons={true}
-                                        showAI={true}
+                                        coment="누가 봐도 인정하는 인기 웹툰! 신규 입덕자도 바로 정주행 각!"
+                                        webtoons={() => Promise.resolve(topWebtoonList)}
+                                        cardSize={'sm'}
                                         initialLoad={false}
-                                        rows={2}
-                                        countType={null}
+                                        showActionButtons={isAuthenticated}
                                     />
-                                ) : (
-                                    <div className="bg-white rounded-lg p-8 text-center my-8">
-                                        <p className="text-gray-700">아직 추천 데이터가 준비되지 않았습니다.</p>
+                                </div>
+                            </section>
+                        )}
+
+                        {popularByLikes && popularByLikes.length > 0 && (
+                            <section id="section3" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/likes" title="✨ 심장을 저격한 작품들"/>
                                     </div>
-                                )}
-                            </div>
-                        ) : (
-                            <Card className="w-full border border-gray-200 bg-gray-50">
-                                <CardContent className="p-6">
-                                    <h2 className="text-xl font-bold mb-2">{`📌 ${userInfo?.nickname || ''}님의 취향 분석`}</h2>
-                                    <p className="text-gray-500 mb-4">{userInfo?.nickname || ''}님을 알아가고 있는 중입니다.</p>
-                                    <Link to="/ai-recommendation" style={{textDecoration: 'none'}}>
-                                        <Button variant="outline">
-                                            AI 맞춤 추천 설정하러 가기
-                                        </Button>
-                                    </Link>
-                                </CardContent>
-                            </Card>
-                        )
-                    }
-                </section>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="유저들이 따봉을 마구 날린 웹툰들!"
+                                        webtoons={() => Promise.resolve(popularByLikes)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'likes'}
+                                    />
+                                </div>
+                            </section>
+                        )}
 
-                {topWebtoonList && topWebtoonList.content && topWebtoonList.content.length > 0 && (
-                    <section id="section2" className="pt-10">
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <CategoryLink to="/webtoon/list/top" title="🔥 전체"/>
-                            </div>
-                            <WebtoonSlider
-                                title=""
-                                coment="누가 봐도 인정하는 인기 웹툰! 신규 입덕자도 바로 정주행 각!"
-                                webtoons={() => Promise.resolve(topWebtoonList)}
-                                cardSize={'sm'}
-                                initialLoad={false}
-                                showActionButtons={isAuthenticated}
-                            />
-                        </div>
-                    </section>
-                )}
+                        {popularByWatched && popularByWatched.length > 0 && (
+                            <section id="section4" className="pt-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/watched" title="👀 이건 봐야 해"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="다들 본 그 웹툰! 안 보면 손해?!"
+                                        webtoons={() => Promise.resolve(popularByWatched)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'watched'}
+                                    />
+                                </div>
+                            </section>
+                        )}
 
-                {popularByLikes && popularByLikes.length > 0 && (
-                    <section id="section3" className="pt-10">
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <CategoryLink to="/webtoon/list/likes" title="✨ 심장을 저격한 작품들"/>
-                            </div>
-                            <WebtoonSlider
-                                title=""
-                                coment="유저들이 따봉을 마구 날린 웹툰들!"
-                                webtoons={() => Promise.resolve(popularByLikes)}
-                                cardSize={'sm'}
-                                initialLoad={false}
-                                showActionButtons={isAuthenticated}
-                                countType={'likes'}
-                            />
-                        </div>
-                    </section>
-                )}
-
-                {popularByWatched && popularByWatched.length > 0 && (
-                    <section id="section4" className="pt-10">
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <CategoryLink to="/webtoon/list/watched" title="👀 이건 봐야 해"/>
-                            </div>
-                            <WebtoonSlider
-                                title=""
-                                coment="다들 본 그 웹툰! 안 보면 손해?!"
-                                webtoons={() => Promise.resolve(popularByWatched)}
-                                cardSize={'sm'}
-                                initialLoad={false}
-                                showActionButtons={isAuthenticated}
-                                countType={'watched'}
-                            />
-                        </div>
-                    </section>
-                )}
-
-                {popularByFavorites && popularByFavorites.length > 0 && (
-                    <section id="section5" className="pt-10 pb-10">
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <CategoryLink to="/webtoon/list/favorites" title="🔖 찜 안 하면 섭섭해"/>
-                            </div>
-                            <WebtoonSlider
-                                title=""
-                                coment="찜했다 === 믿고 본다! 유저들이 북마크 꽂고 간 찐-작들!"
-                                webtoons={() => Promise.resolve(popularByFavorites)}
-                                cardSize={'sm'}
-                                initialLoad={false}
-                                showActionButtons={isAuthenticated}
-                                countType={'favorites'}
-                            />
-                        </div>
-                    </section>
+                        {popularByFavorites && popularByFavorites.length > 0 && (
+                            <section id="section5" className="pt-10 pb-10">
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <CategoryLink to="/webtoon/list/favorites" title="🔖 찜 안 하면 섭섭해"/>
+                                    </div>
+                                    <WebtoonSlider
+                                        title=""
+                                        coment="찜했다 === 믿고 본다! 유저들이 북마크 꽂고 간 찐-작들!"
+                                        webtoons={() => Promise.resolve(popularByFavorites)}
+                                        cardSize={'sm'}
+                                        initialLoad={false}
+                                        showActionButtons={isAuthenticated}
+                                        countType={'favorites'}
+                                    />
+                                </div>
+                            </section>
+                        )}
+                    </>
                 )}
             </div>
         </div>
