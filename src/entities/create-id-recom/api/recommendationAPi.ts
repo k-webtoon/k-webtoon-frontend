@@ -10,7 +10,7 @@ export const fetchRecommendedWebtoons = async ({
   thumbClass: number[];
 }) => {
   try {
-    const response = await axios.post('http://localhost:5555/api/send_init', {
+    const response = await axios.post('http://localhost:5000/api/send_init', {
       tag_list: tagList,
       pop_C_list: popClass,
       thumb_C_list: thumbClass,
