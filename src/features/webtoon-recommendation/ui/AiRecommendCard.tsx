@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/shared/ui/shadcn/card';
 import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-const AIAnalysisBanner = () => {
+const AiRecommendCard = () => {
     const navigate = useNavigate();
     const [displayText, setDisplayText] = useState("");
     const fullText = "AI가 당신의 취향을 분석해 드립니다";
@@ -24,7 +24,7 @@ const AIAnalysisBanner = () => {
             const resetTimeout = setTimeout(() => {
                 setIsTyping(false);
                 setCurrentIndex(fullText.length - 1);
-            }, 3000);
+            }, 1500);
 
             return () => clearTimeout(resetTimeout);
         } else if (!isTyping && currentIndex >= 0) {
@@ -50,11 +50,11 @@ const AIAnalysisBanner = () => {
     };
 
     return (
-        <Card className="w-full border border-gray-200 bg-gradient-to-r from-orange-50 to-amber-50 overflow-hidden">
+        <Card className="w-full border border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50 overflow-hidden">
             <CardContent className="p-0">
                 <div className="relative p-6">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-200 rounded-full opacity-20 -mt-24 -mr-24"></div>
-                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-yellow-300 rounded-full opacity-20 -mb-20 -ml-20"></div>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-200 rounded-full opacity-20 -mt-24 -mr-24"></div>
+                    <div className="absolute bottom-0 left-0 w-40 h-40 bg-orange-200 rounded-full opacity-20 -mb-20 -ml-20"></div>
 
                     <div className="flex items-center gap-6 relative z-10">
                         <div className="relative h-16 w-16 flex-shrink-0">
@@ -98,7 +98,7 @@ const AIAnalysisBanner = () => {
                         </div>
 
                         <Button
-                            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600
+                            className="bg-gradient-to-r from-yellow-600 to-amber-500 hover:from-yellow-700 hover:to-amber-600
                                      text-white px-6 h-12 rounded-full flex items-center gap-2 font-medium shadow-md transition-all duration-300 hover:shadow-lg"
                             onClick={handleStartClick}
                         >
@@ -112,4 +112,4 @@ const AIAnalysisBanner = () => {
     );
 };
 
-export default AIAnalysisBanner;
+export default AiRecommendCard;
