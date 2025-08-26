@@ -1,6 +1,3 @@
-좋아, **깔끔·실전형 README** 바로 붙여 쓰게 만들어줬다.
-아래 블록을 `README.md`에 그대로 붙여 넣어 👇
-
 ---
 
 # k-webtoon-frontend
